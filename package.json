@@ -1,7 +1,7 @@
 {
-  "name": "nightshift-fullstack",
+  "name": "NightOwl-fullstack",
   "version": "1.0.0",
-  "description": "NightShift Operations & Safety Decision Dashboard - Full Stack with Supabase Integration",
+  "description": "NightOwl Operations & Safety Decision Dashboard - Full Stack with Supabase Integration",
   "main": "server.js",
   "type": "module",
   "scripts": {

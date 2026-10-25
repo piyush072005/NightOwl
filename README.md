@@ -1,4 +1,4 @@
-# NightShift - Full Stack Safety & Operations Dashboard (Supabase Integration)
+# NightOwl - Full Stack Safety & Operations Dashboard (Supabase Integration)
 
 A full-stack, real-time operations hub for night-time worker safety and community route intelligence, powered by **Express.js**, **Node.js**, **Vanilla JavaScript**, **Tailwind CSS**, and **Supabase (PostgreSQL + Realtime)**.
 
@@ -19,7 +19,7 @@ A full-stack, real-time operations hub for night-time worker safety and communit
 
 ## 📁 Project Structure
 ```
-nightshift2/
+NightOwl2/
 ├── .env                              # Environment variables (Supabase URL & Anon Key)
 ├── .env.example                      # Template for environment variables
 ├── package.json                      # Node dependencies & npm scripts
@@ -70,7 +70,7 @@ For a detailed walkthrough, see [supabase/README_SUPABASE_SETUP.md](supabase/REA
 
 ---
 
-## 🔌 Connecting Supabase to NightShift
+## 🔌 Connecting Supabase to NightOwl
 
 1. In your Supabase Dashboard, go to **Project Settings** > **API**.
 2. Copy your **Project URL** and **anon public key**.

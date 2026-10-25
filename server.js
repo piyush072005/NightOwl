@@ -386,7 +386,7 @@ app.get('*', (req, res) => {
 function startServer(portToTry) {
   const server = app.listen(portToTry, () => {
     console.log(`\n======================================================`);
-    console.log(`🌙 NightShift Full Stack Server running at:`);
+    console.log(`🌙 NightOwl Full Stack Server running at:`);
     console.log(`👉 http://localhost:${portToTry}`);
     console.log(`======================================================\n`);
   });

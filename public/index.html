@@ -1,47 +1,87 @@
 <!DOCTYPE html>
 <html class="light" lang="en">
+
 <head>
-  <meta charset="utf-8"/>
-  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-  <title>NightShift - Operations & Safety Decision Dashboard (Full Stack)</title>
-  
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>NightOwl - Operations & Safety Decision Dashboard (Full Stack)</title>
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <!-- FontAwesome Icons -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
   <!-- Google Fonts Inter & JetBrains Mono -->
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet" />
   <!-- Supabase JS Client (v2) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    body { font-family: 'Outfit', sans-serif; font-size: 14px; text-wrap: pretty; }
-    h1 { font-size: 26px; font-weight: 800; line-height: 1.25; text-wrap: balance; }
-    h2 { font-size: 20px; font-weight: 700; line-height: 1.3; text-wrap: balance; }
-    h3 { font-size: 16px; font-weight: 700; line-height: 1.35; text-wrap: balance; }
-    h4 { font-size: 14px; font-weight: 600; line-height: 1.4; text-wrap: balance; }
-    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    body {
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      text-wrap: pretty;
+    }
+
+    h1 {
+      font-size: 26px;
+      font-weight: 800;
+      line-height: 1.25;
+      text-wrap: balance;
+    }
+
+    h2 {
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.3;
+      text-wrap: balance;
+    }
+
+    h3 {
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.35;
+      text-wrap: balance;
+    }
+
+    h4 {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.4;
+      text-wrap: balance;
+    }
+
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
     .whatsapp-pattern {
       background-color: #efeae2;
       background-image: radial-gradient(#d5cdc4 1px, transparent 1px);
       background-size: 16px 16px;
       padding: 16px;
     }
+
     .custom-scroll::-webkit-scrollbar {
       width: 5px;
       height: 5px;
     }
+
     .custom-scroll::-webkit-scrollbar-track {
-      background: rgba(0,0,0,0.03);
+      background: rgba(0, 0, 0, 0.03);
     }
+
     .custom-scroll::-webkit-scrollbar-thumb {
       background: #94a3b8;
       border-radius: 4px;
     }
+
     ::selection {
       background-color: #fde68a;
       color: #78350f;
     }
+
     /* Purposeful Motion System & Easing Tokens */
     :root {
       --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -57,6 +97,7 @@
         opacity: 0;
         transform: translateY(6px);
       }
+
       to {
         opacity: 1;
         transform: translateY(0);
@@ -72,6 +113,7 @@
         opacity: 0;
         transform: scale(0.97) translateY(6px);
       }
+
       to {
         opacity: 1;
         transform: scale(1) translateY(0);
@@ -86,9 +128,11 @@
       0% {
         box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
       }
+
       70% {
         box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
       }
+
       100% {
         box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
       }
@@ -100,12 +144,16 @@
 
     /* Accessibility: Respect Reduced Motion */
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
+
+      *,
+      *::before,
+      *::after {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
       }
+
       .animate-message-enter,
       .animate-modal-enter,
       .telemetry-beacon {
@@ -598,24 +646,32 @@ body > header h2 {
     }
   </script>
 </head>
-<body class="bg-slate-100/80 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-amber-100 selection:text-amber-900">
+
+<body
+  class="bg-slate-100/80 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-amber-100 selection:text-amber-900">
 
   <!-- Top Navigation Header -->
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 px-4 lg:px-8 py-3 flex items-center justify-between shadow-xs">
+  <header
+    class="bg-white border-b border-slate-200 sticky top-0 z-40 px-4 lg:px-8 py-3 flex items-center justify-between shadow-xs">
     <div class="flex items-center space-x-3 sm:space-x-4">
       <div class="flex items-center gap-3">
-        <div class="bg-amber-500/10 p-2.5 rounded-xl border border-amber-500/25 text-amber-800 shadow-xs flex items-center justify-center">
+        <div
+          class="bg-amber-500/10 p-2.5 rounded-xl border border-amber-500/25 text-amber-800 shadow-xs flex items-center justify-center">
           <i class="fa-solid fa-moon text-lg"></i>
         </div>
         <div>
           <div class="flex items-center gap-2 flex-wrap">
-            <span class="text-base font-extrabold tracking-tight text-slate-900">NIGHTSHIFT</span>
-            <span class="text-xs uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300">Operations Hub</span>
-            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <span class="text-base font-extrabold tracking-tight text-slate-900">NightOwl</span>
+            <span
+              class="text-xs uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300">Operations
+              Hub</span>
+            <span
+              class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 "></span> Telemetry Live
             </span>
           </div>
-          <p class="text-xs text-slate-600 font-medium hidden sm:block">Night-Time Worker Safety & Community Route Intelligence Engine • Full Stack</p>
+          <p class="text-xs text-slate-600 font-medium hidden sm:block">Night-Time Worker Safety & Community Route
+            Intelligence Engine • Full Stack</p>
         </div>
       </div>
     </div>
@@ -623,7 +679,9 @@ body > header h2 {
     <!-- Right Global Actions & Supabase Live Status Indicator -->
     <div class="flex items-center space-x-2 sm:space-x-3">
       <!-- Supabase Connection Status Pill -->
-      <button id="supabase-status-btn" onclick="openSupabaseModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition shadow-2xs cursor-pointer active:scale-95 bg-slate-50 text-slate-700 border-slate-300 hover:bg-slate-100" title="Click to view Supabase Connection details">
+      <button id="supabase-status-btn" onclick="openSupabaseModal()"
+        class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition shadow-2xs cursor-pointer active:scale-95 bg-slate-50 text-slate-700 border-slate-300 hover:bg-slate-100"
+        title="Click to view Supabase Connection details">
         <span id="supabase-status-dot" class="w-2 h-2 rounded-full bg-amber-500 "></span>
         <span id="supabase-status-text">Checking Supabase...</span>
         <i class="fa-solid fa-database text-xs ml-0.5 text-slate-600"></i>
@@ -637,13 +695,16 @@ body > header h2 {
       </div>
 
       <!-- Emergency SOS button -->
-      <button class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-2 shadow-2xs cursor-pointer active:scale-95" onclick="triggerEmergencySOS()">
+      <button
+        class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-2 shadow-2xs cursor-pointer active:scale-95"
+        onclick="triggerEmergencySOS()">
         <i class="fa-solid fa-triangle-exclamation text-rose-600 "></i> Emergency SOS
       </button>
 
       <!-- Scout Rep Profile Pill -->
       <div class="hidden lg:flex items-center pl-2 border-l border-slate-200 space-x-2">
-        <div class="w-8 h-8 rounded-full bg-amber-500/10 border border-amber-300 flex items-center justify-center text-amber-700 font-bold text-xs">
+        <div
+          class="w-8 h-8 rounded-full bg-amber-500/10 border border-amber-300 flex items-center justify-center text-amber-700 font-bold text-xs">
           <i class="fa-solid fa-users text-amber-800"></i>
         </div>
         <div class="text-left text-xs">
@@ -655,7 +716,8 @@ body > header h2 {
   </header>
 
   <!-- Notification Banner when Database Live Updates happen -->
-  <div id="live-toast" class="fixed top-16 right-5 z-50 transform transition-all duration-300 translate-y-[-20px] opacity-0 pointer-events-none bg-slate-900 text-white text-xs px-4 py-2.5 rounded-xl shadow-lg border border-slate-700 flex items-center gap-2">
+  <div id="live-toast"
+    class="fixed top-16 right-5 z-50 transform transition-all duration-300 translate-y-[-20px] opacity-0 pointer-events-none bg-slate-900 text-white text-xs px-4 py-2.5 rounded-xl shadow-lg border border-slate-700 flex items-center gap-2">
     <i class="fa-solid fa-bell text-amber-400"></i>
     <span id="toast-text">New live telemetry received</span>
   </div>
@@ -740,7 +802,8 @@ body > header h2 {
               <i class="fa-solid fa-shield-halved text-sky-600"></i> Epistemic Tagging System
             </h3>
           </div>
-          <p class="text-xs text-slate-600 mb-2.5 leading-relaxed">Guarantees safety decisions reflect empirical ground truth, avoiding night hallucinations:</p>
+          <p class="text-xs text-slate-600 mb-2.5 leading-relaxed">Guarantees safety decisions reflect empirical ground
+            truth, avoiding night hallucinations:</p>
           <div class="divide-y divide-slate-100 text-xs">
             <div class="flex items-center justify-between py-2">
               <span class="font-bold text-emerald-700 flex items-center gap-1.5 text-xs">
@@ -778,7 +841,8 @@ body > header h2 {
             <span class="text-xs font-mono text-amber-700" id="advisory-time">02:18 AM</span>
           </div>
           <p class="text-xs text-amber-800 leading-normal" id="advisory-text">
-            Underpass streetlights on <strong>Bypass East</strong> operating on reduced 50% backup power. Motorized transit advised over pedestrian routes.
+            Underpass streetlights on <strong>Bypass East</strong> operating on reduced 50% backup power. Motorized
+            transit advised over pedestrian routes.
           </p>
         </div>
 
@@ -788,7 +852,9 @@ body > header h2 {
             <span class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
               <i class="fa-solid fa-users text-emerald-800"></i> Community Intel Feed
             </span>
-            <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Database Active</span>
+            <span
+              class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Database
+              Active</span>
           </div>
           <div class="text-xs text-slate-600 space-y-1.5 pt-1">
             <div class="flex justify-between items-center">
@@ -809,10 +875,14 @@ body > header h2 {
             </div>
           </div>
           <div class="pt-2 border-t border-slate-100 flex flex-col gap-2">
-            <button class="w-full bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 py-1.5 px-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer" onclick="selectChatRole('provider')">
+            <button
+              class="w-full bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 py-1.5 px-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+              onclick="selectChatRole('provider')">
               <i class="fa-solid fa-bolt text-amber-800 text-xs"></i> Log Route Observation (+25 pts)
             </button>
-            <button class="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-300 py-1.5 px-2 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer" onclick="openSupabaseModal()">
+            <button
+              class="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-300 py-1.5 px-2 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer"
+              onclick="openSupabaseModal()">
               <i class="fa-solid fa-gear text-slate-600 text-xs"></i> Supabase Setup & Tables
             </button>
           </div>
@@ -822,10 +892,13 @@ body > header h2 {
       <!-- Column 2: Center Main Operations & Safety Corridor Canvas (5 cols) -->
       <section class="lg:col-span-5 space-y-4">
         <!-- Main Live Route Plan Card -->
-        <div class="bg-white rounded-xl p-5 border border-slate-200  shadow-2xs relative overflow-hidden" id="plan-status-card">
+        <div class="bg-white rounded-xl p-5 border border-slate-200  shadow-2xs relative overflow-hidden"
+          id="plan-status-card">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
             <div>
-              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300" id="badge-status">
+              <span
+                class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300"
+                id="badge-status">
                 KNOWN • OPTIMIZED CORRIDOR ACTIVE
               </span>
               <h2 class="text-base font-bold text-slate-900 mt-1 tracking-tight" id="plan-title">
@@ -840,7 +913,9 @@ body > header h2 {
             </div>
           </div>
           <p class="text-xs text-slate-600 leading-relaxed mb-4" id="plan-description">
-            Public transit frequency is minimal at this hour. The engine has synthesized a well-lit corridor avoiding isolated underpasses, leveraging 24/7 patrol checkpoints and active open pharmacies along the arterial route.
+            Public transit frequency is minimal at this hour. The engine has synthesized a well-lit corridor avoiding
+            isolated underpasses, leveraging 24/7 patrol checkpoints and active open pharmacies along the arterial
+            route.
           </p>
 
           <!-- Corridor Health Metrics Matrix -->
@@ -881,7 +956,8 @@ body > header h2 {
                 <h3 class="text-xs font-bold text-slate-800 flex items-center gap-1.5 uppercase tracking-wide">
                   <i class="fa-solid fa-kit-medical text-rose-500"></i> 24/7 Open Havens
                 </h3>
-                <span class="text-xs px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-bold border border-emerald-300">KNOWN</span>
+                <span
+                  class="text-xs px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-bold border border-emerald-300">KNOWN</span>
               </div>
               <div class="space-y-2" id="services-list">
                 <div class="py-2 flex items-center justify-between">
@@ -889,20 +965,26 @@ body > header h2 {
                     <h4 class="text-xs font-semibold text-slate-900">Apollo 24/7 Pharmacy</h4>
                     <p class="text-xs text-slate-600">Block B (0.8 km from route)</p>
                   </div>
-                  <span class="text-xs text-emerald-800 font-bold bg-emerald-100 px-1.5 py-0.5 rounded border border-emerald-300">Open Now</span>
+                  <span
+                    class="text-xs text-emerald-800 font-bold bg-emerald-100 px-1.5 py-0.5 rounded border border-emerald-300">Open
+                    Now</span>
                 </div>
                 <div class="py-2 flex items-center justify-between">
                   <div>
                     <h4 class="text-xs font-semibold text-slate-900">Lifeline Emergency Clinic</h4>
                     <p class="text-xs text-slate-600">Expressway Junc. (1.4 km)</p>
                   </div>
-                  <span class="text-xs text-emerald-800 font-bold bg-emerald-100 px-1.5 py-0.5 rounded border border-emerald-300">Open Now</span>
+                  <span
+                    class="text-xs text-emerald-800 font-bold bg-emerald-100 px-1.5 py-0.5 rounded border border-emerald-300">Open
+                    Now</span>
                 </div>
               </div>
             </div>
             <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
               <span id="ping-text">Sensor ping: Just now</span>
-              <button class="text-amber-700 hover:text-amber-800 font-semibold inline-flex items-center gap-1 cursor-pointer" onclick="refreshCheckpoints()">
+              <button
+                class="text-amber-700 hover:text-amber-800 font-semibold inline-flex items-center gap-1 cursor-pointer"
+                onclick="refreshCheckpoints()">
                 <i class="fa-solid fa-rotate text-xs"></i> Sync
               </button>
             </div>
@@ -915,7 +997,8 @@ body > header h2 {
                 <h3 class="text-xs font-bold text-slate-800 flex items-center gap-1.5 uppercase tracking-wide">
                   <i class="fa-solid fa-route text-amber-800"></i> Community Observation Radar
                 </h3>
-                <span class="text-xs px-2 py-0.5 bg-amber-100 text-amber-800 rounded font-bold border border-amber-300" id="radar-tag">PROBABLE</span>
+                <span class="text-xs px-2 py-0.5 bg-amber-100 text-amber-800 rounded font-bold border border-amber-300"
+                  id="radar-tag">PROBABLE</span>
               </div>
               <div class="space-y-2">
                 <div class="p-2 bg-slate-50">
@@ -930,15 +1013,18 @@ body > header h2 {
                 </div>
                 <div class="py-2 flex items-center justify-between">
                   <div class="flex items-center gap-2">
-                    <div class="w-6 h-6 rounded bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-800 font-bold text-xs">
+                    <div
+                      class="w-6 h-6 rounded bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-800 font-bold text-xs">
                       <i class="fa-solid fa-users"></i>
                     </div>
                     <div>
                       <h4 class="text-xs font-semibold text-slate-900">Crowd & Vigilance Activity</h4>
-                      <p class="text-xs text-slate-600" id="crowd-vigilance-note">Active tea stall & commuters at Central Sq. (@Dev_M 4m ago)</p>
+                      <p class="text-xs text-slate-600" id="crowd-vigilance-note">Active tea stall & commuters at
+                        Central Sq. (@Dev_M 4m ago)</p>
                     </div>
                   </div>
-                  <span class="text-xs text-emerald-800 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">Vouched</span>
+                  <span
+                    class="text-xs text-emerald-800 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">Vouched</span>
                 </div>
               </div>
             </div>
@@ -955,27 +1041,40 @@ body > header h2 {
             <h3 class="text-xs font-bold text-slate-800 flex items-center gap-1.5 uppercase tracking-wide">
               <i class="fa-solid fa-timeline text-amber-800"></i> Night Progression Simulation (12 AM → 5 AM)
             </h3>
-            <span class="text-xs font-mono font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded" id="timeline-current-hour">02:30 AM</span>
+            <span
+              class="text-xs font-mono font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded"
+              id="timeline-current-hour">02:30 AM</span>
           </div>
-          <p class="text-xs text-slate-600 mb-3">Simulate transit availability and police presence shifts across the night window:</p>
+          <p class="text-xs text-slate-600 mb-3">Simulate transit availability and police presence shifts across the
+            night window:</p>
           <div class="grid grid-cols-5 gap-1.5" id="timeline-buttons-container">
-            <button class="timeline-step bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 py-2 px-1 rounded-lg text-center transition cursor-pointer" onclick="setSimulatedHour('12:00 AM', 0)" type="button">
+            <button
+              class="timeline-step bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 py-2 px-1 rounded-lg text-center transition cursor-pointer"
+              onclick="setSimulatedHour('12:00 AM', 0)" type="button">
               <span class="block text-xs font-mono font-semibold text-slate-700">12:00 AM</span>
               <span class="block text-xs text-slate-600 mt-0.5">Regular Bus</span>
             </button>
-            <button class="timeline-step bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 py-2 px-1 rounded-lg text-center transition cursor-pointer" onclick="setSimulatedHour('01:30 AM', 1)" type="button">
+            <button
+              class="timeline-step bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 py-2 px-1 rounded-lg text-center transition cursor-pointer"
+              onclick="setSimulatedHour('01:30 AM', 1)" type="button">
               <span class="block text-xs font-mono font-semibold text-slate-700">01:30 AM</span>
               <span class="block text-xs text-slate-600 mt-0.5">Transition</span>
             </button>
-            <button class="timeline-step active-timeline bg-amber-500 text-slate-950 font-bold border-2 border-amber-600 py-2 px-1 rounded-lg text-center shadow-2xs transition cursor-pointer" onclick="setSimulatedHour('02:30 AM', 2)" type="button">
+            <button
+              class="timeline-step active-timeline bg-amber-500 text-slate-950 font-bold border-2 border-amber-600 py-2 px-1 rounded-lg text-center shadow-2xs transition cursor-pointer"
+              onclick="setSimulatedHour('02:30 AM', 2)" type="button">
               <span class="block text-xs font-mono font-bold text-slate-950">02:30 AM</span>
               <span class="block text-xs text-slate-900 font-semibold mt-0.5">Shift End</span>
             </button>
-            <button class="timeline-step bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 py-2 px-1 rounded-lg text-center transition cursor-pointer" onclick="setSimulatedHour('03:45 AM', 3)" type="button">
+            <button
+              class="timeline-step bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 py-2 px-1 rounded-lg text-center transition cursor-pointer"
+              onclick="setSimulatedHour('03:45 AM', 3)" type="button">
               <span class="block text-xs font-mono font-semibold text-slate-700">03:45 AM</span>
               <span class="block text-xs text-slate-600 mt-0.5">Deep Lull</span>
             </button>
-            <button class="timeline-step bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 py-2 px-1 rounded-lg text-center transition cursor-pointer" onclick="setSimulatedHour('05:00 AM', 4)" type="button">
+            <button
+              class="timeline-step bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 py-2 px-1 rounded-lg text-center transition cursor-pointer"
+              onclick="setSimulatedHour('05:00 AM', 4)" type="button">
               <span class="block text-xs font-mono font-semibold text-slate-700">05:00 AM</span>
               <span class="block text-xs text-slate-600 mt-0.5">Early Dawn</span>
             </button>
@@ -986,13 +1085,15 @@ body > header h2 {
         <div class="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
           <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
             <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
-              <i class="fa-solid fa-map-pin text-emerald-800"></i> Corridor Safety Checkpoints (Supabase Table: <code>corridor_checkpoints</code>)
+              <i class="fa-solid fa-map-pin text-emerald-800"></i> Corridor Safety Checkpoints (Supabase Table:
+              <code>corridor_checkpoints</code>)
             </h3>
             <span class="text-xs text-slate-600 font-medium" id="checkpoint-count-badge">4 Verified Checkpoints</span>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
-              <thead class="bg-slate-50 text-slate-600 text-xs uppercase font-bold tracking-wider border-b border-slate-200/60">
+              <thead
+                class="bg-slate-50 text-slate-600 text-xs uppercase font-bold tracking-wider border-b border-slate-200/60">
                 <tr>
                   <th class="py-2 px-3">Node</th>
                   <th class="py-2 px-3">Type</th>
@@ -1008,7 +1109,9 @@ body > header h2 {
                   <td class="py-2 px-3 text-slate-600">Departure Gate</td>
                   <td class="py-2 px-3"><span class="text-emerald-700 font-semibold">100% High Mast</span></td>
                   <td class="py-2 px-3">CCTV + 24/7 Chai Kiosk (Vouched by 8 Scouts)</td>
-                  <td class="py-2 px-3 text-right"><span class="px-1.5 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">KNOWN</span></td>
+                  <td class="py-2 px-3 text-right"><span
+                      class="px-1.5 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">KNOWN</span>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -1019,13 +1122,16 @@ body > header h2 {
         <div class="bg-white     overflow-hidden">
           <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
             <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
-              <i class="fa-solid fa-list-check text-amber-800"></i> Live Ground-Truth Intel Stream (Table: <code>scout_reports</code>)
+              <i class="fa-solid fa-list-check text-amber-800"></i> Live Ground-Truth Intel Stream (Table:
+              <code>scout_reports</code>)
             </h3>
-            <span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
+            <span
+              class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 "></span> Supabase Realtime
             </span>
           </div>
-          <div class="p-3 divide-y divide-slate-100 max-h-56 overflow-y-auto custom-scroll space-y-2" id="scout-reports-list">
+          <div class="p-3 divide-y divide-slate-100 max-h-56 overflow-y-auto custom-scroll space-y-2"
+            id="scout-reports-list">
             <!-- Dynamically populated from Supabase -->
           </div>
         </div>
@@ -1034,21 +1140,26 @@ body > header h2 {
       <!-- Column 3: Right Sidebar Live WhatsApp Assistant Simulator (4 cols) -->
       <aside class="lg:col-span-4 sticky top-20 space-y-4">
         <!-- WhatsApp Chat Panel Container -->
-        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[740px]" id="whatsapp-section">
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[740px]"
+          id="whatsapp-section">
           <!-- WhatsApp Header -->
           <div class="bg-[#0b5c53] px-4 py-3 text-white flex items-center justify-between shadow-xs flex-shrink-0">
             <div class="flex items-center space-x-2.5">
               <div class="relative flex-shrink-0">
-                <div class="w-9 h-9 rounded-full bg-white/20 ring-2 ring-emerald-300/60 flex items-center justify-center font-bold text-white shadow-inner">
+                <div
+                  class="w-9 h-9 rounded-full bg-white/20 ring-2 ring-emerald-300/60 flex items-center justify-center font-bold text-white shadow-inner">
                   <i class="fa-solid fa-shield-cat text-base text-emerald-200"></i>
                 </div>
-                <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 border-2 border-[#128C7E] rounded-full "></span>
-                <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 border-2 border-[#128C7E] rounded-full"></span>
+                <span
+                  class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 border-2 border-[#128C7E] rounded-full "></span>
+                <span
+                  class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 border-2 border-[#128C7E] rounded-full"></span>
               </div>
               <div>
                 <div class="flex items-center gap-1.5">
-                  <h3 class="text-xs font-bold tracking-tight text-white leading-tight">NightShift Assistant</h3>
-                  <span class="bg-emerald-500/30 text-emerald-100 text-xs px-1 py-0.2 rounded font-mono border border-emerald-400/30">Bot</span>
+                  <h3 class="text-xs font-bold tracking-tight text-white leading-tight">NightOwl Assistant</h3>
+                  <span
+                    class="bg-emerald-500/30 text-emerald-100 text-xs px-1 py-0.2 rounded font-mono border border-emerald-400/30">Bot</span>
                 </div>
                 <p class="text-xs text-emerald-100/90 flex items-center gap-1">
                   <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-300"></span> Ground Truth Realtime
@@ -1056,50 +1167,73 @@ body > header h2 {
               </div>
             </div>
             <div class="flex items-center gap-1 text-emerald-100 text-xs">
-              <button class="hover:text-white p-1 rounded hover:bg-white/10 transition cursor-pointer" onclick="resetWhatsAppChat()" title="Reset Chat to Initial State">
+              <button class="hover:text-white p-1 rounded hover:bg-white/10 transition cursor-pointer"
+                onclick="resetWhatsAppChat()" title="Reset Chat to Initial State">
                 <i class="fa-solid fa-arrow-rotate-left text-xs"></i>
               </button>
-              <button class="hover:text-white p-1 rounded hover:bg-white/10 transition cursor-pointer" onclick="simulateShareLiveLocation()" title="Share Live GPS Location">
+              <button class="hover:text-white p-1 rounded hover:bg-white/10 transition cursor-pointer"
+                onclick="simulateShareLiveLocation()" title="Share Live GPS Location">
                 <i class="fa-solid fa-location-dot text-xs"></i>
               </button>
               <div class="h-3 w-[1px] bg-emerald-600 mx-0.5"></div>
-              <span class="text-xs bg-emerald-900/60 px-1.5 py-0.5 rounded text-emerald-200 border border-emerald-700/60 font-mono">DB SYNC</span>
+              <span
+                class="text-xs bg-emerald-900/60 px-1.5 py-0.5 rounded text-emerald-200 border border-emerald-700/60 font-mono">DB
+                SYNC</span>
             </div>
           </div>
 
           <!-- Chat Messages Stream Area with In-Chat Conversational Flow -->
-          <div class="whatsapp-pattern p-3 flex-grow overflow-y-auto custom-scroll flex flex-col space-y-3" id="chat-messages-container">
+          <div class="whatsapp-pattern p-3 flex-grow overflow-y-auto custom-scroll flex flex-col space-y-3"
+            id="chat-messages-container">
             <!-- Date divider -->
             <div class="flex justify-center my-0.5">
-              <span class="text-xs font-semibold tracking-wider text-slate-900 bg-white shadow-xs px-3 py-1 rounded-full uppercase border border-slate-300 font-bold">
+              <span
+                class="text-xs font-semibold tracking-wider text-slate-900 bg-white shadow-xs px-3 py-1 rounded-full uppercase border border-slate-300 font-bold">
                 Shift Safe Channel • Live
               </span>
             </div>
           </div>
 
           <!-- Quick Prompt Suggestions Bar -->
-          <div class="bg-slate-50 border-t border-slate-200 px-3 py-1.5 flex items-center gap-1.5 overflow-x-auto text-xs whitespace-nowrap flex-shrink-0 custom-scroll">
+          <div
+            class="bg-slate-50 border-t border-slate-200 px-3 py-1.5 flex items-center gap-1.5 overflow-x-auto text-xs whitespace-nowrap flex-shrink-0 custom-scroll">
             <span class="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1">
               <i class="fa-solid fa-bolt text-amber-800"></i> Prompt:
             </span>
-            <button class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-full text-xs font-medium transition cursor-pointer" onclick="sendChatMessage('Check route safety status')">🛡️ Safety</button>
-            <button class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-full text-xs font-medium transition cursor-pointer" onclick="sendChatMessage('Find open pharmacy nearby')">💊 Pharmacy</button>
-            <button class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-full text-xs font-medium transition cursor-pointer" onclick="selectChatRole('provider')">✨ Scout Intel</button>
-            <button class="bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-full text-xs font-medium transition cursor-pointer" onclick="sendChatMessage('Simulate Emergency SOS')">🚨 SOS</button>
+            <button
+              class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-full text-xs font-medium transition cursor-pointer"
+              onclick="sendChatMessage('Check route safety status')">🛡️ Safety</button>
+            <button
+              class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-full text-xs font-medium transition cursor-pointer"
+              onclick="sendChatMessage('Find open pharmacy nearby')">💊 Pharmacy</button>
+            <button
+              class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-full text-xs font-medium transition cursor-pointer"
+              onclick="selectChatRole('provider')">✨ Scout Intel</button>
+            <button
+              class="bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-full text-xs font-medium transition cursor-pointer"
+              onclick="sendChatMessage('Simulate Emergency SOS')">🚨 SOS</button>
           </div>
 
           <!-- Message Composer Bar -->
           <div class="bg-slate-100 p-2.5 border-t border-slate-200 flex items-center gap-1.5 flex-shrink-0">
-            <button class="text-slate-600 hover:text-slate-700 p-1 rounded-full hover:bg-slate-200/70 transition cursor-pointer" onclick="handleQuickReply('Share Live GPS Pin')" title="Share GPS Pin">
+            <button
+              class="text-slate-600 hover:text-slate-700 p-1 rounded-full hover:bg-slate-200/70 transition cursor-pointer"
+              onclick="handleQuickReply('Share Live GPS Pin')" title="Share GPS Pin">
               <i class="fa-solid fa-paperclip text-xs"></i>
             </button>
             <div class="relative flex-grow">
-              <input class="w-full bg-white border border-slate-300 rounded-full pl-3 pr-8 py-1.5 text-xs text-slate-800 placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 shadow-2xs" id="whatsapp-input" onkeypress="if(event.key === 'Enter') handleSendButtonClick()" placeholder="Type inquiry or tap option..." type="text"/>
-              <button class="absolute right-2.5 top-1.5 text-slate-600 hover:text-slate-600 cursor-pointer text-xs" onclick="handleQuickReply('Record Audio Note')" title="Record Audio Note">
+              <input
+                class="w-full bg-white border border-slate-300 rounded-full pl-3 pr-8 py-1.5 text-xs text-slate-800 placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 shadow-2xs"
+                id="whatsapp-input" onkeypress="if(event.key === 'Enter') handleSendButtonClick()"
+                placeholder="Type inquiry or tap option..." type="text" />
+              <button class="absolute right-2.5 top-1.5 text-slate-600 hover:text-slate-600 cursor-pointer text-xs"
+                onclick="handleQuickReply('Record Audio Note')" title="Record Audio Note">
                 <i class="fa-solid fa-microphone text-xs"></i>
               </button>
             </div>
-            <button class="bg-[#128C7E] hover:bg-[#0d6e63] text-white w-7 h-7 rounded-full flex items-center justify-center shadow-xs transition duration-150 cursor-pointer active:scale-95 flex-shrink-0" onclick="handleSendButtonClick()" title="Send Message">
+            <button
+              class="bg-[#128C7E] hover:bg-[#0d6e63] text-white w-7 h-7 rounded-full flex items-center justify-center shadow-xs transition duration-150 cursor-pointer active:scale-95 flex-shrink-0"
+              onclick="handleSendButtonClick()" title="Send Message">
               <i class="fa-solid fa-paper-plane text-xs"></i>
             </button>
           </div>
@@ -1108,7 +1242,8 @@ body > header h2 {
         <!-- Quick Escort Dispatch Banner -->
         <div class="bg-white rounded-xl p-3 border border-slate-200 shadow-2xs flex items-center justify-between">
           <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center font-bold text-xs">
+            <div
+              class="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center font-bold text-xs">
               <i class="fa-solid fa-bolt"></i>
             </div>
             <div>
@@ -1116,15 +1251,19 @@ body > header h2 {
               <div class="text-xs text-slate-600">Share lighting, safe shops & hazards into Supabase</div>
             </div>
           </div>
-          <button class="bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold px-3 py-1 rounded-lg transition shadow-2xs cursor-pointer" onclick="selectChatRole('provider')">Contribute</button>
+          <button
+            class="bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold px-3 py-1 rounded-lg transition shadow-2xs cursor-pointer"
+            onclick="selectChatRole('provider')">Contribute</button>
         </div>
       </aside>
     </div>
   </main>
 
   <!-- Emergency SOS Modal Dialog -->
-  <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4" id="sos-modal">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 border border-slate-200 shadow-xl space-y-4 animate-modal-enter">
+  <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4"
+    id="sos-modal">
+    <div
+      class="bg-white rounded-2xl max-w-md w-full p-6 border border-slate-200 shadow-xl space-y-4 animate-modal-enter">
       <div class="flex items-center justify-between pb-3 border-b border-slate-100">
         <div class="flex items-center gap-2 text-rose-600 font-bold text-base">
           <i class="fa-solid fa-triangle-exclamation"></i> Emergency SOS Broadcast
@@ -1134,7 +1273,8 @@ body > header h2 {
         </button>
       </div>
       <p class="text-slate-600 text-xs leading-relaxed">
-        Real-time incident dispatch alert will be recorded directly into the Supabase <code>sos_alerts</code> table. The nearest PCR vehicle and emergency network contacts will receive your live GPS tracking telemetry immediately.
+        Real-time incident dispatch alert will be recorded directly into the Supabase <code>sos_alerts</code> table. The
+        nearest PCR vehicle and emergency network contacts will receive your live GPS tracking telemetry immediately.
       </p>
       <div class="bg-rose-50   p-3  text-xs text-rose-800 space-y-1">
         <div><strong>Location:</strong> Sector 62 Tech Park Transit Corridor</div>
@@ -1143,20 +1283,28 @@ body > header h2 {
         <div><strong>Supabase Sync:</strong> Realtime WebSocket Broadcast</div>
       </div>
       <div class="flex gap-2 justify-end pt-2">
-        <button class="px-4 py-2 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition cursor-pointer" onclick="closeSOSModal()">Cancel</button>
-        <button class="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow-xs transition cursor-pointer" onclick="confirmSOSCall()">Confirm Broadcast</button>
+        <button
+          class="px-4 py-2 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition cursor-pointer"
+          onclick="closeSOSModal()">Cancel</button>
+        <button
+          class="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow-xs transition cursor-pointer"
+          onclick="confirmSOSCall()">Confirm Broadcast</button>
       </div>
     </div>
   </div>
 
   <!-- Supabase Settings & Table Generator Modal Dialog -->
-  <div class="fixed inset-0 bg-slate-900/65 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4 overflow-y-auto" id="supabase-modal">
-    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 border border-slate-200 shadow-2xl space-y-4 my-8 animate-modal-enter">
-      
+  <div
+    class="fixed inset-0 bg-slate-900/65 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4 overflow-y-auto"
+    id="supabase-modal">
+    <div
+      class="bg-white rounded-2xl max-w-2xl w-full p-6 border border-slate-200 shadow-2xl space-y-4 my-8 animate-modal-enter">
+
       <!-- Modal Header -->
       <div class="flex items-center justify-between pb-3 border-b border-slate-100">
         <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 flex items-center justify-center text-lg">
+          <div
+            class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 flex items-center justify-center text-lg">
             <i class="fa-solid fa-database"></i>
           </div>
           <div>
@@ -1178,7 +1326,8 @@ body > header h2 {
             <div class="text-xs text-slate-600" id="modal-status-desc">Fetching status from server</div>
           </div>
         </div>
-        <button onclick="checkBackendHealth()" class="px-2.5 py-1 bg-white border border-slate-200 rounded text-slate-700 font-semibold text-xs hover:bg-slate-100 cursor-pointer">
+        <button onclick="checkBackendHealth()"
+          class="px-2.5 py-1 bg-white border border-slate-200 rounded text-slate-700 font-semibold text-xs hover:bg-slate-100 cursor-pointer">
           <i class="fa-solid fa-rotate-right mr-1"></i> Refresh
         </button>
       </div>
@@ -1191,15 +1340,18 @@ body > header h2 {
         <div class="space-y-2 text-xs">
           <div>
             <label class="block font-semibold text-slate-700 mb-1">Project URL (SUPABASE_URL)</label>
-            <input type="text" id="cfg-supabase-url" placeholder="https://xyzcompany.supabase.co" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800 font-mono focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"/>
+            <input type="text" id="cfg-supabase-url" placeholder="https://xyzcompany.supabase.co"
+              class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800 font-mono focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500" />
           </div>
           <div>
             <label class="block font-semibold text-slate-700 mb-1">Public Anon Key (SUPABASE_ANON_KEY)</label>
-            <input type="password" id="cfg-supabase-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800 font-mono focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"/>
+            <input type="password" id="cfg-supabase-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+              class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800 font-mono focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500" />
           </div>
         </div>
         <div class="flex justify-end gap-2 pt-1">
-          <button onclick="saveSupabaseConfig()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-lg text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer">
+          <button onclick="saveSupabaseConfig()"
+            class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-lg text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer">
             <i class="fa-solid fa-floppy-disk"></i> Save & Connect Supabase
           </button>
         </div>
@@ -1211,47 +1363,66 @@ body > header h2 {
           <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
             <i class="fa-solid fa-table-list text-sky-600"></i> How to Generate the Tables in Supabase
           </h4>
-          <button onclick="copySQLSchema()" class="text-xs text-sky-700 font-semibold hover:underline flex items-center gap-1 cursor-pointer">
+          <button onclick="copySQLSchema()"
+            class="text-xs text-sky-700 font-semibold hover:underline flex items-center gap-1 cursor-pointer">
             <i class="fa-regular fa-copy"></i> Copy Full SQL Script
           </button>
         </div>
 
         <div class="bg-slate-900 text-slate-200 rounded-xl p-3.5 text-xs space-y-2.5 font-mono">
           <div class="flex items-start gap-2">
-            <span class="bg-emerald-500 text-slate-950 font-bold w-4 h-4 rounded-full flex items-center justify-center text-xs mt-0.5">1</span>
-            <div>Log in to <a href="https://supabase.com/dashboard" target="_blank" class="text-emerald-400 underline font-semibold">supabase.com/dashboard</a> and create or select your project.</div>
+            <span
+              class="bg-emerald-500 text-slate-950 font-bold w-4 h-4 rounded-full flex items-center justify-center text-xs mt-0.5">1</span>
+            <div>Log in to <a href="https://supabase.com/dashboard" target="_blank"
+                class="text-emerald-400 underline font-semibold">supabase.com/dashboard</a> and create or select your
+              project.</div>
           </div>
           <div class="flex items-start gap-2">
-            <span class="bg-emerald-500 text-slate-950 font-bold w-4 h-4 rounded-full flex items-center justify-center text-xs mt-0.5">2</span>
-            <div>In the left sidebar, click the <strong class="text-white">SQL Editor</strong> icon (<i class="fa-solid fa-code text-xs text-emerald-400"></i>).</div>
+            <span
+              class="bg-emerald-500 text-slate-950 font-bold w-4 h-4 rounded-full flex items-center justify-center text-xs mt-0.5">2</span>
+            <div>In the left sidebar, click the <strong class="text-white">SQL Editor</strong> icon (<i
+                class="fa-solid fa-code text-xs text-emerald-400"></i>).</div>
           </div>
           <div class="flex items-start gap-2">
-            <span class="bg-emerald-500 text-slate-950 font-bold w-4 h-4 rounded-full flex items-center justify-center text-xs mt-0.5">3</span>
-            <div>Click <strong class="text-white">+ New Query</strong>, paste the SQL schema from <code class="text-amber-300">supabase/schema.sql</code>, and click <strong class="text-emerald-400">Run</strong>.</div>
+            <span
+              class="bg-emerald-500 text-slate-950 font-bold w-4 h-4 rounded-full flex items-center justify-center text-xs mt-0.5">3</span>
+            <div>Click <strong class="text-white">+ New Query</strong>, paste the SQL schema from <code
+                class="text-amber-300">supabase/schema.sql</code>, and click <strong
+                class="text-emerald-400">Run</strong>.</div>
           </div>
           <div class="flex items-start gap-2">
-            <span class="bg-emerald-500 text-slate-950 font-bold w-4 h-4 rounded-full flex items-center justify-center text-xs mt-0.5">4</span>
-            <div>All 6 tables (<code>scout_reports</code>, <code>commute_intakes</code>, <code>sos_alerts</code>, <code>corridor_checkpoints</code>, <code>chat_messages</code>, <code>scout_profiles</code>) + Realtime + RLS policies are created automatically!</div>
+            <span
+              class="bg-emerald-500 text-slate-950 font-bold w-4 h-4 rounded-full flex items-center justify-center text-xs mt-0.5">4</span>
+            <div>All 6 tables (<code>scout_reports</code>, <code>commute_intakes</code>, <code>sos_alerts</code>,
+              <code>corridor_checkpoints</code>, <code>chat_messages</code>, <code>scout_profiles</code>) + Realtime +
+              RLS policies are created automatically!</div>
           </div>
           <div class="flex items-start gap-2">
-            <span class="bg-emerald-500 text-slate-950 font-bold w-4 h-4 rounded-full flex items-center justify-center text-xs mt-0.5">5</span>
-            <div>Navigate to <strong class="text-white">Project Settings &gt; API</strong>, copy your <strong class="text-white">Project URL</strong> &amp; <strong class="text-white">anon public key</strong>, and paste them above!</div>
+            <span
+              class="bg-emerald-500 text-slate-950 font-bold w-4 h-4 rounded-full flex items-center justify-center text-xs mt-0.5">5</span>
+            <div>Navigate to <strong class="text-white">Project Settings &gt; API</strong>, copy your <strong
+                class="text-white">Project URL</strong> &amp; <strong class="text-white">anon public key</strong>, and
+              paste them above!</div>
           </div>
         </div>
       </div>
 
       <div class="flex justify-end pt-2 border-t border-slate-100">
-        <button class="px-4 py-2 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition cursor-pointer" onclick="closeSupabaseModal()">Close</button>
+        <button
+          class="px-4 py-2 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition cursor-pointer"
+          onclick="closeSupabaseModal()">Close</button>
       </div>
     </div>
   </div>
 
   <!-- Dashboard Footer -->
   <footer class="bg-white border-t border-slate-200 py-3.5 px-6 text-center text-xs text-slate-600">
-    NightShift Decision Dashboard • Full Stack Supabase Edition • Real-time Telemetry, Community Ground Truth Network & Emergency Haven Network
+    NightOwl Decision Dashboard • Full Stack Supabase Edition • Real-time Telemetry, Community Ground Truth Network &
+    Emergency Haven Network
   </footer>
 
   <!-- App Logic & Supabase Integration Script -->
   <script src="/js/app.js"></script>
 </body>
+
 </html>
