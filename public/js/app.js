@@ -1,5 +1,5 @@
 /**
- * NightShift Decision Dashboard - Full Stack & Supabase Integration Client
+ * NightOwl Decision Dashboard - Full Stack & Supabase Integration Client
  */
 
 let supabaseClient = null;
@@ -104,9 +104,8 @@ function showToast(message, isAlert = false) {
   if (!toast || !toastText) return;
 
   toastText.innerHTML = message;
-  toast.className = `fixed top-16 right-5 z-50 transform transition-all duration-300 translate-y-0 opacity-100 ${
-    isAlert ? 'bg-rose-900 border-rose-500' : 'bg-slate-900 border-slate-700'
-  } text-white text-xs px-4 py-2.5 rounded-xl shadow-lg border flex items-center gap-2`;
+  toast.className = `fixed top-16 right-5 z-50 transform transition-all duration-300 translate-y-0 opacity-100 ${isAlert ? 'bg-rose-900 border-rose-500' : 'bg-slate-900 border-slate-700'
+    } text-white text-xs px-4 py-2.5 rounded-xl shadow-lg border flex items-center gap-2`;
 
   setTimeout(() => {
     toast.className = 'fixed top-16 right-5 z-50 transform transition-all duration-300 translate-y-[-20px] opacity-0 pointer-events-none bg-slate-900 text-white text-xs px-4 py-2.5 rounded-xl shadow-lg border border-slate-700 flex items-center gap-2';
@@ -169,7 +168,7 @@ function updateSupabaseUIStatus(isConnected, url = '') {
 function setupRealtimeSubscriptions() {
   if (!supabaseClient) return;
 
-  const channel = supabaseClient.channel('nightshift-live-channel')
+  const channel = supabaseClient.channel('NightOwl-live-channel')
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'scout_reports' }, payload => {
       console.log('⚡ Realtime Scout Report received:', payload.new);
       showToast(`⚡ <strong>New Scout Report:</strong> ${payload.new.condition_title} by ${payload.new.scout_name}`);
@@ -243,9 +242,8 @@ function renderCheckpointsTable(checkpoints) {
       </td>
       <td class="py-2.5 px-3.5 text-slate-700">${cp.community_vouch}</td>
       <td class="py-2.5 px-3.5 text-right">
-        <span class="px-2 py-0.5 rounded-md text-xs font-bold ${
-          cp.epistemic_status === 'KNOWN' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-amber-100 text-amber-800 border-amber-300'
-        } border">${cp.epistemic_status}</span>
+        <span class="px-2 py-0.5 rounded-md text-xs font-bold ${cp.epistemic_status === 'KNOWN' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-amber-100 text-amber-800 border-amber-300'
+    } border">${cp.epistemic_status}</span>
       </td>
     </tr>
   `).join('');
@@ -296,8 +294,7 @@ function appendScoutReportToFeed(report, prepend = true) {
       <div class="text-slate-700 text-xs leading-normal">${report.condition_title}</div>
       ${report.landmark_note ? `<div class="text-xs text-slate-500 italic">"${report.landmark_note}"</div>` : ''}
     </div>
-    <span class="px-2 py-0.5 rounded-md text-xs font-bold ${
-      report.epistemic_status === 'KNOWN' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800 border border-amber-300'
+    <span class="px-2 py-0.5 rounded-md text-xs font-bold ${report.epistemic_status === 'KNOWN' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800 border border-amber-300'
     } border">${report.epistemic_status || 'KNOWN'}</span>
   `;
 
@@ -476,11 +473,10 @@ function sendBotMessage(htmlContent, isCard = false, customTag = "KNOWN") {
     <div class="bg-white text-slate-900 text-xs rounded-xl rounded-tl-xs p-3.5 max-w-[95%] shadow-xs  space-y-2">
       <div class="flex items-center justify-between pb-1.5 border-b border-slate-100">
         <span class="font-bold text-emerald-800 flex items-center gap-1.5 text-xs">
-          <i class="fa-solid fa-shield-halved text-emerald-700"></i> NightShift Engine
+          <i class="fa-solid fa-shield-halved text-emerald-700"></i> NightOwl Engine
         </span>
-        <span class="px-2 py-0.5 rounded-md text-xs font-bold ${
-          customTag === 'KNOWN' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : (customTag === 'PROBABLE' ? 'bg-amber-100 text-amber-800 border-amber-300' : 'bg-rose-100 text-rose-800 border-rose-300')
-        } border">${customTag}</span>
+        <span class="px-2 py-0.5 rounded-md text-xs font-bold ${customTag === 'KNOWN' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : (customTag === 'PROBABLE' ? 'bg-amber-100 text-amber-800 border-amber-300' : 'bg-rose-100 text-rose-800 border-rose-300')
+    } border">${customTag}</span>
       </div>
       <div class="text-slate-800 leading-normal text-xs">${htmlContent}</div>
       <div class="flex items-center justify-end gap-1 mt-1 text-xs text-slate-500 font-mono">
@@ -504,7 +500,7 @@ function selectChatRole(role) {
         <div class="bg-white text-slate-900 text-xs rounded-xl rounded-tl-xs p-4 max-w-[96%] w-full shadow-xs  space-y-2.5">
           <div class="flex items-center justify-between pb-1.5 border-b border-slate-100">
             <span class="font-bold text-emerald-800 flex items-center gap-1.5 text-xs">
-              <i class="fa-solid fa-shield-halved text-emerald-700"></i> NightShift Engine
+              <i class="fa-solid fa-shield-halved text-emerald-700"></i> NightOwl Engine
             </span>
             <span class="px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">INTAKE</span>
           </div>
@@ -804,7 +800,7 @@ async function handleProviderGroundTruthSubmit() {
       <div class="bg-white text-slate-900 text-xs rounded-xl rounded-tl-xs p-4 max-w-[96%] w-full shadow-xs  space-y-2.5">
         <div class="flex items-center justify-between pb-1.5 border-b border-slate-100">
           <span class="font-bold text-emerald-800 flex items-center gap-1.5 text-xs">
-            <i class="fa-solid fa-shield-halved text-emerald-700"></i> NightShift Engine
+            <i class="fa-solid fa-shield-halved text-emerald-700"></i> NightOwl Engine
           </span>
           <span class="px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">KNOWN • STORED IN SUPABASE</span>
         </div>
@@ -906,7 +902,7 @@ async function handleInChatCommuteSubmit() {
       <div class="bg-white text-slate-900 text-xs rounded-xl rounded-tl-xs p-3.5 max-w-[95%] shadow-xs  space-y-2">
         <div class="flex items-center justify-between pb-1.5 border-b border-slate-100">
           <span class="font-bold text-emerald-800 flex items-center gap-1 text-xs">
-            <i class="fa-solid fa-shield-halved text-emerald-700"></i> NightShift Engine
+            <i class="fa-solid fa-shield-halved text-emerald-700"></i> NightOwl Engine
           </span>
           <span class="px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">KNOWN</span>
         </div>
@@ -1014,13 +1010,13 @@ function resetWhatsAppChat() {
       <div class="bg-white text-slate-900 text-xs rounded-xl rounded-tl-xs p-4 max-w-[96%] w-full shadow-xs  space-y-3">
         <div class="flex items-center justify-between pb-1.5 border-b border-slate-100">
           <span class="font-bold text-emerald-800 flex items-center gap-1.5 text-xs">
-            <i class="fa-solid fa-shield-halved text-emerald-700"></i> NightShift Engine
+            <i class="fa-solid fa-shield-halved text-emerald-700"></i> NightOwl Engine
           </span>
           <span class="px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">LIVE</span>
         </div>
 
         <p class="text-slate-800 leading-normal text-xs">
-          Hello! Welcome to <strong class="text-slate-950 font-bold">NightShift Operations</strong>. Are you joining as a <strong class="text-emerald-800 font-bold">Provider (Route Scout)</strong> or a <strong class="text-emerald-800 font-bold">Consumer</strong> tonight?
+          Hello! Welcome to <strong class="text-slate-950 font-bold">NightOwl Operations</strong>. Are you joining as a <strong class="text-emerald-800 font-bold">Provider (Route Scout)</strong> or a <strong class="text-emerald-800 font-bold">Consumer</strong> tonight?
         </p>
 
         <div class="grid grid-cols-1 gap-2.5 pt-1">
@@ -1123,7 +1119,7 @@ async function saveSupabaseConfig() {
 }
 
 async function copySQLSchema() {
-  const sql = `-- NightShift Operations Supabase Schema
+  const sql = `-- NightOwl Operations Supabase Schema
 -- Run this in your Supabase SQL Editor:
 -- (Check supabase/schema.sql in the project root for full schema)
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

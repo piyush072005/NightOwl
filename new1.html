@@ -1,588 +1,908 @@
 <!DOCTYPE html>
 
-<html class="light" lang="en" style=""><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>NightShift - Operations &amp; Safety Decision Dashboard</title>
-<!-- Tailwind CSS CDN -->
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<!-- FontAwesome Icons -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
-<!-- Google Fonts Inter -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
-<style>
-    body { font-family: 'Inter', sans-serif; font-size: 13px; }
-    .font-mono { font-family: 'JetBrains Mono', monospace; }
-    .whatsapp-pattern {
-        background-color: #efeae2;
-        background-image: radial-gradient(#d5cdc4 1px, transparent 1px);
-        background-size: 16px 16px;
-    }
-    .custom-scroll::-webkit-scrollbar {
-        width: 5px;
-        height: 5px;
-    }
-    .custom-scroll::-webkit-scrollbar-track {
-        background: rgba(0,0,0,0.03);
-    }
-    .custom-scroll::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 4px;
-    }
-</style>
-<script>
-    tailwind.config = {
-        darkMode: 'class',
-        theme: {
-            extend: {
-                colors: {
-                    brand: {
-                        50: '#fffbeb',
-                        100: '#fef3c7',
-                        200: '#fde68a',
-                        500: '#f59e0b',
-                        600: '#d97706',
-                        700: '#b45309',
-                        800: '#92400e',
-                    },
-                    wa: {
-                        teal: '#128C7E',
-                        darkTeal: '#075E54',
-                        green: '#25D366',
-                        lightGreen: '#dcf8c6',
+<html class="light" lang="en" style="">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>NightOwl - Operations &amp; Safety Decision Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- FontAwesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <!-- Google Fonts Inter -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap"
+        rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .whatsapp-pattern {
+            background-color: #efeae2;
+            background-image: radial-gradient(#d5cdc4 1px, transparent 1px);
+            background-size: 16px 16px;
+        }
+
+        .custom-scroll::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            200: '#fde68a',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            700: '#b45309',
+                            800: '#92400e',
+                        },
+                        wa: {
+                            teal: '#128C7E',
+                            darkTeal: '#075E54',
+                            green: '#25D366',
+                            lightGreen: '#dcf8c6',
+                        }
                     }
                 }
             }
         }
-    }
-</script>
+    </script>
 </head>
-<body class="bg-slate-100/80 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-amber-100 selection:text-amber-900">
-<!-- Top Navigation Header -->
-<header class="bg-white border-b border-slate-200 sticky top-0 z-40 px-5 lg:px-8 py-3 flex items-center justify-between shadow-xs">
-<div class="flex items-center space-x-4">
-<div class="flex items-center gap-3">
-<div class="bg-amber-500/10 p-2.5 rounded-xl border border-amber-500/25 text-amber-600 shadow-xs flex items-center justify-center">
-<i class="fa-solid fa-moon text-lg"></i>
-</div>
-<div>
-<div class="flex items-center gap-2">
-<span class="text-base font-extrabold tracking-tight text-slate-900">NIGHTSHIFT</span>
-<span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300">Operations Hub</span>
-<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Telemetry Live
-                    </span>
-</div>
-<p class="text-xs text-slate-500 font-medium">Night-Time Worker Safety &amp; Community Route Intelligence Engine</p>
-</div>
-</div>
-</div>
-<!-- Right Global Actions -->
-<div class="flex items-center space-x-3">
-<!-- Night Simulated Clock -->
-<div class="hidden sm:flex items-center space-x-2 bg-slate-50 px-3.5 py-1.5 rounded-lg border border-slate-200 text-xs shadow-2xs">
-<i class="fa-regular fa-clock text-amber-600"></i>
-<span class="font-mono font-bold text-slate-900 text-sm" id="live-night-clock">02:30 AM</span>
-<span class="text-[10px] text-slate-400 font-medium">(Simulated Lull)</span>
-</div>
-<button class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-2 shadow-2xs cursor-pointer active:scale-95" onclick="triggerEmergencySOS()">
-<i class="fa-solid fa-triangle-exclamation text-rose-600 animate-bounce"></i> Emergency SOS
-        </button>
-<div class="hidden md:flex items-center pl-2 border-l border-slate-200 space-x-2"><div class="w-8 h-8 rounded-full bg-amber-500/10 border border-amber-300 flex items-center justify-center text-amber-700 font-bold text-xs"><i class="fa-solid fa-users text-amber-600"></i></div><div class="text-left text-xs"><div class="font-semibold text-slate-800 leading-tight">Community Route Scout</div><div class="text-[10px] text-slate-400" id="header-scout-rep">Scout Hub • Rep 480 pts (Level 3)</div></div></div>
-</div>
-</header>
-<!-- Main Dashboard Layout -->
-<main class="flex-grow max-w-[1600px] w-full mx-auto px-4 lg:px-6 py-5 space-y-5">
-<!-- KPI Summary Row -->
-<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
-<div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
-<div class="flex items-center justify-between text-slate-500 text-xs font-medium mb-1">
-<span class="">Active Commuters</span>
-<i class="fa-solid fa-users text-amber-500"></i>
-</div>
-<div class="text-xl font-bold text-slate-900 font-mono">1,428</div>
-<div class="text-[11px] text-emerald-600 font-medium mt-0.5 flex items-center gap-1">
-<i class="fa-solid fa-arrow-up text-[9px]"></i> 12% shift peak
+
+<body
+    class="bg-slate-100/80 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-amber-100 selection:text-amber-900">
+    <!-- Top Navigation Header -->
+    <header
+        class="bg-white border-b border-slate-200 sticky top-0 z-40 px-5 lg:px-8 py-3 flex items-center justify-between shadow-xs">
+        <div class="flex items-center space-x-4">
+            <div class="flex items-center gap-3">
+                <div
+                    class="bg-amber-500/10 p-2.5 rounded-xl border border-amber-500/25 text-amber-600 shadow-xs flex items-center justify-center">
+                    <i class="fa-solid fa-moon text-lg"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-base font-extrabold tracking-tight text-slate-900">NightOwl</span>
+                        <span
+                            class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300">Operations
+                            Hub</span>
+                        <span
+                            class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Telemetry Live
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-500 font-medium">Night-Time Worker Safety &amp; Community Route
+                        Intelligence Engine</p>
+                </div>
             </div>
-</div>
-<div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
-<div class="flex items-center justify-between text-slate-500 text-xs font-medium mb-1">
-<span class="">Corridor Lighting</span>
-<i class="fa-solid fa-lightbulb text-amber-500"></i>
-</div>
-<div class="text-xl font-bold text-slate-900 font-mono" id="kpi-lighting">84% Lit</div>
-<div class="text-[11px] text-amber-600 font-medium mt-0.5 flex items-center gap-1"><i class="fa-solid fa-circle-check text-[9px]"></i> Community Ground-Truthed</div>
-</div>
-<div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs"><div class="flex items-center justify-between text-slate-500 text-xs font-medium mb-1"><span class="">Community Scouts (Active)</span><i class="fa-solid fa-users text-sky-600"></i></div><div class="text-xl font-bold text-slate-900 font-mono" id="kpi-scouts">42 Scouts</div><div class="text-[11px] text-emerald-600 font-medium mt-0.5 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 42 active scouts reporting</div></div>
-<div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs"><div class="flex items-center justify-between text-slate-500 text-xs font-medium mb-1"><span class="">Open Havens Verified</span><i class="fa-solid fa-hospital text-rose-500"></i></div><div class="text-xl font-bold text-slate-900 font-mono">34 Verified</div><div class="text-[11px] text-emerald-600 font-medium mt-0.5 flex items-center gap-1"><i class="fa-solid fa-circle-check text-[9px]"></i> Verified by contributors</div></div>
-<div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs"><div class="flex items-center justify-between text-slate-500 text-xs font-medium mb-1"><span class="">Live Route Intel Reports</span><i class="fa-solid fa-bolt text-amber-600"></i></div><div class="text-xl font-bold text-slate-900 font-mono" id="kpi-intel-reports">128 Reports</div><div class="text-[11px] text-slate-500 font-medium mt-0.5" id="kpi-reports-sub">128 Filed tonight</div></div>
-<div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
-<div class="flex items-center justify-between text-slate-500 text-xs font-medium mb-1">
-<span class="">Epistemic Reliability</span>
-<i class="fa-solid fa-circle-nodes text-emerald-600"></i>
-</div>
-<div class="text-xl font-bold text-emerald-700 font-mono" id="kpi-epistemic">KNOWN</div>
-<div class="text-[11px] text-slate-500 font-medium mt-0.5">
-                98.4% Live Verified
+        </div>
+        <!-- Right Global Actions -->
+        <div class="flex items-center space-x-3">
+            <!-- Night Simulated Clock -->
+            <div
+                class="hidden sm:flex items-center space-x-2 bg-slate-50 px-3.5 py-1.5 rounded-lg border border-slate-200 text-xs shadow-2xs">
+                <i class="fa-regular fa-clock text-amber-600"></i>
+                <span class="font-mono font-bold text-slate-900 text-sm" id="live-night-clock">02:30 AM</span>
+                <span class="text-[10px] text-slate-400 font-medium">(Simulated Lull)</span>
             </div>
-</div>
-</div>
-<!-- Main Content 3-Column Holy Grail Grid -->
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-<!-- Column 1: Left Control & Epistemic Tagging System (3 cols) -->
-<aside class="lg:col-span-3 space-y-4">
-<!-- Epistemic Reliability Legend Card -->
-<div class="bg-white rounded-xl p-4 border border-slate-200 shadow-2xs">
-<div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
-<h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-<i class="fa-solid fa-shield-halved text-sky-600"></i> Epistemic Tagging System
-                    </h3>
-</div>
-<p class="text-[11px] text-slate-500 mb-2.5 leading-relaxed">Guarantees safety decisions reflect empirical ground truth, avoiding night hallucinations:</p>
-<div class="space-y-1.5 text-xs">
-<div class="flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-slate-200/80">
-<span class="font-bold text-emerald-700 flex items-center gap-1.5 text-[11px]"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> KNOWN</span>
-<span class="text-slate-600 font-medium text-[11px]">Sensor / Live GPS &lt; 5m</span>
-</div>
-<div class="flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-slate-200/80">
-<span class="font-bold text-amber-700 flex items-center gap-1.5 text-[11px]"><span class="w-2 h-2 rounded-full bg-amber-500"></span> PROBABLE</span>
-<span class="text-slate-600 font-medium text-[11px]">Historical Patrol Pattern</span>
-</div>
-<div class="flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-slate-200/80">
-<span class="font-bold text-orange-700 flex items-center gap-1.5 text-[11px]"><span class="w-2 h-2 rounded-full bg-orange-500"></span> OUTDATED</span>
-<span class="text-slate-600 font-medium text-[11px]">&gt; 45m Signal Gap</span>
-</div>
-<div class="flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-slate-200/80">
-<span class="font-bold text-rose-700 flex items-center gap-1.5 text-[11px]"><span class="w-2 h-2 rounded-full bg-rose-500"></span> UNKNOWN</span>
-<span class="text-slate-600 font-medium text-[11px]">Fallback Safe Anchor</span>
-</div>
-</div>
-</div>
-<!-- Active Alerts Broadcast Box -->
-<div class="bg-amber-50/70 rounded-xl p-3.5 border border-amber-200 shadow-2xs space-y-2">
-<div class="flex items-center justify-between">
-<span class="text-xs font-bold text-amber-900 flex items-center gap-1.5">
-<i class="fa-solid fa-bullhorn text-amber-600"></i> Night Advisory
-                    </span>
-<span class="text-[10px] font-mono text-amber-700">02:18 AM</span>
-</div>
-<p class="text-[11px] text-amber-800 leading-normal">
-                    Underpass streetlights on <strong>Bypass East</strong> operating on reduced 50% backup power. Motorized transit advised over pedestrian routes.
-                </p>
-</div>
-<!-- Operations Dispatch Stats Summary -->
-<div class="bg-white rounded-xl p-3.5 border border-slate-200 shadow-2xs space-y-2"><div class="flex items-center justify-between"><span class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-users text-emerald-600"></i> Community Intel Feed</span><span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Live Intel</span></div><div class="text-[11px] text-slate-600 space-y-1.5 pt-1"><div class="flex justify-between items-center"><span class="">Active Contributors:</span><span class="font-bold text-slate-800" id="sidebar-scout-count">42 Scouts</span></div><div class="flex justify-between items-center"><span class="">Corridor Reports Filed:</span><span class="font-bold text-slate-800" id="sidebar-report-count">128 tonight</span></div><div class="flex justify-between items-center"><span class="">Community Trust Score:</span><span class="font-bold text-emerald-700">98.4%</span></div><div class="flex justify-between items-center"><span class="">Top Badge:</span><span class="font-bold text-amber-700">Verified Night Pioneer</span></div></div><div class="pt-2 border-t border-slate-100"><button class="w-full bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 py-1.5 px-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer" onclick="selectChatRole('provider')"><i class="fa-solid fa-bolt text-amber-600 text-xs"></i> Log Route Observation (+25 pts)</button></div></div>
-</aside>
-<!-- Column 2: Center Main Operations & Safety Corridor Canvas (5 cols) -->
-<section class="lg:col-span-5 space-y-4">
-<!-- Main Live Route Plan Card -->
-<div class="bg-white rounded-xl p-5 border border-slate-200 border-l-4 border-l-amber-500 shadow-2xs relative overflow-hidden" id="plan-status-card">
-<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-<div>
-<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300" id="badge-status">
-                            KNOWN • OPTIMIZED CORRIDOR ACTIVE
+            <button
+                class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-2 shadow-2xs cursor-pointer active:scale-95"
+                onclick="triggerEmergencySOS()">
+                <i class="fa-solid fa-triangle-exclamation text-rose-600 animate-bounce"></i> Emergency SOS
+            </button>
+            <div class="hidden md:flex items-center pl-2 border-l border-slate-200 space-x-2">
+                <div
+                    class="w-8 h-8 rounded-full bg-amber-500/10 border border-amber-300 flex items-center justify-center text-amber-700 font-bold text-xs">
+                    <i class="fa-solid fa-users text-amber-600"></i></div>
+                <div class="text-left text-xs">
+                    <div class="font-semibold text-slate-800 leading-tight">Community Route Scout</div>
+                    <div class="text-[10px] text-slate-400" id="header-scout-rep">Scout Hub • Rep 480 pts (Level 3)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- Main Dashboard Layout -->
+    <main class="flex-grow max-w-[1600px] w-full mx-auto px-4 lg:px-6 py-5 space-y-5">
+        <!-- KPI Summary Row -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
+            <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
+                <div class="flex items-center justify-between text-slate-500 text-xs font-medium mb-1">
+                    <span class="">Active Commuters</span>
+                    <i class="fa-solid fa-users text-amber-500"></i>
+                </div>
+                <div class="text-xl font-bold text-slate-900 font-mono">1,428</div>
+                <div class="text-[11px] text-emerald-600 font-medium mt-0.5 flex items-center gap-1">
+                    <i class="fa-solid fa-arrow-up text-[9px]"></i> 12% shift peak
+                </div>
+            </div>
+            <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
+                <div class="flex items-center justify-between text-slate-500 text-xs font-medium mb-1">
+                    <span class="">Corridor Lighting</span>
+                    <i class="fa-solid fa-lightbulb text-amber-500"></i>
+                </div>
+                <div class="text-xl font-bold text-slate-900 font-mono" id="kpi-lighting">84% Lit</div>
+                <div class="text-[11px] text-amber-600 font-medium mt-0.5 flex items-center gap-1"><i
+                        class="fa-solid fa-circle-check text-[9px]"></i> Community Ground-Truthed</div>
+            </div>
+            <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
+                <div class="flex items-center justify-between text-slate-500 text-xs font-medium mb-1"><span
+                        class="">Community Scouts (Active)</span><i class="fa-solid fa-users text-sky-600"></i></div>
+                <div class="text-xl font-bold text-slate-900 font-mono" id="kpi-scouts">42 Scouts</div>
+                <div class="text-[11px] text-emerald-600 font-medium mt-0.5 flex items-center gap-1"><span
+                        class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 42 active scouts reporting</div>
+            </div>
+            <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
+                <div class="flex items-center justify-between text-slate-500 text-xs font-medium mb-1"><span
+                        class="">Open Havens Verified</span><i class="fa-solid fa-hospital text-rose-500"></i></div>
+                <div class="text-xl font-bold text-slate-900 font-mono">34 Verified</div>
+                <div class="text-[11px] text-emerald-600 font-medium mt-0.5 flex items-center gap-1"><i
+                        class="fa-solid fa-circle-check text-[9px]"></i> Verified by contributors</div>
+            </div>
+            <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
+                <div class="flex items-center justify-between text-slate-500 text-xs font-medium mb-1"><span
+                        class="">Live Route Intel Reports</span><i class="fa-solid fa-bolt text-amber-600"></i></div>
+                <div class="text-xl font-bold text-slate-900 font-mono" id="kpi-intel-reports">128 Reports</div>
+                <div class="text-[11px] text-slate-500 font-medium mt-0.5" id="kpi-reports-sub">128 Filed tonight</div>
+            </div>
+            <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
+                <div class="flex items-center justify-between text-slate-500 text-xs font-medium mb-1">
+                    <span class="">Epistemic Reliability</span>
+                    <i class="fa-solid fa-circle-nodes text-emerald-600"></i>
+                </div>
+                <div class="text-xl font-bold text-emerald-700 font-mono" id="kpi-epistemic">KNOWN</div>
+                <div class="text-[11px] text-slate-500 font-medium mt-0.5">
+                    98.4% Live Verified
+                </div>
+            </div>
+        </div>
+        <!-- Main Content 3-Column Holy Grail Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+            <!-- Column 1: Left Control & Epistemic Tagging System (3 cols) -->
+            <aside class="lg:col-span-3 space-y-4">
+                <!-- Epistemic Reliability Legend Card -->
+                <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-2xs">
+                    <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
+                        <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-shield-halved text-sky-600"></i> Epistemic Tagging System
+                        </h3>
+                    </div>
+                    <p class="text-[11px] text-slate-500 mb-2.5 leading-relaxed">Guarantees safety decisions reflect
+                        empirical ground truth, avoiding night hallucinations:</p>
+                    <div class="space-y-1.5 text-xs">
+                        <div
+                            class="flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-slate-200/80">
+                            <span class="font-bold text-emerald-700 flex items-center gap-1.5 text-[11px]"><span
+                                    class="w-2 h-2 rounded-full bg-emerald-500"></span> KNOWN</span>
+                            <span class="text-slate-600 font-medium text-[11px]">Sensor / Live GPS &lt; 5m</span>
+                        </div>
+                        <div
+                            class="flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-slate-200/80">
+                            <span class="font-bold text-amber-700 flex items-center gap-1.5 text-[11px]"><span
+                                    class="w-2 h-2 rounded-full bg-amber-500"></span> PROBABLE</span>
+                            <span class="text-slate-600 font-medium text-[11px]">Historical Patrol Pattern</span>
+                        </div>
+                        <div
+                            class="flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-slate-200/80">
+                            <span class="font-bold text-orange-700 flex items-center gap-1.5 text-[11px]"><span
+                                    class="w-2 h-2 rounded-full bg-orange-500"></span> OUTDATED</span>
+                            <span class="text-slate-600 font-medium text-[11px]">&gt; 45m Signal Gap</span>
+                        </div>
+                        <div
+                            class="flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-slate-200/80">
+                            <span class="font-bold text-rose-700 flex items-center gap-1.5 text-[11px]"><span
+                                    class="w-2 h-2 rounded-full bg-rose-500"></span> UNKNOWN</span>
+                            <span class="text-slate-600 font-medium text-[11px]">Fallback Safe Anchor</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Active Alerts Broadcast Box -->
+                <div class="bg-amber-50/70 rounded-xl p-3.5 border border-amber-200 shadow-2xs space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-amber-900 flex items-center gap-1.5">
+                            <i class="fa-solid fa-bullhorn text-amber-600"></i> Night Advisory
                         </span>
-<h2 class="text-base font-bold text-slate-900 mt-1 tracking-tight" id="plan-title">
-                            02:15 AM Shift Departure: Sector 62 → Block C
-                        </h2>
-</div>
-<div class="text-left sm:text-right">
-<span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">Target Arrival</span>
-<div class="text-sm font-mono font-bold text-amber-700" id="plan-eta">
-                            03:02 AM <span class="text-xs font-medium text-slate-500">(47 mins)</span>
-</div>
-</div>
-</div>
-<p class="text-xs text-slate-600 leading-relaxed mb-4" id="plan-description">
-                    Public transit frequency is minimal at this hour. The engine has synthesized a well-lit corridor avoiding isolated underpasses, leveraging 24/7 patrol checkpoints and active open pharmacies along the arterial route.
-                </p>
-<!-- Corridor Health Metrics Matrix -->
-<div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3 border-t border-slate-100 text-xs">
-<div class="bg-slate-50 p-2 rounded-lg border border-slate-200">
-<span class="text-slate-400 block mb-0.5 text-[10px] font-medium">Risk Level</span>
-<span class="font-bold text-emerald-700 flex items-center gap-1 text-[11px]" id="metric-risk">
-<i class="fa-solid fa-shield text-emerald-600"></i> Low (Patrolled)
-                        </span>
-</div>
-<div class="bg-slate-50 p-2 rounded-lg border border-slate-200">
-<span class="text-slate-400 block mb-0.5 text-[10px] font-medium">Weather / Surface</span>
-<span class="font-bold text-sky-700 flex items-center gap-1 text-[11px]" id="metric-weather">
-<i class="fa-solid fa-cloud-moon text-sky-600"></i> Clear (14°C)
-                        </span>
-</div>
-<div class="bg-slate-50 p-2 rounded-lg border border-slate-200">
-<span class="text-slate-400 block mb-0.5 text-[10px] font-medium">Transit Availability</span>
-<span class="font-bold text-amber-800 flex items-center gap-1 text-[11px]" id="metric-transport">
-<i class="fa-solid fa-taxi text-amber-600"></i> 2 Cabs Nearby
-                        </span>
-</div>
-<div class="bg-slate-50 p-2 rounded-lg border border-slate-200">
-<span class="text-slate-400 block mb-0.5 text-[10px] font-medium">Emergency Havens</span>
-<span class="font-bold text-purple-700 flex items-center gap-1 text-[11px]" id="metric-emergency">
-<i class="fa-solid fa-hospital text-purple-600"></i> 2 Open Clinics
-                        </span>
-</div>
-</div>
-</div>
-<!-- 2-Column Corridor Detail: Essential Havens & Incident Radar -->
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-<!-- Essential Havens Open Now -->
-<div class="bg-white rounded-xl p-4 border border-slate-200 shadow-2xs flex flex-col justify-between">
-<div>
-<div class="flex items-center justify-between mb-3">
-<h3 class="text-xs font-bold text-slate-800 flex items-center gap-1.5 uppercase tracking-wide">
-<i class="fa-solid fa-kit-medical text-rose-500"></i> 24/7 Open Havens
-                            </h3>
-<span class="text-[9px] px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-bold border border-emerald-300">KNOWN</span>
-</div>
-<div class="space-y-2" id="services-list">
-<div class="bg-slate-50 p-2 rounded-lg border border-slate-200 flex items-center justify-between">
-<div>
-<h4 class="text-xs font-semibold text-slate-900">Apollo 24/7 Pharmacy</h4>
-<p class="text-[10px] text-slate-500">Block B (0.8 km from route)</p>
-</div>
-<span class="text-[9px] text-emerald-800 font-bold bg-emerald-100 px-1.5 py-0.5 rounded border border-emerald-300">Open Now</span>
-</div>
-<div class="bg-slate-50 p-2 rounded-lg border border-slate-200 flex items-center justify-between">
-<div>
-<h4 class="text-xs font-semibold text-slate-900">Lifeline Emergency Clinic</h4>
-<p class="text-[10px] text-slate-500">Expressway Junc. (1.4 km)</p>
-</div>
-<span class="text-[9px] text-emerald-800 font-bold bg-emerald-100 px-1.5 py-0.5 rounded border border-emerald-300">Open Now</span>
-</div>
-</div>
-</div>
-<div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-<span class="" id="ping-text">Sensor ping: 2m ago</span>
-<button class="text-amber-700 hover:text-amber-800 font-semibold inline-flex items-center gap-1 cursor-pointer" onclick="refreshServices()">
-<i class="fa-solid fa-rotate text-xs"></i> Sync
+                        <span class="text-[10px] font-mono text-amber-700">02:18 AM</span>
+                    </div>
+                    <p class="text-[11px] text-amber-800 leading-normal">
+                        Underpass streetlights on <strong>Bypass East</strong> operating on reduced 50% backup power.
+                        Motorized transit advised over pedestrian routes.
+                    </p>
+                </div>
+                <!-- Operations Dispatch Stats Summary -->
+                <div class="bg-white rounded-xl p-3.5 border border-slate-200 shadow-2xs space-y-2">
+                    <div class="flex items-center justify-between"><span
+                            class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5"><i
+                                class="fa-solid fa-users text-emerald-600"></i> Community Intel Feed</span><span
+                            class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Live
+                            Intel</span></div>
+                    <div class="text-[11px] text-slate-600 space-y-1.5 pt-1">
+                        <div class="flex justify-between items-center"><span class="">Active Contributors:</span><span
+                                class="font-bold text-slate-800" id="sidebar-scout-count">42 Scouts</span></div>
+                        <div class="flex justify-between items-center"><span class="">Corridor Reports
+                                Filed:</span><span class="font-bold text-slate-800" id="sidebar-report-count">128
+                                tonight</span></div>
+                        <div class="flex justify-between items-center"><span class="">Community Trust Score:</span><span
+                                class="font-bold text-emerald-700">98.4%</span></div>
+                        <div class="flex justify-between items-center"><span class="">Top Badge:</span><span
+                                class="font-bold text-amber-700">Verified Night Pioneer</span></div>
+                    </div>
+                    <div class="pt-2 border-t border-slate-100"><button
+                            class="w-full bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 py-1.5 px-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                            onclick="selectChatRole('provider')"><i class="fa-solid fa-bolt text-amber-600 text-xs"></i>
+                            Log Route Observation (+25 pts)</button></div>
+                </div>
+            </aside>
+            <!-- Column 2: Center Main Operations & Safety Corridor Canvas (5 cols) -->
+            <section class="lg:col-span-5 space-y-4">
+                <!-- Main Live Route Plan Card -->
+                <div class="bg-white rounded-xl p-5 border border-slate-200 border-l-4 border-l-amber-500 shadow-2xs relative overflow-hidden"
+                    id="plan-status-card">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                        <div>
+                            <span
+                                class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300"
+                                id="badge-status">
+                                KNOWN • OPTIMIZED CORRIDOR ACTIVE
+                            </span>
+                            <h2 class="text-base font-bold text-slate-900 mt-1 tracking-tight" id="plan-title">
+                                02:15 AM Shift Departure: Sector 62 → Block C
+                            </h2>
+                        </div>
+                        <div class="text-left sm:text-right">
+                            <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">Target
+                                Arrival</span>
+                            <div class="text-sm font-mono font-bold text-amber-700" id="plan-eta">
+                                03:02 AM <span class="text-xs font-medium text-slate-500">(47 mins)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-600 leading-relaxed mb-4" id="plan-description">
+                        Public transit frequency is minimal at this hour. The engine has synthesized a well-lit corridor
+                        avoiding isolated underpasses, leveraging 24/7 patrol checkpoints and active open pharmacies
+                        along the arterial route.
+                    </p>
+                    <!-- Corridor Health Metrics Matrix -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3 border-t border-slate-100 text-xs">
+                        <div class="bg-slate-50 p-2 rounded-lg border border-slate-200">
+                            <span class="text-slate-400 block mb-0.5 text-[10px] font-medium">Risk Level</span>
+                            <span class="font-bold text-emerald-700 flex items-center gap-1 text-[11px]"
+                                id="metric-risk">
+                                <i class="fa-solid fa-shield text-emerald-600"></i> Low (Patrolled)
+                            </span>
+                        </div>
+                        <div class="bg-slate-50 p-2 rounded-lg border border-slate-200">
+                            <span class="text-slate-400 block mb-0.5 text-[10px] font-medium">Weather / Surface</span>
+                            <span class="font-bold text-sky-700 flex items-center gap-1 text-[11px]"
+                                id="metric-weather">
+                                <i class="fa-solid fa-cloud-moon text-sky-600"></i> Clear (14°C)
+                            </span>
+                        </div>
+                        <div class="bg-slate-50 p-2 rounded-lg border border-slate-200">
+                            <span class="text-slate-400 block mb-0.5 text-[10px] font-medium">Transit
+                                Availability</span>
+                            <span class="font-bold text-amber-800 flex items-center gap-1 text-[11px]"
+                                id="metric-transport">
+                                <i class="fa-solid fa-taxi text-amber-600"></i> 2 Cabs Nearby
+                            </span>
+                        </div>
+                        <div class="bg-slate-50 p-2 rounded-lg border border-slate-200">
+                            <span class="text-slate-400 block mb-0.5 text-[10px] font-medium">Emergency Havens</span>
+                            <span class="font-bold text-purple-700 flex items-center gap-1 text-[11px]"
+                                id="metric-emergency">
+                                <i class="fa-solid fa-hospital text-purple-600"></i> 2 Open Clinics
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <!-- 2-Column Corridor Detail: Essential Havens & Incident Radar -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Essential Havens Open Now -->
+                    <div
+                        class="bg-white rounded-xl p-4 border border-slate-200 shadow-2xs flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <h3
+                                    class="text-xs font-bold text-slate-800 flex items-center gap-1.5 uppercase tracking-wide">
+                                    <i class="fa-solid fa-kit-medical text-rose-500"></i> 24/7 Open Havens
+                                </h3>
+                                <span
+                                    class="text-[9px] px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-bold border border-emerald-300">KNOWN</span>
+                            </div>
+                            <div class="space-y-2" id="services-list">
+                                <div
+                                    class="bg-slate-50 p-2 rounded-lg border border-slate-200 flex items-center justify-between">
+                                    <div>
+                                        <h4 class="text-xs font-semibold text-slate-900">Apollo 24/7 Pharmacy</h4>
+                                        <p class="text-[10px] text-slate-500">Block B (0.8 km from route)</p>
+                                    </div>
+                                    <span
+                                        class="text-[9px] text-emerald-800 font-bold bg-emerald-100 px-1.5 py-0.5 rounded border border-emerald-300">Open
+                                        Now</span>
+                                </div>
+                                <div
+                                    class="bg-slate-50 p-2 rounded-lg border border-slate-200 flex items-center justify-between">
+                                    <div>
+                                        <h4 class="text-xs font-semibold text-slate-900">Lifeline Emergency Clinic</h4>
+                                        <p class="text-[10px] text-slate-500">Expressway Junc. (1.4 km)</p>
+                                    </div>
+                                    <span
+                                        class="text-[9px] text-emerald-800 font-bold bg-emerald-100 px-1.5 py-0.5 rounded border border-emerald-300">Open
+                                        Now</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                            <span class="" id="ping-text">Sensor ping: 2m ago</span>
+                            <button
+                                class="text-amber-700 hover:text-amber-800 font-semibold inline-flex items-center gap-1 cursor-pointer"
+                                onclick="refreshServices()">
+                                <i class="fa-solid fa-rotate text-xs"></i> Sync
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Safety & Patrol Radar -->
+                    <div
+                        class="bg-white rounded-xl p-4 border border-slate-200 shadow-2xs flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <h3
+                                    class="text-xs font-bold text-slate-800 flex items-center gap-1.5 uppercase tracking-wide">
+                                    <i class="fa-solid fa-route text-amber-600"></i> Community Observation Radar</h3>
+                                <span
+                                    class="text-[9px] px-2 py-0.5 bg-amber-100 text-amber-800 rounded font-bold border border-amber-300"
+                                    id="radar-tag">PROBABLE</span>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="bg-slate-50 p-2 rounded-lg border border-slate-200">
+                                    <div class="flex justify-between text-[11px] mb-1"><span
+                                            class="text-slate-700 font-semibold">Underpass Lighting</span><span
+                                            class="text-amber-700 font-bold" id="light-status-text">50% Dim</span></div>
+                                    <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                                        <div class="bg-amber-500 h-full w-1/2 transition-all duration-300"
+                                            id="lighting-bar"></div>
+                                    </div>
+                                    <p class="text-[10px] text-slate-500 mt-1">Reported by Scout @Rhea_K 8m ago</p>
+                                </div>
+                                <div
+                                    class="bg-slate-50 p-2 rounded-lg border border-slate-200 flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <div
+                                            class="w-6 h-6 rounded bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-600 font-bold text-xs">
+                                            <i class="fa-solid fa-users"></i></div>
+                                        <div>
+                                            <h4 class="text-xs font-semibold text-slate-900">Crowd &amp; Vigilance
+                                                Activity</h4>
+                                            <p class="text-[10px] text-slate-500">Active tea stall &amp; commuters at
+                                                Central Sq. (@Dev_M 4m ago)</p>
+                                        </div>
+                                    </div><span
+                                        class="text-[9px] text-emerald-800 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">Vouched</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            class="mt-3 pt-2.5 border-t border-slate-100 text-[11px] text-slate-600 flex justify-between items-center">
+                            <span class="">Scout Vouched Stretch:</span><span class="text-emerald-700 font-bold">42
+                                active alerts verified</span></div>
+                    </div>
+                </div>
+                <!-- Simulated Night Shift Progression Timeline Slider -->
+                <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-2xs">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-xs font-bold text-slate-800 flex items-center gap-1.5 uppercase tracking-wide">
+                            <i class="fa-solid fa-timeline text-amber-600"></i> Night Progression Simulation (12 AM → 5
+                            AM)
+                        </h3>
+                        <span
+                            class="text-xs font-mono font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded"
+                            id="timeline-current-hour">02:30 AM</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 mb-3">Simulate transit availability and police presence shifts
+                        across the night window:</p>
+                    <div class="grid grid-cols-5 gap-1.5" id="timeline-buttons-container">
+                        <button
+                            class="timeline-step bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 py-2 px-1 rounded-lg text-center transition cursor-pointer"
+                            onclick="setSimulatedHour('12:00 AM', 0)" type="button">
+                            <span class="block text-xs font-mono font-semibold text-slate-700">12:00 AM</span>
+                            <span class="block text-[10px] text-slate-500 mt-0.5">Regular Bus</span>
                         </button>
-</div>
-</div>
-<!-- Safety & Patrol Radar -->
-<div class="bg-white rounded-xl p-4 border border-slate-200 shadow-2xs flex flex-col justify-between"><div><div class="flex items-center justify-between mb-3"><h3 class="text-xs font-bold text-slate-800 flex items-center gap-1.5 uppercase tracking-wide"><i class="fa-solid fa-route text-amber-600"></i> Community Observation Radar</h3><span class="text-[9px] px-2 py-0.5 bg-amber-100 text-amber-800 rounded font-bold border border-amber-300" id="radar-tag">PROBABLE</span></div><div class="space-y-2"><div class="bg-slate-50 p-2 rounded-lg border border-slate-200"><div class="flex justify-between text-[11px] mb-1"><span class="text-slate-700 font-semibold">Underpass Lighting</span><span class="text-amber-700 font-bold" id="light-status-text">50% Dim</span></div><div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden"><div class="bg-amber-500 h-full w-1/2 transition-all duration-300" id="lighting-bar"></div></div><p class="text-[10px] text-slate-500 mt-1">Reported by Scout @Rhea_K 8m ago</p></div><div class="bg-slate-50 p-2 rounded-lg border border-slate-200 flex items-center justify-between"><div class="flex items-center gap-2"><div class="w-6 h-6 rounded bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-600 font-bold text-xs"><i class="fa-solid fa-users"></i></div><div><h4 class="text-xs font-semibold text-slate-900">Crowd &amp; Vigilance Activity</h4><p class="text-[10px] text-slate-500">Active tea stall &amp; commuters at Central Sq. (@Dev_M 4m ago)</p></div></div><span class="text-[9px] text-emerald-800 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">Vouched</span></div></div></div><div class="mt-3 pt-2.5 border-t border-slate-100 text-[11px] text-slate-600 flex justify-between items-center"><span class="">Scout Vouched Stretch:</span><span class="text-emerald-700 font-bold">42 active alerts verified</span></div></div>
-</div>
-<!-- Simulated Night Shift Progression Timeline Slider -->
-<div class="bg-white rounded-xl p-4 border border-slate-200 shadow-2xs">
-<div class="flex items-center justify-between mb-2">
-<h3 class="text-xs font-bold text-slate-800 flex items-center gap-1.5 uppercase tracking-wide">
-<i class="fa-solid fa-timeline text-amber-600"></i> Night Progression Simulation (12 AM → 5 AM)
-                    </h3>
-<span class="text-xs font-mono font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded" id="timeline-current-hour">02:30 AM</span>
-</div>
-<p class="text-[11px] text-slate-500 mb-3">Simulate transit availability and police presence shifts across the night window:</p>
-<div class="grid grid-cols-5 gap-1.5" id="timeline-buttons-container">
-<button class="timeline-step bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 py-2 px-1 rounded-lg text-center transition cursor-pointer" onclick="setSimulatedHour('12:00 AM', 0)" type="button">
-<span class="block text-xs font-mono font-semibold text-slate-700">12:00 AM</span>
-<span class="block text-[10px] text-slate-500 mt-0.5">Regular Bus</span>
-</button>
-<button class="timeline-step bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 py-2 px-1 rounded-lg text-center transition cursor-pointer" onclick="setSimulatedHour('01:30 AM', 1)" type="button">
-<span class="block text-xs font-mono font-semibold text-slate-700">01:30 AM</span>
-<span class="block text-[10px] text-slate-500 mt-0.5">Transition</span>
-</button>
-<button class="timeline-step active-timeline bg-amber-500 text-slate-950 font-bold border-2 border-amber-600 py-2 px-1 rounded-lg text-center shadow-2xs transition cursor-pointer" onclick="setSimulatedHour('02:30 AM', 2)" type="button">
-<span class="block text-xs font-mono font-bold text-slate-950">02:30 AM</span>
-<span class="block text-[10px] text-slate-900 font-semibold mt-0.5">Shift End</span>
-</button>
-<button class="timeline-step bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 py-2 px-1 rounded-lg text-center transition cursor-pointer" onclick="setSimulatedHour('03:45 AM', 3)" type="button">
-<span class="block text-xs font-mono font-semibold text-slate-700">03:45 AM</span>
-<span class="block text-[10px] text-slate-500 mt-0.5">Deep Lull</span>
-</button>
-<button class="timeline-step bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 py-2 px-1 rounded-lg text-center transition cursor-pointer" onclick="setSimulatedHour('05:00 AM', 4)" type="button">
-<span class="block text-xs font-mono font-semibold text-slate-700">05:00 AM</span>
-<span class="block text-[10px] text-slate-500 mt-0.5">Early Dawn</span>
-</button>
-</div>
-</div>
-<!-- Safe Commute Verification Nodes Table -->
-<div class="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
-<div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-<h3 class="text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
-<i class="fa-solid fa-map-pin text-emerald-600"></i> Corridor Safety Checkpoints
-                    </h3>
-<span class="text-[10px] text-slate-500 font-medium">4 Verified Checkpoints</span>
-</div>
-<div class="overflow-x-auto">
-<table class="w-full text-left text-xs">
-<thead class="bg-slate-50 text-slate-500 text-[10px] uppercase font-bold tracking-wider border-b border-slate-200/60">
-<tr>
-<th class="py-2 px-3">Node</th>
-<th class="py-2 px-3">Type</th>
-<th class="py-2 px-3">Lighting</th>
-<th class="py-2 px-3">Community Vouch &amp; Anchor</th>
-<th class="py-2 px-3 text-right">Epistemic Status</th>
-</tr>
-</thead>
-<tbody class="divide-y divide-slate-100 text-slate-700"><tr class="hover:bg-slate-50/80"><td class="py-2 px-3 font-semibold text-slate-900">Sector 62 Hub Exit</td><td class="py-2 px-3 text-slate-500">Departure Gate</td><td class="py-2 px-3"><span class="text-emerald-700 font-semibold">100% High Mast</span></td><td class="py-2 px-3">CCTV + 24/7 Chai Kiosk (Vouched by 8 Scouts)</td><td class="py-2 px-3 text-right"><span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">KNOWN</span></td></tr><tr class="hover:bg-slate-50/80"><td class="py-2 px-3 font-semibold text-slate-900">Central Square Junction</td><td class="py-2 px-3 text-slate-500">Major Arterial</td><td class="py-2 px-3"><span class="text-emerald-700 font-semibold">90% Sodium Halide</span></td><td class="py-2 px-3">Active Night Market &amp; Rickshaw Stand</td><td class="py-2 px-3 text-right"><span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">KNOWN</span></td></tr><tr class="hover:bg-slate-50/80"><td class="py-2 px-3 font-semibold text-slate-900">Bypass East Underpass</td><td class="py-2 px-3 text-slate-500">Connecting Link</td><td class="py-2 px-3"><span class="text-amber-700 font-semibold">50% Dimmed Grid</span></td><td class="py-2 px-3 text-amber-800 font-medium"><i class="fa-solid fa-triangle-exclamation text-amber-600"></i> Dimmed Grid - Warning: Use Northern Footbridge</td><td class="py-2 px-3 text-right"><span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 text-amber-800 border border-amber-300">PROBABLE</span></td></tr><tr class="hover:bg-slate-50/80"><td class="py-2 px-3 font-semibold text-slate-900">Block B Market Haven</td><td class="py-2 px-3 text-slate-500">Safe Haven Zone</td><td class="py-2 px-3"><span class="text-emerald-700 font-semibold">100% Commercial Lit</span></td><td class="py-2 px-3">Apollo 24/7 Pharmacist &amp; Guard on Duty</td><td class="py-2 px-3 text-right"><span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">KNOWN</span></td></tr></tbody>
-</table>
-</div>
-</div>
-</section>
-<!-- Column 3: Right Sidebar Live WhatsApp Assistant Simulator (4 cols) -->
-<aside class="lg:col-span-4 sticky top-20 space-y-4">
-<!-- WhatsApp Chat Panel Container -->
-<div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[740px]" id="whatsapp-section">
-<!-- WhatsApp Header -->
-<div class="bg-gradient-to-r from-emerald-800 via-[#128C7E] to-[#075E54] px-4 py-3 text-white flex items-center justify-between shadow-xs flex-shrink-0">
-<div class="flex items-center space-x-2.5">
-<div class="relative flex-shrink-0">
-<div class="w-9 h-9 rounded-full bg-white/20 ring-2 ring-emerald-300/60 flex items-center justify-center font-bold text-white shadow-inner">
-<i class="fa-solid fa-shield-cat text-base text-emerald-200"></i>
-</div>
-<span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 border-2 border-[#128C7E] rounded-full animate-ping"></span>
-<span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 border-2 border-[#128C7E] rounded-full"></span>
-</div>
-<div>
-<div class="flex items-center gap-1.5">
-<h3 class="text-xs font-bold tracking-tight text-white leading-tight">NightShift Assistant</h3>
-<span class="bg-emerald-500/30 text-emerald-100 text-[9px] px-1 py-0.2 rounded font-mono border border-emerald-400/30">Bot</span>
-</div>
-<p class="text-[10px] text-emerald-100/90 flex items-center gap-1"><span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-300"></span> Community Ground Truth Network</p>
-</div>
-</div>
-<div class="flex items-center gap-1 text-emerald-100 text-xs">
-<button class="hover:text-white p-1 rounded hover:bg-white/10 transition cursor-pointer" onclick="resetWhatsAppChat()" title="Reset Chat to Initial State">
-<i class="fa-solid fa-arrow-rotate-left text-xs"></i>
-</button>
-<button class="hover:text-white p-1 rounded hover:bg-white/10 transition cursor-pointer" onclick="simulateShareLiveLocation()" title="Share Live GPS Location">
-<i class="fa-solid fa-location-dot text-xs"></i>
-</button>
-<div class="h-3 w-[1px] bg-emerald-600 mx-0.5"></div>
-<span class="text-[9px] bg-emerald-900/60 px-1.5 py-0.5 rounded text-emerald-200 border border-emerald-700/60 font-mono">E2E</span>
-</div>
-</div>
-<!-- Chat Messages Stream Area with In-Chat Conversational Flow -->
-<div class="whatsapp-pattern p-3 flex-grow overflow-y-auto custom-scroll flex flex-col space-y-3" id="chat-messages-container"><div class="flex justify-center my-0.5"><span class="text-[10px] font-semibold tracking-wider text-slate-500 bg-white/85 shadow-2xs backdrop-blur-xs px-2.5 py-0.5 rounded-full uppercase border border-slate-200/50">Shift Safe Channel • Live</span></div><div class="flex flex-col items-start w-full"><div class="bg-white text-slate-800 text-xs rounded-xl rounded-tl-xs p-3.5 max-w-[96%] w-full shadow-2xs border border-slate-200/80 space-y-2.5"><div class="flex items-center justify-between pb-1.5 border-b border-slate-100"><span class="font-bold text-emerald-800 flex items-center gap-1.5 text-[10px]"><i class="fa-solid fa-shield-halved text-emerald-600"></i> NightShift Engine</span><span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">LIVE</span></div><p class="text-slate-800 leading-relaxed text-xs">Hello! Welcome to <strong class="text-slate-900 font-bold">NightShift Operations</strong>. Are you joining as a <strong class="text-emerald-700">Provider (Route Scout)</strong> or a <strong class="text-emerald-700">Consumer</strong> tonight?</p><div class="grid grid-cols-1 gap-2 pt-1"><button class="text-left p-2.5 rounded-lg border-2 border-emerald-500/80 bg-emerald-50/70 hover:bg-emerald-100/70 transition shadow-2xs group cursor-pointer" onclick="selectChatRole('consumer')"><div class="flex items-start gap-2.5"><div class="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-sm flex-shrink-0 shadow-xs group-hover:scale-105 transition"><i class="fa-solid fa-users"></i></div><div class="flex-grow"><div class="flex items-center justify-between"><div class="font-bold text-xs text-slate-900">Join as Consumer</div><span class="text-[9px] font-bold text-emerald-800 bg-emerald-200/80 px-1.5 py-0.2 rounded">Select</span></div><p class="text-[10.5px] text-slate-600 mt-0.5 leading-snug">Commuter / Night worker requesting safe corridor &amp; live telemetry</p></div></div></button><button class="text-left p-2.5 rounded-lg border-2 border-amber-400 bg-amber-50/60 hover:bg-amber-100/70 transition shadow-2xs group cursor-pointer" onclick="selectChatRole('provider')"><div class="flex items-start gap-2.5"><div class="w-8 h-8 rounded-lg bg-amber-500 text-slate-950 flex items-center justify-center font-bold text-sm flex-shrink-0 shadow-xs group-hover:scale-105 transition"><i class="fa-solid fa-bolt"></i></div><div class="flex-grow"><div class="flex items-center justify-between"><div class="font-bold text-xs text-slate-900">Join as Provider (Route Scout)</div><span class="text-[9px] font-bold text-amber-800 bg-amber-200/80 px-1.5 py-0.2 rounded">Select</span></div><p class="text-[10.5px] text-slate-600 mt-0.5 leading-snug">Community Route Scout / Contributor: Share road updates, lighting status, open havens &amp; journey experiences</p></div></div></button></div><div class="flex items-center justify-end gap-1 mt-1 text-[10px] text-slate-400 font-mono"><span class="">02:30 AM</span></div></div></div></div>
-<!-- Quick Prompt Suggestions Bar -->
-<div class="bg-slate-50 border-t border-slate-200 px-3 py-1.5 flex items-center gap-1.5 overflow-x-auto text-xs whitespace-nowrap flex-shrink-0 custom-scroll"><span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1"><i class="fa-solid fa-bolt text-amber-500"></i> Prompt:</span><button class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-full text-[11px] font-medium transition cursor-pointer" onclick="sendChatMessage('Check route safety status')">🛡️ Safety</button><button class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-full text-[11px] font-medium transition cursor-pointer" onclick="sendChatMessage('Find open pharmacy nearby')">💊 Pharmacy</button><button class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-full text-[11px] font-medium transition cursor-pointer" onclick="selectChatRole('provider')">✨ Scout Intel</button><button class="bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-full text-[11px] font-medium transition cursor-pointer" onclick="sendChatMessage('Simulate Emergency SOS')">🚨 SOS</button></div>
-<!-- Message Composer Bar -->
-<div class="bg-slate-100 p-2.5 border-t border-slate-200 flex items-center gap-1.5 flex-shrink-0">
-<button class="text-slate-500 hover:text-slate-700 p-1 rounded-full hover:bg-slate-200/70 transition cursor-pointer" onclick="handleQuickReply('Share Live GPS Pin')" title="Share GPS Pin">
-<i class="fa-solid fa-paperclip text-xs"></i>
-</button>
-<div class="relative flex-grow">
-<input class="w-full bg-white border border-slate-300 rounded-full pl-3 pr-8 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 shadow-2xs" id="whatsapp-input" onkeypress="if(event.key === 'Enter') handleSendButtonClick()" placeholder="Type inquiry or tap option..." type="text"/>
-<button class="absolute right-2.5 top-1.5 text-slate-400 hover:text-slate-600 cursor-pointer text-xs" onclick="handleQuickReply('Record Audio Note')" title="Record Audio Note">
-<i class="fa-solid fa-microphone text-[11px]"></i>
-</button>
-</div>
-<button class="bg-[#128C7E] hover:bg-[#0d6e63] text-white w-7 h-7 rounded-full flex items-center justify-center shadow-xs transition duration-150 cursor-pointer active:scale-95 flex-shrink-0" onclick="handleSendButtonClick()" title="Send Message">
-<i class="fa-solid fa-paper-plane text-xs"></i>
-</button>
-</div>
-</div>
-<!-- Quick Escort Dispatch Banner -->
-<div class="bg-white rounded-xl p-3 border border-slate-200 shadow-2xs flex items-center justify-between"><div class="flex items-center gap-2.5"><div class="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center font-bold text-xs"><i class="fa-solid fa-bolt"></i></div><div><div class="text-xs font-bold text-slate-900">Report Route Ground Truth</div><div class="text-[10px] text-slate-500">Share lighting, safe shops &amp; hazards</div></div></div><button class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-3 py-1 rounded-lg transition shadow-2xs cursor-pointer" onclick="selectChatRole('provider')">Contribute</button></div>
-</aside>
-</div>
-</main>
-<!-- Emergency SOS Modal Dialog -->
-<div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4" id="sos-modal">
-<div class="bg-white rounded-2xl max-w-md w-full p-6 border border-slate-200 shadow-xl space-y-4">
-<div class="flex items-center justify-between pb-3 border-b border-slate-100">
-<div class="flex items-center gap-2 text-rose-600 font-bold text-base">
-<i class="fa-solid fa-triangle-exclamation"></i> Emergency SOS Broadcast
+                        <button
+                            class="timeline-step bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 py-2 px-1 rounded-lg text-center transition cursor-pointer"
+                            onclick="setSimulatedHour('01:30 AM', 1)" type="button">
+                            <span class="block text-xs font-mono font-semibold text-slate-700">01:30 AM</span>
+                            <span class="block text-[10px] text-slate-500 mt-0.5">Transition</span>
+                        </button>
+                        <button
+                            class="timeline-step active-timeline bg-amber-500 text-slate-950 font-bold border-2 border-amber-600 py-2 px-1 rounded-lg text-center shadow-2xs transition cursor-pointer"
+                            onclick="setSimulatedHour('02:30 AM', 2)" type="button">
+                            <span class="block text-xs font-mono font-bold text-slate-950">02:30 AM</span>
+                            <span class="block text-[10px] text-slate-900 font-semibold mt-0.5">Shift End</span>
+                        </button>
+                        <button
+                            class="timeline-step bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 py-2 px-1 rounded-lg text-center transition cursor-pointer"
+                            onclick="setSimulatedHour('03:45 AM', 3)" type="button">
+                            <span class="block text-xs font-mono font-semibold text-slate-700">03:45 AM</span>
+                            <span class="block text-[10px] text-slate-500 mt-0.5">Deep Lull</span>
+                        </button>
+                        <button
+                            class="timeline-step bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 py-2 px-1 rounded-lg text-center transition cursor-pointer"
+                            onclick="setSimulatedHour('05:00 AM', 4)" type="button">
+                            <span class="block text-xs font-mono font-semibold text-slate-700">05:00 AM</span>
+                            <span class="block text-[10px] text-slate-500 mt-0.5">Early Dawn</span>
+                        </button>
+                    </div>
+                </div>
+                <!-- Safe Commute Verification Nodes Table -->
+                <div class="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
+                    <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                        <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
+                            <i class="fa-solid fa-map-pin text-emerald-600"></i> Corridor Safety Checkpoints
+                        </h3>
+                        <span class="text-[10px] text-slate-500 font-medium">4 Verified Checkpoints</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead
+                                class="bg-slate-50 text-slate-500 text-[10px] uppercase font-bold tracking-wider border-b border-slate-200/60">
+                                <tr>
+                                    <th class="py-2 px-3">Node</th>
+                                    <th class="py-2 px-3">Type</th>
+                                    <th class="py-2 px-3">Lighting</th>
+                                    <th class="py-2 px-3">Community Vouch &amp; Anchor</th>
+                                    <th class="py-2 px-3 text-right">Epistemic Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-slate-700">
+                                <tr class="hover:bg-slate-50/80">
+                                    <td class="py-2 px-3 font-semibold text-slate-900">Sector 62 Hub Exit</td>
+                                    <td class="py-2 px-3 text-slate-500">Departure Gate</td>
+                                    <td class="py-2 px-3"><span class="text-emerald-700 font-semibold">100% High
+                                            Mast</span></td>
+                                    <td class="py-2 px-3">CCTV + 24/7 Chai Kiosk (Vouched by 8 Scouts)</td>
+                                    <td class="py-2 px-3 text-right"><span
+                                            class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">KNOWN</span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-slate-50/80">
+                                    <td class="py-2 px-3 font-semibold text-slate-900">Central Square Junction</td>
+                                    <td class="py-2 px-3 text-slate-500">Major Arterial</td>
+                                    <td class="py-2 px-3"><span class="text-emerald-700 font-semibold">90% Sodium
+                                            Halide</span></td>
+                                    <td class="py-2 px-3">Active Night Market &amp; Rickshaw Stand</td>
+                                    <td class="py-2 px-3 text-right"><span
+                                            class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">KNOWN</span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-slate-50/80">
+                                    <td class="py-2 px-3 font-semibold text-slate-900">Bypass East Underpass</td>
+                                    <td class="py-2 px-3 text-slate-500">Connecting Link</td>
+                                    <td class="py-2 px-3"><span class="text-amber-700 font-semibold">50% Dimmed
+                                            Grid</span></td>
+                                    <td class="py-2 px-3 text-amber-800 font-medium"><i
+                                            class="fa-solid fa-triangle-exclamation text-amber-600"></i> Dimmed Grid -
+                                        Warning: Use Northern Footbridge</td>
+                                    <td class="py-2 px-3 text-right"><span
+                                            class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 text-amber-800 border border-amber-300">PROBABLE</span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-slate-50/80">
+                                    <td class="py-2 px-3 font-semibold text-slate-900">Block B Market Haven</td>
+                                    <td class="py-2 px-3 text-slate-500">Safe Haven Zone</td>
+                                    <td class="py-2 px-3"><span class="text-emerald-700 font-semibold">100% Commercial
+                                            Lit</span></td>
+                                    <td class="py-2 px-3">Apollo 24/7 Pharmacist &amp; Guard on Duty</td>
+                                    <td class="py-2 px-3 text-right"><span
+                                            class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">KNOWN</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+            <!-- Column 3: Right Sidebar Live WhatsApp Assistant Simulator (4 cols) -->
+            <aside class="lg:col-span-4 sticky top-20 space-y-4">
+                <!-- WhatsApp Chat Panel Container -->
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[740px]"
+                    id="whatsapp-section">
+                    <!-- WhatsApp Header -->
+                    <div
+                        class="bg-gradient-to-r from-emerald-800 via-[#128C7E] to-[#075E54] px-4 py-3 text-white flex items-center justify-between shadow-xs flex-shrink-0">
+                        <div class="flex items-center space-x-2.5">
+                            <div class="relative flex-shrink-0">
+                                <div
+                                    class="w-9 h-9 rounded-full bg-white/20 ring-2 ring-emerald-300/60 flex items-center justify-center font-bold text-white shadow-inner">
+                                    <i class="fa-solid fa-shield-cat text-base text-emerald-200"></i>
+                                </div>
+                                <span
+                                    class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 border-2 border-[#128C7E] rounded-full animate-ping"></span>
+                                <span
+                                    class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 border-2 border-[#128C7E] rounded-full"></span>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-1.5">
+                                    <h3 class="text-xs font-bold tracking-tight text-white leading-tight">NightOwl
+                                        Assistant</h3>
+                                    <span
+                                        class="bg-emerald-500/30 text-emerald-100 text-[9px] px-1 py-0.2 rounded font-mono border border-emerald-400/30">Bot</span>
+                                </div>
+                                <p class="text-[10px] text-emerald-100/90 flex items-center gap-1"><span
+                                        class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-300"></span> Community
+                                    Ground Truth Network</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1 text-emerald-100 text-xs">
+                            <button class="hover:text-white p-1 rounded hover:bg-white/10 transition cursor-pointer"
+                                onclick="resetWhatsAppChat()" title="Reset Chat to Initial State">
+                                <i class="fa-solid fa-arrow-rotate-left text-xs"></i>
+                            </button>
+                            <button class="hover:text-white p-1 rounded hover:bg-white/10 transition cursor-pointer"
+                                onclick="simulateShareLiveLocation()" title="Share Live GPS Location">
+                                <i class="fa-solid fa-location-dot text-xs"></i>
+                            </button>
+                            <div class="h-3 w-[1px] bg-emerald-600 mx-0.5"></div>
+                            <span
+                                class="text-[9px] bg-emerald-900/60 px-1.5 py-0.5 rounded text-emerald-200 border border-emerald-700/60 font-mono">E2E</span>
+                        </div>
+                    </div>
+                    <!-- Chat Messages Stream Area with In-Chat Conversational Flow -->
+                    <div class="whatsapp-pattern p-3 flex-grow overflow-y-auto custom-scroll flex flex-col space-y-3"
+                        id="chat-messages-container">
+                        <div class="flex justify-center my-0.5"><span
+                                class="text-[10px] font-semibold tracking-wider text-slate-500 bg-white/85 shadow-2xs backdrop-blur-xs px-2.5 py-0.5 rounded-full uppercase border border-slate-200/50">Shift
+                                Safe Channel • Live</span></div>
+                        <div class="flex flex-col items-start w-full">
+                            <div
+                                class="bg-white text-slate-800 text-xs rounded-xl rounded-tl-xs p-3.5 max-w-[96%] w-full shadow-2xs border border-slate-200/80 space-y-2.5">
+                                <div class="flex items-center justify-between pb-1.5 border-b border-slate-100"><span
+                                        class="font-bold text-emerald-800 flex items-center gap-1.5 text-[10px]"><i
+                                            class="fa-solid fa-shield-halved text-emerald-600"></i> NightOwl
+                                        Engine</span><span
+                                        class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">LIVE</span>
+                                </div>
+                                <p class="text-slate-800 leading-relaxed text-xs">Hello! Welcome to <strong
+                                        class="text-slate-900 font-bold">NightOwl Operations</strong>. Are you joining
+                                    as a <strong class="text-emerald-700">Provider (Route Scout)</strong> or a <strong
+                                        class="text-emerald-700">Consumer</strong> tonight?</p>
+                                <div class="grid grid-cols-1 gap-2 pt-1"><button
+                                        class="text-left p-2.5 rounded-lg border-2 border-emerald-500/80 bg-emerald-50/70 hover:bg-emerald-100/70 transition shadow-2xs group cursor-pointer"
+                                        onclick="selectChatRole('consumer')">
+                                        <div class="flex items-start gap-2.5">
+                                            <div
+                                                class="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-sm flex-shrink-0 shadow-xs group-hover:scale-105 transition">
+                                                <i class="fa-solid fa-users"></i></div>
+                                            <div class="flex-grow">
+                                                <div class="flex items-center justify-between">
+                                                    <div class="font-bold text-xs text-slate-900">Join as Consumer</div>
+                                                    <span
+                                                        class="text-[9px] font-bold text-emerald-800 bg-emerald-200/80 px-1.5 py-0.2 rounded">Select</span>
+                                                </div>
+                                                <p class="text-[10.5px] text-slate-600 mt-0.5 leading-snug">Commuter /
+                                                    Night worker requesting safe corridor &amp; live telemetry</p>
+                                            </div>
+                                        </div>
+                                    </button><button
+                                        class="text-left p-2.5 rounded-lg border-2 border-amber-400 bg-amber-50/60 hover:bg-amber-100/70 transition shadow-2xs group cursor-pointer"
+                                        onclick="selectChatRole('provider')">
+                                        <div class="flex items-start gap-2.5">
+                                            <div
+                                                class="w-8 h-8 rounded-lg bg-amber-500 text-slate-950 flex items-center justify-center font-bold text-sm flex-shrink-0 shadow-xs group-hover:scale-105 transition">
+                                                <i class="fa-solid fa-bolt"></i></div>
+                                            <div class="flex-grow">
+                                                <div class="flex items-center justify-between">
+                                                    <div class="font-bold text-xs text-slate-900">Join as Provider
+                                                        (Route Scout)</div><span
+                                                        class="text-[9px] font-bold text-amber-800 bg-amber-200/80 px-1.5 py-0.2 rounded">Select</span>
+                                                </div>
+                                                <p class="text-[10.5px] text-slate-600 mt-0.5 leading-snug">Community
+                                                    Route Scout / Contributor: Share road updates, lighting status, open
+                                                    havens &amp; journey experiences</p>
+                                            </div>
+                                        </div>
+                                    </button></div>
+                                <div
+                                    class="flex items-center justify-end gap-1 mt-1 text-[10px] text-slate-400 font-mono">
+                                    <span class="">02:30 AM</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Quick Prompt Suggestions Bar -->
+                    <div
+                        class="bg-slate-50 border-t border-slate-200 px-3 py-1.5 flex items-center gap-1.5 overflow-x-auto text-xs whitespace-nowrap flex-shrink-0 custom-scroll">
+                        <span
+                            class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1"><i
+                                class="fa-solid fa-bolt text-amber-500"></i> Prompt:</span><button
+                            class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-full text-[11px] font-medium transition cursor-pointer"
+                            onclick="sendChatMessage('Check route safety status')">🛡️ Safety</button><button
+                            class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-full text-[11px] font-medium transition cursor-pointer"
+                            onclick="sendChatMessage('Find open pharmacy nearby')">💊 Pharmacy</button><button
+                            class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-full text-[11px] font-medium transition cursor-pointer"
+                            onclick="selectChatRole('provider')">✨ Scout Intel</button><button
+                            class="bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-full text-[11px] font-medium transition cursor-pointer"
+                            onclick="sendChatMessage('Simulate Emergency SOS')">🚨 SOS</button></div>
+                    <!-- Message Composer Bar -->
+                    <div class="bg-slate-100 p-2.5 border-t border-slate-200 flex items-center gap-1.5 flex-shrink-0">
+                        <button
+                            class="text-slate-500 hover:text-slate-700 p-1 rounded-full hover:bg-slate-200/70 transition cursor-pointer"
+                            onclick="handleQuickReply('Share Live GPS Pin')" title="Share GPS Pin">
+                            <i class="fa-solid fa-paperclip text-xs"></i>
+                        </button>
+                        <div class="relative flex-grow">
+                            <input
+                                class="w-full bg-white border border-slate-300 rounded-full pl-3 pr-8 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 shadow-2xs"
+                                id="whatsapp-input" onkeypress="if(event.key === 'Enter') handleSendButtonClick()"
+                                placeholder="Type inquiry or tap option..." type="text" />
+                            <button
+                                class="absolute right-2.5 top-1.5 text-slate-400 hover:text-slate-600 cursor-pointer text-xs"
+                                onclick="handleQuickReply('Record Audio Note')" title="Record Audio Note">
+                                <i class="fa-solid fa-microphone text-[11px]"></i>
+                            </button>
+                        </div>
+                        <button
+                            class="bg-[#128C7E] hover:bg-[#0d6e63] text-white w-7 h-7 rounded-full flex items-center justify-center shadow-xs transition duration-150 cursor-pointer active:scale-95 flex-shrink-0"
+                            onclick="handleSendButtonClick()" title="Send Message">
+                            <i class="fa-solid fa-paper-plane text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+                <!-- Quick Escort Dispatch Banner -->
+                <div
+                    class="bg-white rounded-xl p-3 border border-slate-200 shadow-2xs flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div
+                            class="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center font-bold text-xs">
+                            <i class="fa-solid fa-bolt"></i></div>
+                        <div>
+                            <div class="text-xs font-bold text-slate-900">Report Route Ground Truth</div>
+                            <div class="text-[10px] text-slate-500">Share lighting, safe shops &amp; hazards</div>
+                        </div>
+                    </div><button
+                        class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-3 py-1 rounded-lg transition shadow-2xs cursor-pointer"
+                        onclick="selectChatRole('provider')">Contribute</button>
+                </div>
+            </aside>
+        </div>
+    </main>
+    <!-- Emergency SOS Modal Dialog -->
+    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4"
+        id="sos-modal">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 border border-slate-200 shadow-xl space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2 text-rose-600 font-bold text-base">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Emergency SOS Broadcast
+                </div>
+                <button class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer" onclick="closeSOSModal()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
-<button class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer" onclick="closeSOSModal()">
-<i class="fa-solid fa-xmark"></i>
-</button>
-</div>
-<p class="text-slate-600 text-xs leading-relaxed">
-            Real-time incident dispatch alert is simulated. The nearest PCR vehicle and emergency network contacts will receive your live GPS tracking telemetry immediately.
-        </p>
-<div class="bg-rose-50 border border-rose-200 p-3 rounded-xl text-xs text-rose-800 space-y-1">
-<div class=""><strong>Location:</strong> Sector 62 Tech Park Transit Corridor</div>
-<div class=""><strong>Nearest Police Van:</strong> PCR #4 (0.3 km away)</div>
-<div class=""><strong>Emergency Dispatch:</strong> 112 / 100 Initiated</div>
-</div>
-<div class="flex gap-2 justify-end pt-2">
-<button class="px-4 py-2 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition cursor-pointer" onclick="closeSOSModal()">Cancel</button>
-<button class="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow-xs transition cursor-pointer" onclick="confirmSOSCall()">Confirm Broadcast</button>
-</div>
-</div>
-</div>
-<!-- Dashboard Footer -->
-<footer class="bg-white border-t border-slate-200 py-3.5 px-6 text-center text-xs text-slate-500">NightShift Decision Dashboard • Real-time Telemetry, Community Ground Truth Network &amp; Emergency Haven Network • Built for Night Workers &amp; Route Scouts</footer>
-<!-- Interactive Scripts Preserved and Adapted for Full Dashboard Experience -->
-<script>
-    let scoutRepScore = 480;
-    let totalReportsFiled = 128;
-    let selectedProofImage = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='100' viewBox='0 0 160 100'><rect width='160' height='100' fill='%231e293b'/><circle cx='80' cy='25' r='14' fill='%23fbbf24' opacity='0.85'/><path d='M0 75 Q40 68 80 72 T160 70 L160 100 L0 100 Z' fill='%23334155'/><line x1='30' y1='55' x2='30' y2='80' stroke='%2394a3b8' stroke-width='3'/><circle cx='30' cy='52' r='4' fill='%23fef08a'/><line x1='130' y1='52' x2='130' y2='80' stroke='%2394a3b8' stroke-width='3'/><circle cx='130' cy='49' r='4' fill='%23fef08a'/><text x='10' y='92' fill='%23e2e8f0' font-size='9' font-family='sans-serif'>CAM-REC 02:30 AM</text></svg>";
+            <p class="text-slate-600 text-xs leading-relaxed">
+                Real-time incident dispatch alert is simulated. The nearest PCR vehicle and emergency network contacts
+                will receive your live GPS tracking telemetry immediately.
+            </p>
+            <div class="bg-rose-50 border border-rose-200 p-3 rounded-xl text-xs text-rose-800 space-y-1">
+                <div class=""><strong>Location:</strong> Sector 62 Tech Park Transit Corridor</div>
+                <div class=""><strong>Nearest Police Van:</strong> PCR #4 (0.3 km away)</div>
+                <div class=""><strong>Emergency Dispatch:</strong> 112 / 100 Initiated</div>
+            </div>
+            <div class="flex gap-2 justify-end pt-2">
+                <button
+                    class="px-4 py-2 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition cursor-pointer"
+                    onclick="closeSOSModal()">Cancel</button>
+                <button
+                    class="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow-xs transition cursor-pointer"
+                    onclick="confirmSOSCall()">Confirm Broadcast</button>
+            </div>
+        </div>
+    </div>
+    <!-- Dashboard Footer -->
+    <footer class="bg-white border-t border-slate-200 py-3.5 px-6 text-center text-xs text-slate-500">NightOwl Decision
+        Dashboard • Real-time Telemetry, Community Ground Truth Network &amp; Emergency Haven Network • Built for Night
+        Workers &amp; Route Scouts</footer>
+    <!-- Interactive Scripts Preserved and Adapted for Full Dashboard Experience -->
+    <script>
+        let scoutRepScore = 480;
+        let totalReportsFiled = 128;
+        let selectedProofImage = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='100' viewBox='0 0 160 100'><rect width='160' height='100' fill='%231e293b'/><circle cx='80' cy='25' r='14' fill='%23fbbf24' opacity='0.85'/><path d='M0 75 Q40 68 80 72 T160 70 L160 100 L0 100 Z' fill='%23334155'/><line x1='30' y1='55' x2='30' y2='80' stroke='%2394a3b8' stroke-width='3'/><circle cx='30' cy='52' r='4' fill='%23fef08a'/><line x1='130' y1='52' x2='130' y2='80' stroke='%2394a3b8' stroke-width='3'/><circle cx='130' cy='49' r='4' fill='%23fef08a'/><text x='10' y='92' fill='%23e2e8f0' font-size='9' font-family='sans-serif'>CAM-REC 02:30 AM</text></svg>";
 
-    const timelineData = [
-        {
-            time: "12:00 AM",
-            eta: "12:38 AM (38 mins)",
-            badge: "KNOWN • ACTIVE REGULAR TRANSIT",
-            title: "Mid-Shift High Frequency Route",
-            desc: "Subway lines and major feeder buses are still active with short waiting times. Streetlights operate at 100% capacity.",
-            risk: "Minimal Risk",
-            riskClass: "text-emerald-700",
-            weather: "Clear, Mild (17°C)",
-            transport: "Metro + Bus Active",
-            emergency: "5 Clinics Open",
-            radarTag: "KNOWN",
-            lightPercent: "95%",
-            lightText: "95% Fully Lit Mainways",
-            kpiLighting: "95% Lit",
-            kpiEpistemic: "KNOWN"
-        },
-        {
-            time: "01:30 AM",
-            eta: "02:14 AM (44 mins)",
-            badge: "KNOWN • MODERATE WATCH",
-            title: "Transition Window Transit Corridor",
-            desc: "Metro operations closing. Shared shuttles and last feeder loop available along main avenue. Patrol frequency normal.",
-            risk: "Low Risk",
-            riskClass: "text-emerald-700",
-            weather: "Clear, Cool (15°C)",
-            transport: "Feeder Loop Active",
-            emergency: "3 Clinics Open",
-            radarTag: "KNOWN",
-            lightPercent: "75%",
-            lightText: "75% Well-Lit",
-            kpiLighting: "88% Lit",
-            kpiEpistemic: "KNOWN"
-        },
-        {
-            time: "02:30 AM",
-            eta: "03:02 AM (47 mins)",
-            badge: "KNOWN • SECURE PLAN ACTIVE",
-            title: "Optimized 02:15 AM Transit & Safety Route",
-            desc: "Public transit frequency is minimal at this hour. The engine has synthesized a well-lit route avoiding isolated underpasses, leveraging 24/7 patrol checkpoints and active open pharmacies along the corridor.",
-            risk: "Low (Patrolled)",
-            riskClass: "text-emerald-700",
-            weather: "Clear, Dry (14°C)",
-            transport: "2 Cabs Nearby",
-            emergency: "2 Open Clinics",
-            radarTag: "PROBABLE",
-            lightPercent: "50%",
-            lightText: "50% Dim (Backup Power)",
-            kpiLighting: "84% Lit",
-            kpiEpistemic: "KNOWN"
-        },
-        {
-            time: "03:45 AM",
-            eta: "04:37 AM (52 mins)",
-            badge: "PROBABLE • ELEVATED CAUTION",
-            title: "Night Transit Lull Escorted Pathway",
-            desc: "Peak quiet hour with reduced cab availability. Walking via illuminated arterial corridor advised; patrol van station nearby.",
-            risk: "Moderate (Stick to Path)",
-            riskClass: "text-amber-700",
-            weather: "Slight Fog (13°C)",
-            transport: "1 Cab on Demand",
-            emergency: "2 Clinics Open",
-            radarTag: "PROBABLE",
-            lightPercent: "40%",
-            lightText: "40% Main St. Active",
-            kpiLighting: "76% Lit",
-            kpiEpistemic: "PROBABLE"
-        },
-        {
-            time: "05:00 AM",
-            eta: "05:32 AM (32 mins)",
-            badge: "KNOWN • DAWN TRANSIT RESUMPTION",
-            title: "Early Dawn Rapid Connect Route",
-            desc: "First morning municipal buses commence service. Street vendors active and daylight commencement reduces route isolation.",
-            risk: "Low Risk",
-            riskClass: "text-emerald-700",
-            weather: "Brisk, Dawn (14°C)",
-            transport: "Early Morning Buses",
-            emergency: "All Hospitals Open",
-            radarTag: "KNOWN",
-            lightPercent: "100%",
-            lightText: "100% Daybreak / Full Light",
-            kpiLighting: "98% Lit",
-            kpiEpistemic: "KNOWN"
-        }
-    ];
-
-    function setSimulatedHour(timeStr, index) {
-        const data = timelineData[index];
-        document.getElementById('live-night-clock').textContent = data.time;
-        document.getElementById('timeline-current-hour').textContent = data.time;
-        document.getElementById('badge-status').textContent = data.badge;
-        document.getElementById('plan-title').textContent = data.title;
-        document.getElementById('plan-eta').innerHTML = data.eta;
-        document.getElementById('plan-description').textContent = data.desc;
-        
-        document.getElementById('metric-risk').innerHTML = `<i class="fa-solid fa-shield ${data.riskClass}"></i> ${data.risk}`;
-        document.getElementById('metric-weather').innerHTML = `<i class="fa-solid fa-cloud-moon text-sky-600"></i> ${data.weather}`;
-        document.getElementById('metric-transport').innerHTML = `<i class="fa-solid fa-taxi text-amber-600"></i> ${data.transport}`;
-        document.getElementById('metric-emergency').innerHTML = `<i class="fa-solid fa-hospital text-purple-600"></i> ${data.emergency}`;
-        
-        document.getElementById('radar-tag').textContent = data.radarTag;
-        document.getElementById('light-status-text').textContent = data.lightText;
-        document.getElementById('lighting-bar').style.width = data.lightPercent;
-
-        // KPI Updates
-        document.getElementById('kpi-lighting').textContent = data.kpiLighting;
-        document.getElementById('kpi-epistemic').textContent = data.kpiEpistemic;
-
-        // Update Timeline step buttons
-        const buttons = document.querySelectorAll('.timeline-step');
-        buttons.forEach((btn, idx) => {
-            if (idx === index) {
-                btn.className = "timeline-step active-timeline bg-amber-500 text-slate-950 font-bold border-2 border-amber-600 py-2 px-1 rounded-lg text-center shadow-2xs transition cursor-pointer";
-                btn.querySelector('span:first-child').className = "block text-xs font-mono font-bold text-slate-950";
-                btn.querySelector('span:last-child').className = "block text-[10px] text-slate-900 font-semibold mt-0.5";
-            } else {
-                btn.className = "timeline-step bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 py-2 px-1 rounded-lg text-center transition cursor-pointer";
-                btn.querySelector('span:first-child').className = "block text-xs font-mono font-semibold text-slate-700";
-                btn.querySelector('span:last-child').className = "block text-[10px] text-slate-500 mt-0.5";
+        const timelineData = [
+            {
+                time: "12:00 AM",
+                eta: "12:38 AM (38 mins)",
+                badge: "KNOWN • ACTIVE REGULAR TRANSIT",
+                title: "Mid-Shift High Frequency Route",
+                desc: "Subway lines and major feeder buses are still active with short waiting times. Streetlights operate at 100% capacity.",
+                risk: "Minimal Risk",
+                riskClass: "text-emerald-700",
+                weather: "Clear, Mild (17°C)",
+                transport: "Metro + Bus Active",
+                emergency: "5 Clinics Open",
+                radarTag: "KNOWN",
+                lightPercent: "95%",
+                lightText: "95% Fully Lit Mainways",
+                kpiLighting: "95% Lit",
+                kpiEpistemic: "KNOWN"
+            },
+            {
+                time: "01:30 AM",
+                eta: "02:14 AM (44 mins)",
+                badge: "KNOWN • MODERATE WATCH",
+                title: "Transition Window Transit Corridor",
+                desc: "Metro operations closing. Shared shuttles and last feeder loop available along main avenue. Patrol frequency normal.",
+                risk: "Low Risk",
+                riskClass: "text-emerald-700",
+                weather: "Clear, Cool (15°C)",
+                transport: "Feeder Loop Active",
+                emergency: "3 Clinics Open",
+                radarTag: "KNOWN",
+                lightPercent: "75%",
+                lightText: "75% Well-Lit",
+                kpiLighting: "88% Lit",
+                kpiEpistemic: "KNOWN"
+            },
+            {
+                time: "02:30 AM",
+                eta: "03:02 AM (47 mins)",
+                badge: "KNOWN • SECURE PLAN ACTIVE",
+                title: "Optimized 02:15 AM Transit & Safety Route",
+                desc: "Public transit frequency is minimal at this hour. The engine has synthesized a well-lit route avoiding isolated underpasses, leveraging 24/7 patrol checkpoints and active open pharmacies along the corridor.",
+                risk: "Low (Patrolled)",
+                riskClass: "text-emerald-700",
+                weather: "Clear, Dry (14°C)",
+                transport: "2 Cabs Nearby",
+                emergency: "2 Open Clinics",
+                radarTag: "PROBABLE",
+                lightPercent: "50%",
+                lightText: "50% Dim (Backup Power)",
+                kpiLighting: "84% Lit",
+                kpiEpistemic: "KNOWN"
+            },
+            {
+                time: "03:45 AM",
+                eta: "04:37 AM (52 mins)",
+                badge: "PROBABLE • ELEVATED CAUTION",
+                title: "Night Transit Lull Escorted Pathway",
+                desc: "Peak quiet hour with reduced cab availability. Walking via illuminated arterial corridor advised; patrol van station nearby.",
+                risk: "Moderate (Stick to Path)",
+                riskClass: "text-amber-700",
+                weather: "Slight Fog (13°C)",
+                transport: "1 Cab on Demand",
+                emergency: "2 Clinics Open",
+                radarTag: "PROBABLE",
+                lightPercent: "40%",
+                lightText: "40% Main St. Active",
+                kpiLighting: "76% Lit",
+                kpiEpistemic: "PROBABLE"
+            },
+            {
+                time: "05:00 AM",
+                eta: "05:32 AM (32 mins)",
+                badge: "KNOWN • DAWN TRANSIT RESUMPTION",
+                title: "Early Dawn Rapid Connect Route",
+                desc: "First morning municipal buses commence service. Street vendors active and daylight commencement reduces route isolation.",
+                risk: "Low Risk",
+                riskClass: "text-emerald-700",
+                weather: "Brisk, Dawn (14°C)",
+                transport: "Early Morning Buses",
+                emergency: "All Hospitals Open",
+                radarTag: "KNOWN",
+                lightPercent: "100%",
+                lightText: "100% Daybreak / Full Light",
+                kpiLighting: "98% Lit",
+                kpiEpistemic: "KNOWN"
             }
-        });
-    }
+        ];
 
-    function refreshServices() {
-        const ping = document.getElementById('ping-text');
-        ping.textContent = "Sensor ping: Just now";
-        const btn = event.currentTarget;
-        btn.innerHTML = `<i class="fa-solid fa-check text-emerald-600 text-xs"></i> Synced`;
-        setTimeout(() => {
-            btn.innerHTML = `<i class="fa-solid fa-rotate text-xs"></i> Sync`;
-        }, 2000);
-    }
+        function setSimulatedHour(timeStr, index) {
+            const data = timelineData[index];
+            document.getElementById('live-night-clock').textContent = data.time;
+            document.getElementById('timeline-current-hour').textContent = data.time;
+            document.getElementById('badge-status').textContent = data.badge;
+            document.getElementById('plan-title').textContent = data.title;
+            document.getElementById('plan-eta').innerHTML = data.eta;
+            document.getElementById('plan-description').textContent = data.desc;
 
-    function triggerEmergencySOS() {
-        document.getElementById('sos-modal').classList.remove('hidden');
-    }
+            document.getElementById('metric-risk').innerHTML = `<i class="fa-solid fa-shield ${data.riskClass}"></i> ${data.risk}`;
+            document.getElementById('metric-weather').innerHTML = `<i class="fa-solid fa-cloud-moon text-sky-600"></i> ${data.weather}`;
+            document.getElementById('metric-transport').innerHTML = `<i class="fa-solid fa-taxi text-amber-600"></i> ${data.transport}`;
+            document.getElementById('metric-emergency').innerHTML = `<i class="fa-solid fa-hospital text-purple-600"></i> ${data.emergency}`;
 
-    function closeSOSModal() {
-        document.getElementById('sos-modal').classList.add('hidden');
-    }
+            document.getElementById('radar-tag').textContent = data.radarTag;
+            document.getElementById('light-status-text').textContent = data.lightText;
+            document.getElementById('lighting-bar').style.width = data.lightPercent;
 
-    function confirmSOSCall() {
-        alert("Emergency broadcast beacon activated to Police PCR #4 and selected contacts.");
-        closeSOSModal();
-        sendBotMessage("⚠️ <strong class='text-rose-700'>EMERGENCY SOS BROADCAST CONFIRMED:</strong> Live GPS coordinates dispatched to Police PCR #4 (0.3 km away) and Emergency Hubs.");
-    }
+            // KPI Updates
+            document.getElementById('kpi-lighting').textContent = data.kpiLighting;
+            document.getElementById('kpi-epistemic').textContent = data.kpiEpistemic;
 
-    /* WhatsApp Simulator Functions & Conversational Flow Implementation */
-    function getCurrentTimeStr() {
-        const now = new Date();
-        let hours = now.getHours();
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12 || 12;
-        return `${String(hours).padStart(2, '0')}:${minutes} ${ampm}`;
-    }
-
-    function handleSendButtonClick() {
-        const input = document.getElementById('whatsapp-input');
-        const text = input.value.trim();
-        if (text) {
-            sendChatMessage(text);
-            input.value = '';
+            // Update Timeline step buttons
+            const buttons = document.querySelectorAll('.timeline-step');
+            buttons.forEach((btn, idx) => {
+                if (idx === index) {
+                    btn.className = "timeline-step active-timeline bg-amber-500 text-slate-950 font-bold border-2 border-amber-600 py-2 px-1 rounded-lg text-center shadow-2xs transition cursor-pointer";
+                    btn.querySelector('span:first-child').className = "block text-xs font-mono font-bold text-slate-950";
+                    btn.querySelector('span:last-child').className = "block text-[10px] text-slate-900 font-semibold mt-0.5";
+                } else {
+                    btn.className = "timeline-step bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 py-2 px-1 rounded-lg text-center transition cursor-pointer";
+                    btn.querySelector('span:first-child').className = "block text-xs font-mono font-semibold text-slate-700";
+                    btn.querySelector('span:last-child').className = "block text-[10px] text-slate-500 mt-0.5";
+                }
+            });
         }
-    }
 
-    function sendUserBubble(text) {
-        const container = document.getElementById('chat-messages-container');
-        const time = getCurrentTimeStr();
-        const userMsg = document.createElement('div');
-        userMsg.className = "flex flex-col items-end";
-        userMsg.innerHTML = `
+        function refreshServices() {
+            const ping = document.getElementById('ping-text');
+            ping.textContent = "Sensor ping: Just now";
+            const btn = event.currentTarget;
+            btn.innerHTML = `<i class="fa-solid fa-check text-emerald-600 text-xs"></i> Synced`;
+            setTimeout(() => {
+                btn.innerHTML = `<i class="fa-solid fa-rotate text-xs"></i> Sync`;
+            }, 2000);
+        }
+
+        function triggerEmergencySOS() {
+            document.getElementById('sos-modal').classList.remove('hidden');
+        }
+
+        function closeSOSModal() {
+            document.getElementById('sos-modal').classList.add('hidden');
+        }
+
+        function confirmSOSCall() {
+            alert("Emergency broadcast beacon activated to Police PCR #4 and selected contacts.");
+            closeSOSModal();
+            sendBotMessage("⚠️ <strong class='text-rose-700'>EMERGENCY SOS BROADCAST CONFIRMED:</strong> Live GPS coordinates dispatched to Police PCR #4 (0.3 km away) and Emergency Hubs.");
+        }
+
+        /* WhatsApp Simulator Functions & Conversational Flow Implementation */
+        function getCurrentTimeStr() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12 || 12;
+            return `${String(hours).padStart(2, '0')}:${minutes} ${ampm}`;
+        }
+
+        function handleSendButtonClick() {
+            const input = document.getElementById('whatsapp-input');
+            const text = input.value.trim();
+            if (text) {
+                sendChatMessage(text);
+                input.value = '';
+            }
+        }
+
+        function sendUserBubble(text) {
+            const container = document.getElementById('chat-messages-container');
+            const time = getCurrentTimeStr();
+            const userMsg = document.createElement('div');
+            userMsg.className = "flex flex-col items-end";
+            userMsg.innerHTML = `
             <div class="bg-[#d9fdd3] text-slate-800 text-xs rounded-xl rounded-tr-xs px-3 py-2 max-w-[85%] shadow-2xs border border-emerald-200/70">
                 <div class="font-normal leading-relaxed text-slate-800">${text}</div>
                 <div class="flex items-center justify-end gap-1 mt-1 text-[10px] text-slate-500 font-mono">
@@ -591,36 +911,36 @@
                 </div>
             </div>
         `;
-        container.appendChild(userMsg);
-        container.scrollTop = container.scrollHeight;
-    }
+            container.appendChild(userMsg);
+            container.scrollTop = container.scrollHeight;
+        }
 
-    function sendChatMessage(text) {
-        sendUserBubble(text);
-        setTimeout(() => {
-            processBotResponse(text);
-        }, 600);
-    }
+        function sendChatMessage(text) {
+            sendUserBubble(text);
+            setTimeout(() => {
+                processBotResponse(text);
+            }, 600);
+        }
 
-    function handleQuickReply(actionText) {
-        sendChatMessage(actionText);
-    }
+        function handleQuickReply(actionText) {
+            sendChatMessage(actionText);
+        }
 
-    function simulateShareLiveLocation() {
-        sendChatMessage("📍 Shared live GPS coordinate: Sector 62 Main Crossing (Active for 60m)");
-    }
+        function simulateShareLiveLocation() {
+            sendChatMessage("📍 Shared live GPS coordinate: Sector 62 Main Crossing (Active for 60m)");
+        }
 
-    function sendBotMessage(htmlContent, isCard = false, customTag = "KNOWN") {
-        const container = document.getElementById('chat-messages-container');
-        const time = getCurrentTimeStr();
-        const botMsg = document.createElement('div');
-        botMsg.className = "flex flex-col items-start w-full";
-        
-        botMsg.innerHTML = `
+        function sendBotMessage(htmlContent, isCard = false, customTag = "KNOWN") {
+            const container = document.getElementById('chat-messages-container');
+            const time = getCurrentTimeStr();
+            const botMsg = document.createElement('div');
+            botMsg.className = "flex flex-col items-start w-full";
+
+            botMsg.innerHTML = `
             <div class="bg-white text-slate-800 text-xs rounded-xl rounded-tl-xs p-3 max-w-[95%] shadow-2xs border border-slate-200/80 space-y-1.5">
                 <div class="flex items-center justify-between pb-1 border-b border-slate-100">
                     <span class="font-bold text-emerald-800 flex items-center gap-1.5 text-[10px]">
-                        <i class="fa-solid fa-shield-halved text-emerald-600"></i> NightShift Engine
+                        <i class="fa-solid fa-shield-halved text-emerald-600"></i> NightOwl Engine
                     </span>
                     <span class="px-1.5 py-0.2 rounded text-[9px] font-bold ${customTag === 'KNOWN' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : (customTag === 'PROBABLE' ? 'bg-amber-100 text-amber-800 border-amber-300' : 'bg-rose-100 text-rose-800 border-rose-300')} border">${customTag}</span>
                 </div>
@@ -630,24 +950,24 @@
                 </div>
             </div>
         `;
-        container.appendChild(botMsg);
-        container.scrollTop = container.scrollHeight;
-    }
+            container.appendChild(botMsg);
+            container.scrollTop = container.scrollHeight;
+        }
 
-    /* Primary Role Selection Flow */
-    function selectChatRole(role) {
-        if (role === 'consumer') {
-            sendUserBubble("I'm joining as a Consumer");
-            setTimeout(() => {
-                const container = document.getElementById('chat-messages-container');
-                const time = getCurrentTimeStr();
-                const botMsg = document.createElement('div');
-                botMsg.className = "flex flex-col items-start w-full";
-                botMsg.innerHTML = `
+        /* Primary Role Selection Flow */
+        function selectChatRole(role) {
+            if (role === 'consumer') {
+                sendUserBubble("I'm joining as a Consumer");
+                setTimeout(() => {
+                    const container = document.getElementById('chat-messages-container');
+                    const time = getCurrentTimeStr();
+                    const botMsg = document.createElement('div');
+                    botMsg.className = "flex flex-col items-start w-full";
+                    botMsg.innerHTML = `
                     <div class="bg-white text-slate-800 text-xs rounded-xl rounded-tl-xs p-3 max-w-[96%] w-full shadow-2xs border border-slate-200/80 space-y-2">
                         <div class="flex items-center justify-between pb-1 border-b border-slate-100">
                             <span class="font-bold text-emerald-800 flex items-center gap-1.5 text-[10px]">
-                                <i class="fa-solid fa-shield-halved text-emerald-600"></i> NightShift Engine
+                                <i class="fa-solid fa-shield-halved text-emerald-600"></i> NightOwl Engine
                             </span>
                             <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">INTAKE</span>
                         </div>
@@ -706,17 +1026,17 @@
                         </div>
                     </div>
                 `;
-                container.appendChild(botMsg);
-                container.scrollTop = container.scrollHeight;
-            }, 500);
-        } else if (role === 'provider') {
-            sendUserBubble("I'm joining as a Provider (Route Scout)");
-            setTimeout(() => {
-                const container = document.getElementById('chat-messages-container');
-                const time = getCurrentTimeStr();
-                const botMsg = document.createElement('div');
-                botMsg.className = "flex flex-col items-start w-full";
-                botMsg.innerHTML = `
+                    container.appendChild(botMsg);
+                    container.scrollTop = container.scrollHeight;
+                }, 500);
+            } else if (role === 'provider') {
+                sendUserBubble("I'm joining as a Provider (Route Scout)");
+                setTimeout(() => {
+                    const container = document.getElementById('chat-messages-container');
+                    const time = getCurrentTimeStr();
+                    const botMsg = document.createElement('div');
+                    botMsg.className = "flex flex-col items-start w-full";
+                    botMsg.innerHTML = `
                     <div class="bg-white text-slate-800 text-xs rounded-xl rounded-tl-xs p-3.5 max-w-[98%] w-full shadow-2xs border border-amber-200/90 space-y-2.5">
                         <div class="flex items-center justify-between pb-1.5 border-b border-amber-100">
                             <span class="font-bold text-amber-800 flex items-center gap-1.5 text-[11px]">
@@ -823,76 +1143,76 @@
                         </div>
                     </div>
                 `;
-                container.appendChild(botMsg);
-                container.scrollTop = container.scrollHeight;
-            }, 500);
-        }
-    }
-
-    function triggerMockPhotoCycle() {
-        const samples = [
-            {
-                name: "photo_proof_corridor_cam02.jpg",
-                svg: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='100' viewBox='0 0 160 100'><rect width='160' height='100' fill='%231e293b'/><circle cx='80' cy='25' r='14' fill='%23fbbf24' opacity='0.85'/><path d='M0 75 Q40 68 80 72 T160 70 L160 100 L0 100 Z' fill='%23334155'/><line x1='30' y1='55' x2='30' y2='80' stroke='%2394a3b8' stroke-width='3'/><circle cx='30' cy='52' r='4' fill='%23fef08a'/><line x1='130' y1='52' x2='130' y2='80' stroke='%2394a3b8' stroke-width='3'/><circle cx='130' cy='49' r='4' fill='%23fef08a'/><text x='10' y='92' fill='%23e2e8f0' font-size='9' font-family='sans-serif'>CAM-REC 02:30 AM</text></svg>"
-            },
-            {
-                name: "live_snap_bypass_underpass.jpg",
-                svg: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='100' viewBox='0 0 160 100'><rect width='160' height='100' fill='%230f172a'/><rect x='15' y='30' width='130' height='50' rx='6' fill='%231e293b' stroke='%23f59e0b' stroke-width='2'/><path d='M25 65 L45 35 L55 35 L35 65 Z' fill='%23f59e0b'/><path d='M65 65 L85 35 L95 35 L75 65 Z' fill='%23f59e0b'/><path d='M105 65 L125 35 L135 35 L115 65 Z' fill='%23f59e0b'/><text x='15' y='92' fill='%23fbbf24' font-size='9' font-family='sans-serif'>BARRIER SENSOR ACTIVE</text></svg>"
-            },
-            {
-                name: "street_lighting_checkpoint_b.jpg",
-                svg: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='100' viewBox='0 0 160 100'><rect width='160' height='100' fill='%23022c22'/><circle cx='80' cy='40' r='26' fill='%2334d399' opacity='0.3'/><circle cx='80' cy='40' r='14' fill='%236ee7b7' opacity='0.85'/><path d='M10 85 L150 85' stroke='%2310b981' stroke-width='4'/><text x='12' y='94' fill='%23a7f3d0' font-size='9' font-family='sans-serif'>ILLUMINATION 94%</text></svg>"
-            }
-        ];
-        const currentImg = document.getElementById('scout-preview-img');
-        const currentTitle = document.getElementById('scout-preview-title');
-        const nextIdx = (samples.findIndex(s => s.name === (currentTitle ? currentTitle.textContent.trim().replace(/^.*photo/, 'photo') : '')) + 1) % samples.length;
-        const chosen = samples[nextIdx];
-        if (currentImg) currentImg.src = chosen.svg;
-        if (currentTitle) currentTitle.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 text-[10px]"></i> ${chosen.name}`;
-        selectedProofImage = chosen.svg;
-    }
-
-    function handleProviderGroundTruthSubmit() {
-        const radios = document.getElementsByName('road_condition');
-        let selectedCondition = 'safe_light';
-        for (const r of radios) {
-            if (r.checked) {
-                selectedCondition = r.value;
-                break;
+                    container.appendChild(botMsg);
+                    container.scrollTop = container.scrollHeight;
+                }, 500);
             }
         }
-        const note = (document.getElementById('scout-optional-note') && document.getElementById('scout-optional-note').value.trim()) || 'Bypass East Arterial Segment #12';
-        
-        let conditionBadge = "";
-        let conditionText = "";
-        let impactDesc = "";
-        let radarTag = "KNOWN";
 
-        if (selectedCondition === 'safe_light') {
-            conditionText = "Road is safe and proper lighting";
-            conditionBadge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300"><i class="fa-solid fa-lightbulb"></i> Road Safe &amp; Proper Lighting</span>`;
-            impactDesc = "Corridor lighting raised to 92%. Active patrolled lane verified.";
-        } else if (selectedCondition === 'unsafe') {
-            conditionText = "Road is unsafe";
-            conditionBadge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300"><i class="fa-solid fa-triangle-exclamation"></i> Road is Unsafe</span>`;
-            impactDesc = "Caution alert pushed to active commuters. Direct escort waypoint active.";
-        } else if (selectedCondition === 'construction') {
-            conditionText = "Road is under Construction";
-            conditionBadge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300"><i class="fa-solid fa-person-digging"></i> Road Under Construction</span>`;
-            impactDesc = "Arterial detour via Central Square engaged. Avoid pedestrian lane.";
-        } else {
-            conditionText = "Water logging";
-            conditionBadge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-sky-100 text-sky-800 border border-sky-300"><i class="fa-solid fa-water"></i> Water Logging Hazard</span>`;
-            impactDesc = "Surface water warning broadcasted. Two-wheelers advised to take elevated flyover.";
+        function triggerMockPhotoCycle() {
+            const samples = [
+                {
+                    name: "photo_proof_corridor_cam02.jpg",
+                    svg: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='100' viewBox='0 0 160 100'><rect width='160' height='100' fill='%231e293b'/><circle cx='80' cy='25' r='14' fill='%23fbbf24' opacity='0.85'/><path d='M0 75 Q40 68 80 72 T160 70 L160 100 L0 100 Z' fill='%23334155'/><line x1='30' y1='55' x2='30' y2='80' stroke='%2394a3b8' stroke-width='3'/><circle cx='30' cy='52' r='4' fill='%23fef08a'/><line x1='130' y1='52' x2='130' y2='80' stroke='%2394a3b8' stroke-width='3'/><circle cx='130' cy='49' r='4' fill='%23fef08a'/><text x='10' y='92' fill='%23e2e8f0' font-size='9' font-family='sans-serif'>CAM-REC 02:30 AM</text></svg>"
+                },
+                {
+                    name: "live_snap_bypass_underpass.jpg",
+                    svg: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='100' viewBox='0 0 160 100'><rect width='160' height='100' fill='%230f172a'/><rect x='15' y='30' width='130' height='50' rx='6' fill='%231e293b' stroke='%23f59e0b' stroke-width='2'/><path d='M25 65 L45 35 L55 35 L35 65 Z' fill='%23f59e0b'/><path d='M65 65 L85 35 L95 35 L75 65 Z' fill='%23f59e0b'/><path d='M105 65 L125 35 L135 35 L115 65 Z' fill='%23f59e0b'/><text x='15' y='92' fill='%23fbbf24' font-size='9' font-family='sans-serif'>BARRIER SENSOR ACTIVE</text></svg>"
+                },
+                {
+                    name: "street_lighting_checkpoint_b.jpg",
+                    svg: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='100' viewBox='0 0 160 100'><rect width='160' height='100' fill='%23022c22'/><circle cx='80' cy='40' r='26' fill='%2334d399' opacity='0.3'/><circle cx='80' cy='40' r='14' fill='%236ee7b7' opacity='0.85'/><path d='M10 85 L150 85' stroke='%2310b981' stroke-width='4'/><text x='12' y='94' fill='%23a7f3d0' font-size='9' font-family='sans-serif'>ILLUMINATION 94%</text></svg>"
+                }
+            ];
+            const currentImg = document.getElementById('scout-preview-img');
+            const currentTitle = document.getElementById('scout-preview-title');
+            const nextIdx = (samples.findIndex(s => s.name === (currentTitle ? currentTitle.textContent.trim().replace(/^.*photo/, 'photo') : '')) + 1) % samples.length;
+            const chosen = samples[nextIdx];
+            if (currentImg) currentImg.src = chosen.svg;
+            if (currentTitle) currentTitle.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 text-[10px]"></i> ${chosen.name}`;
+            selectedProofImage = chosen.svg;
         }
 
-        // Outgoing User Bubble showing chosen road condition badge, photo proof thumbnail, timestamp & double blue ticks
-        const container = document.getElementById('chat-messages-container');
-        const time = getCurrentTimeStr();
-        const userMsg = document.createElement('div');
-        userMsg.className = "flex flex-col items-end w-full";
-        userMsg.innerHTML = `
+        function handleProviderGroundTruthSubmit() {
+            const radios = document.getElementsByName('road_condition');
+            let selectedCondition = 'safe_light';
+            for (const r of radios) {
+                if (r.checked) {
+                    selectedCondition = r.value;
+                    break;
+                }
+            }
+            const note = (document.getElementById('scout-optional-note') && document.getElementById('scout-optional-note').value.trim()) || 'Bypass East Arterial Segment #12';
+
+            let conditionBadge = "";
+            let conditionText = "";
+            let impactDesc = "";
+            let radarTag = "KNOWN";
+
+            if (selectedCondition === 'safe_light') {
+                conditionText = "Road is safe and proper lighting";
+                conditionBadge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300"><i class="fa-solid fa-lightbulb"></i> Road Safe &amp; Proper Lighting</span>`;
+                impactDesc = "Corridor lighting raised to 92%. Active patrolled lane verified.";
+            } else if (selectedCondition === 'unsafe') {
+                conditionText = "Road is unsafe";
+                conditionBadge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300"><i class="fa-solid fa-triangle-exclamation"></i> Road is Unsafe</span>`;
+                impactDesc = "Caution alert pushed to active commuters. Direct escort waypoint active.";
+            } else if (selectedCondition === 'construction') {
+                conditionText = "Road is under Construction";
+                conditionBadge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300"><i class="fa-solid fa-person-digging"></i> Road Under Construction</span>`;
+                impactDesc = "Arterial detour via Central Square engaged. Avoid pedestrian lane.";
+            } else {
+                conditionText = "Water logging";
+                conditionBadge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-sky-100 text-sky-800 border border-sky-300"><i class="fa-solid fa-water"></i> Water Logging Hazard</span>`;
+                impactDesc = "Surface water warning broadcasted. Two-wheelers advised to take elevated flyover.";
+            }
+
+            // Outgoing User Bubble showing chosen road condition badge, photo proof thumbnail, timestamp & double blue ticks
+            const container = document.getElementById('chat-messages-container');
+            const time = getCurrentTimeStr();
+            const userMsg = document.createElement('div');
+            userMsg.className = "flex flex-col items-end w-full";
+            userMsg.innerHTML = `
             <div class="bg-[#d9fdd3] text-slate-800 text-xs rounded-xl rounded-tr-xs p-3 max-w-[88%] shadow-2xs border border-emerald-200/80 space-y-2">
                 <div class="flex items-center justify-between gap-2">
                     <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Route Observation Filed</span>
@@ -914,33 +1234,33 @@
                 </div>
             </div>
         `;
-        container.appendChild(userMsg);
-        container.scrollTop = container.scrollHeight;
+            container.appendChild(userMsg);
+            container.scrollTop = container.scrollHeight;
 
-        // Update Dashboard Live Metrics & Gamification
-        scoutRepScore += 25;
-        totalReportsFiled += 1;
-        document.getElementById('header-scout-rep').textContent = `Scout Hub • Rep ${scoutRepScore} pts (Level 3)`;
-        document.getElementById('kpi-intel-reports').textContent = `${totalReportsFiled} Reports`;
-        document.getElementById('sidebar-report-count').textContent = `${totalReportsFiled} tonight`;
-        document.getElementById('kpi-reports-sub').textContent = `${totalReportsFiled} Filed tonight`;
+            // Update Dashboard Live Metrics & Gamification
+            scoutRepScore += 25;
+            totalReportsFiled += 1;
+            document.getElementById('header-scout-rep').textContent = `Scout Hub • Rep ${scoutRepScore} pts (Level 3)`;
+            document.getElementById('kpi-intel-reports').textContent = `${totalReportsFiled} Reports`;
+            document.getElementById('sidebar-report-count').textContent = `${totalReportsFiled} tonight`;
+            document.getElementById('kpi-reports-sub').textContent = `${totalReportsFiled} Filed tonight`;
 
-        if (selectedCondition === 'safe_light') {
-            document.getElementById('kpi-lighting').textContent = '92% Lit';
-            document.getElementById('lighting-bar').style.width = '92%';
-            document.getElementById('light-status-text').textContent = '92% Lit (Verified)';
-        }
+            if (selectedCondition === 'safe_light') {
+                document.getElementById('kpi-lighting').textContent = '92% Lit';
+                document.getElementById('lighting-bar').style.width = '92%';
+                document.getElementById('light-status-text').textContent = '92% Lit (Verified)';
+            }
 
-        // NightShift Assistant Immediate Acknowledgment & Telemetry Broadcast
-        setTimeout(() => {
-            const time2 = getCurrentTimeStr();
-            const botMsg = document.createElement('div');
-            botMsg.className = "flex flex-col items-start w-full space-y-1.5";
-            botMsg.innerHTML = `
+            // NightOwl Assistant Immediate Acknowledgment & Telemetry Broadcast
+            setTimeout(() => {
+                const time2 = getCurrentTimeStr();
+                const botMsg = document.createElement('div');
+                botMsg.className = "flex flex-col items-start w-full space-y-1.5";
+                botMsg.innerHTML = `
                 <div class="bg-white text-slate-800 text-xs rounded-xl rounded-tl-xs p-3.5 max-w-[96%] w-full shadow-2xs border border-emerald-200/90 space-y-2">
                     <div class="flex items-center justify-between pb-1.5 border-b border-slate-100">
                         <span class="font-bold text-emerald-800 flex items-center gap-1.5 text-[10.5px]">
-                            <i class="fa-solid fa-shield-halved text-emerald-600"></i> NightShift Engine
+                            <i class="fa-solid fa-shield-halved text-emerald-600"></i> NightOwl Engine
                         </span>
                         <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">KNOWN • GROUND TRUTH PROOF VERIFIED</span>
                     </div>
@@ -988,43 +1308,43 @@
                     </button>
                 </div>
             `;
-            container.appendChild(botMsg);
-            container.scrollTop = container.scrollHeight;
-        }, 600);
-    }
+                container.appendChild(botMsg);
+                container.scrollTop = container.scrollHeight;
+            }, 600);
+        }
 
-    function handleInChatCommuteSubmit() {
-        const role = document.getElementById('inchat-worker-role').value;
-        const startLoc = document.getElementById('inchat-start-loc').value || 'Sector 62 Tech Park';
-        const endLoc = document.getElementById('inchat-end-loc').value || 'Block C';
-        const endVal = document.getElementById('inchat-shift-end').value || '02:15';
-        const arrVal = document.getElementById('inchat-shift-arr').value || '03:00';
-        const mode = document.getElementById('inchat-transport-mode').value;
+        function handleInChatCommuteSubmit() {
+            const role = document.getElementById('inchat-worker-role').value;
+            const startLoc = document.getElementById('inchat-start-loc').value || 'Sector 62 Tech Park';
+            const endLoc = document.getElementById('inchat-end-loc').value || 'Block C';
+            const endVal = document.getElementById('inchat-shift-end').value || '02:15';
+            const arrVal = document.getElementById('inchat-shift-arr').value || '03:00';
+            const mode = document.getElementById('inchat-transport-mode').value;
 
-        // Log outgoing user message
-        sendUserBubble(`Heading home from <strong>${startLoc}</strong> to <strong>${endLoc}</strong> at ${endVal} (${mode}).`);
+            // Log outgoing user message
+            sendUserBubble(`Heading home from <strong>${startLoc}</strong> to <strong>${endLoc}</strong> at ${endVal} (${mode}).`);
 
-        // Update central dashboard plan
-        const badge = document.getElementById('badge-status');
-        badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300";
-        badge.textContent = "KNOWN • OPTIMIZED CORRIDOR ACTIVE";
-        
-        document.getElementById('plan-title').textContent = `${endVal} Shift Departure: ${startLoc} → ${endLoc}`;
-        document.getElementById('plan-eta').innerHTML = `${arrVal} <span class="text-xs font-medium text-slate-500">(45 mins)</span>`;
-        document.getElementById('plan-description').textContent = `Synthesized corridor for ${role}. The engine has synthesized a well-lit corridor avoiding isolated underpasses, leveraging 24/7 patrol checkpoints and active open pharmacies along the arterial route.`;
+            // Update central dashboard plan
+            const badge = document.getElementById('badge-status');
+            badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300";
+            badge.textContent = "KNOWN • OPTIMIZED CORRIDOR ACTIVE";
 
-        // Render Bot Telemetry Response with synthesized epistemic telemetry and quick action pills
-        setTimeout(() => {
-            const container = document.getElementById('chat-messages-container');
-            const time = getCurrentTimeStr();
-            const botMsg = document.createElement('div');
-            botMsg.className = "flex flex-col items-start w-full space-y-1.5";
-            
-            botMsg.innerHTML = `
+            document.getElementById('plan-title').textContent = `${endVal} Shift Departure: ${startLoc} → ${endLoc}`;
+            document.getElementById('plan-eta').innerHTML = `${arrVal} <span class="text-xs font-medium text-slate-500">(45 mins)</span>`;
+            document.getElementById('plan-description').textContent = `Synthesized corridor for ${role}. The engine has synthesized a well-lit corridor avoiding isolated underpasses, leveraging 24/7 patrol checkpoints and active open pharmacies along the arterial route.`;
+
+            // Render Bot Telemetry Response with synthesized epistemic telemetry and quick action pills
+            setTimeout(() => {
+                const container = document.getElementById('chat-messages-container');
+                const time = getCurrentTimeStr();
+                const botMsg = document.createElement('div');
+                botMsg.className = "flex flex-col items-start w-full space-y-1.5";
+
+                botMsg.innerHTML = `
                 <div class="bg-white text-slate-800 text-xs rounded-xl rounded-tl-xs p-3 max-w-[95%] shadow-2xs border border-slate-200/80 space-y-1.5">
                     <div class="flex items-center justify-between pb-1 border-b border-slate-100">
                         <span class="font-bold text-emerald-800 flex items-center gap-1 text-[10px]">
-                            <i class="fa-solid fa-shield-halved text-emerald-600"></i> NightShift Engine
+                            <i class="fa-solid fa-shield-halved text-emerald-600"></i> NightOwl Engine
                         </span>
                         <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">KNOWN</span>
                     </div>
@@ -1073,23 +1393,23 @@
                     </button>
                 </div>
             `;
-            container.appendChild(botMsg);
-            container.scrollTop = container.scrollHeight;
-        }, 600);
-    }
+                container.appendChild(botMsg);
+                container.scrollTop = container.scrollHeight;
+            }, 600);
+        }
 
-    function processBotResponse(query) {
-        const q = query.toLowerCase();
-        if (q.includes('pharmacy') || q.includes('medicine') || q.includes('chemist')) {
-            sendBotMessage(`
+        function processBotResponse(query) {
+            const q = query.toLowerCase();
+            if (q.includes('pharmacy') || q.includes('medicine') || q.includes('chemist')) {
+                sendBotMessage(`
                 <strong>Verified 24/7 Pharmacies On-Route:</strong>
                 <ul class="mt-1 space-y-1 list-disc list-inside text-slate-600">
                     <li><strong class="text-slate-800">Apollo 24/7 Pharmacy</strong>: Block B Market (0.8 km) - <span class="text-emerald-700 font-semibold">Active Staff [KNOWN]</span></li>
                     <li><strong class="text-slate-800">MedPlus Express</strong>: Metro Gate 2 (1.6 km) - Open</li>
                 </ul>
             `, true, "KNOWN");
-        } else if (q.includes('safety') || q.includes('route') || q.includes('escort')) {
-            sendBotMessage(`
+            } else if (q.includes('safety') || q.includes('route') || q.includes('escort')) {
+                sendBotMessage(`
                 <strong>Active Route Verification:</strong>
                 <div class="mt-1 bg-slate-50 p-2 rounded border border-slate-200 space-y-1">
                     <div>🛣️ <strong>Recommended:</strong> Patrolled Arterial Corridor (Well-lit, 2 active PCR units)</div>
@@ -1097,37 +1417,37 @@
                     <div>👮 <strong>Nearest Security Node:</strong> Central Square Booth (300m)</div>
                 </div>
             `, true, "KNOWN");
-        } else if (q.includes('cab') || q.includes('transit') || q.includes('bus')) {
-            sendBotMessage(`
+            } else if (q.includes('cab') || q.includes('transit') || q.includes('bus')) {
+                sendBotMessage(`
                 <strong>Night Transit Availability Radar:</strong>
                 <p class="mt-1 text-slate-600">🚖 <strong>2 App Cabs Available</strong> within 4 mins of Sector 62 Hub. Night bus #414 frequency is reduced (next arrival at 03:20 AM).</p>
             `, true, "PROBABLE");
-        } else if (q.includes('sos') || q.includes('emergency') || q.includes('help')) {
-            triggerEmergencySOS();
-            sendBotMessage(`
+            } else if (q.includes('sos') || q.includes('emergency') || q.includes('help')) {
+                triggerEmergencySOS();
+                sendBotMessage(`
                 <strong class="text-rose-700">🚨 EMERGENCY PROTOCOL TRIGGERED:</strong>
                 <p class="mt-1 text-slate-700">Connecting directly to Police PCR #4 (0.3 km away) and Lifeline Emergency Clinic. Your current GPS telemetry is transmitted.</p>
             `, true, "KNOWN");
-        } else if (q.includes('er') || q.includes('clinic') || q.includes('hospital')) {
-            sendBotMessage(`
+            } else if (q.includes('er') || q.includes('clinic') || q.includes('hospital')) {
+                sendBotMessage(`
                 <strong>Nearest 24/7 Emergency Rooms:</strong>
                 <div class="mt-1 text-slate-700">
                     🏥 <strong>Lifeline Emergency Clinic</strong> (1.4 km) - Level 1 Trauma active.<br/>
                     🚑 Direct Ambulance Line: +1 800-NIGHT-ER
                 </div>
             `, true, "KNOWN");
-        } else {
-            sendBotMessage(`
+            } else {
+                sendBotMessage(`
                 Telemetry verified for <strong class="text-slate-800">Sector 62 to Block C</strong> corridor. All safety checkpoints are active, and 2 emergency havens remain open.
             `, false, "KNOWN");
+            }
         }
-    }
 
-    /* Reset / Initial Greeting Chat State */
-    function resetWhatsAppChat() {
-        const container = document.getElementById('chat-messages-container');
-        const time = getCurrentTimeStr();
-        container.innerHTML = `
+        /* Reset / Initial Greeting Chat State */
+        function resetWhatsAppChat() {
+            const container = document.getElementById('chat-messages-container');
+            const time = getCurrentTimeStr();
+            container.innerHTML = `
             <!-- Date divider -->
             <div class="flex justify-center my-0.5">
                 <span class="text-[10px] font-semibold tracking-wider text-slate-500 bg-white/85 shadow-2xs backdrop-blur-xs px-2.5 py-0.5 rounded-full uppercase border border-slate-200/50">
@@ -1140,13 +1460,13 @@
                 <div class="bg-white text-slate-800 text-xs rounded-xl rounded-tl-xs p-3.5 max-w-[96%] w-full shadow-2xs border border-slate-200/80 space-y-2.5">
                     <div class="flex items-center justify-between pb-1.5 border-b border-slate-100">
                         <span class="font-bold text-emerald-800 flex items-center gap-1.5 text-[10px]">
-                            <i class="fa-solid fa-shield-halved text-emerald-600"></i> NightShift Engine
+                            <i class="fa-solid fa-shield-halved text-emerald-600"></i> NightOwl Engine
                         </span>
                         <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">LIVE</span>
                     </div>
 
                     <p class="text-slate-800 leading-relaxed text-xs">
-                        Hello! Welcome to <strong class="text-slate-900 font-bold">NightShift Operations</strong>. Are you joining as a <strong class="text-emerald-700">Provider (Route Scout)</strong> or a <strong class="text-emerald-700">Consumer</strong> tonight?
+                        Hello! Welcome to <strong class="text-slate-900 font-bold">NightOwl Operations</strong>. Are you joining as a <strong class="text-emerald-700">Provider (Route Scout)</strong> or a <strong class="text-emerald-700">Consumer</strong> tonight?
                     </p>
 
                     <!-- Interactive Role Selection Cards directly inside message flow -->
@@ -1190,12 +1510,14 @@
                 </div>
             </div>
         `;
-        container.scrollTop = 0;
-    }
+            container.scrollTop = 0;
+        }
 
-    // Initialize on page load
-    window.addEventListener('DOMContentLoaded', () => {
-        resetWhatsAppChat();
-    });
-</script>
-</body></html>
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            resetWhatsAppChat();
+        });
+    </script>
+</body>
+
+</html>

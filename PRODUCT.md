@@ -13,11 +13,11 @@ web
 
 ## Product Purpose
 
-NightShift synthesizes safe, empirically verified night transit corridors. It eliminates nighttime safety uncertainty ("night hallucinations") by combining real-time crowd telemetry, sensor data, and immediate emergency SOS dispatch to police and 24/7 medical facilities.
+NightOwl synthesizes safe, empirically verified night transit corridors. It eliminates nighttime safety uncertainty ("night hallucinations") by combining real-time crowd telemetry, sensor data, and immediate emergency SOS dispatch to police and 24/7 medical facilities.
 
 ## Positioning
 
-Unlike conventional navigation engines that optimize purely for travel time or distance, NightShift optimizes for **empirical epistemic safety**—prioritizing illuminated corridors, verified 24/7 commercial havens, and active police patrol presence backed by recent human ground truth.
+Unlike conventional navigation engines that optimize purely for travel time or distance, NightOwl optimizes for **empirical epistemic safety**—prioritizing illuminated corridors, verified 24/7 commercial havens, and active police patrol presence backed by recent human ground truth.
 
 ## Operating Context
 

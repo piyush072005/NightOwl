@@ -1,6 +1,6 @@
 # Step-by-Step Guide: How to Generate Tables in Supabase
 
-This guide walks you through generating and configuring all required database tables for the **NightShift Operations Hub** using Supabase.
+This guide walks you through generating and configuring all required database tables for the **NightOwl Operations Hub** using Supabase.
 
 ---
 
@@ -13,7 +13,7 @@ This guide walks you through generating and configuring all required database ta
 ## 🚀 Step 1: Open Your Supabase Project
 1. Go to [https://supabase.com/dashboard](https://supabase.com/dashboard) and sign in.
 2. Click **"New Project"** (or choose an existing one).
-3. Give your project a name (e.g., `NightShift-Hub`), set a strong database password, and pick a region close to your users.
+3. Give your project a name (e.g., `NightOwl-Hub`), set a strong database password, and pick a region close to your users.
 4. Wait 1–2 minutes for Supabase to finish provisioning the database.
 
 ---

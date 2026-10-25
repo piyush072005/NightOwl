@@ -1,5 +1,5 @@
 -- ==============================================================================
--- NIGHTSHIFT OPERATIONS HUB - SUPABASE DATABASE SCHEMA
+-- NightOwl OPERATIONS HUB - SUPABASE DATABASE SCHEMA
 -- ==============================================================================
 -- Instructions:
 -- 1. Open your Supabase Dashboard: https://supabase.com/dashboard
