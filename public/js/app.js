@@ -155,7 +155,7 @@ function updateSupabaseUIStatus(isConnected, url = '') {
     if (modalTitle) modalTitle.textContent = 'Supabase Database Online & Connected';
     if (modalDesc) modalDesc.textContent = `Connected to ${url} with live WebSocket Realtime enabled`;
   } else {
-    if (dot) dot.className = 'w-2 h-2 rounded-full bg-amber-500 animate-pulse';
+    if (dot) dot.className = 'w-2 h-2 rounded-full bg-amber-500 ';
     if (text) text.textContent = 'Setup Supabase (Demo Mode)';
     if (btn) btn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition shadow-2xs cursor-pointer active:scale-95 bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100';
 
@@ -234,16 +234,16 @@ function renderCheckpointsTable(checkpoints) {
 
   tbody.innerHTML = checkpoints.map(cp => `
     <tr class="hover:bg-slate-50/80">
-      <td class="py-2 px-3 font-semibold text-slate-900">${cp.node_name}</td>
-      <td class="py-2 px-3 text-slate-500">${cp.node_type}</td>
-      <td class="py-2 px-3">
-        <span class="${cp.lighting_percent.includes('100%') || cp.lighting_percent.includes('90%') ? 'text-emerald-700' : 'text-amber-700'} font-semibold">
+      <td class="py-2.5 px-3.5 font-bold text-slate-900">${cp.node_name}</td>
+      <td class="py-2.5 px-3.5 text-slate-500">${cp.node_type}</td>
+      <td class="py-2.5 px-3.5">
+        <span class="${cp.lighting_percent.includes('100%') || cp.lighting_percent.includes('90%') ? 'text-emerald-800' : 'text-amber-800'} font-bold">
           ${cp.lighting_percent}
         </span>
       </td>
-      <td class="py-2 px-3 text-slate-700">${cp.community_vouch}</td>
-      <td class="py-2 px-3 text-right">
-        <span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${
+      <td class="py-2.5 px-3.5 text-slate-700">${cp.community_vouch}</td>
+      <td class="py-2.5 px-3.5 text-right">
+        <span class="px-2 py-0.5 rounded-md text-xs font-bold ${
           cp.epistemic_status === 'KNOWN' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-amber-100 text-amber-800 border-amber-300'
         } border">${cp.epistemic_status}</span>
       </td>
@@ -259,7 +259,7 @@ function renderReportsList(reports) {
   if (!container) return;
 
   if (!reports || reports.length === 0) {
-    container.innerHTML = '<div class="text-xs text-slate-400 py-3 text-center">No reports filed tonight yet.</div>';
+    container.innerHTML = '<div class="text-xs text-slate-500 py-3 text-center">No reports filed tonight yet.</div>';
     return;
   }
 
@@ -275,30 +275,30 @@ function appendScoutReportToFeed(report, prepend = true) {
 
   let conditionBadge = '';
   if (report.road_condition === 'safe_light') {
-    conditionBadge = '<span class="text-[9px] bg-emerald-100 text-emerald-800 border border-emerald-300 px-1.5 py-0.2 rounded font-bold">Safe & Lit</span>';
+    conditionBadge = '<span class="text-xs bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-md font-bold">Safe & Lit</span>';
   } else if (report.road_condition === 'unsafe') {
-    conditionBadge = '<span class="text-[9px] bg-rose-100 text-rose-800 border border-rose-300 px-1.5 py-0.2 rounded font-bold">Unsafe Hazard</span>';
+    conditionBadge = '<span class="text-xs bg-rose-100 text-rose-800 border border-rose-300 px-2 py-0.5 rounded-md font-bold">Unsafe Hazard</span>';
   } else if (report.road_condition === 'construction') {
-    conditionBadge = '<span class="text-[9px] bg-amber-100 text-amber-800 border border-amber-300 px-1.5 py-0.2 rounded font-bold">Construction</span>';
+    conditionBadge = '<span class="text-xs bg-amber-100 text-amber-800 border border-amber-300 px-2 py-0.5 rounded-md font-bold">Construction</span>';
   } else {
-    conditionBadge = '<span class="text-[9px] bg-sky-100 text-sky-800 border border-sky-300 px-1.5 py-0.2 rounded font-bold">Water Logging</span>';
+    conditionBadge = '<span class="text-xs bg-sky-100 text-sky-800 border border-sky-300 px-2 py-0.5 rounded-md font-bold">Water Logging</span>';
   }
 
   const item = document.createElement('div');
-  item.className = 'py-2 flex items-start justify-between gap-2 text-xs';
+  item.className = 'py-2.5 flex items-start justify-between gap-2.5 text-xs';
   item.innerHTML = `
-    <div class="space-y-0.5">
-      <div class="flex items-center gap-1.5">
-        <span class="font-bold text-slate-800">${report.scout_name || 'Scout'}</span>
+    <div class="space-y-1">
+      <div class="flex items-center gap-2">
+        <span class="font-bold text-slate-900">${report.scout_name || 'Scout'}</span>
         ${conditionBadge}
-        <span class="text-[10px] text-slate-400 font-mono">${timeFormatted}</span>
+        <span class="text-xs text-slate-500 font-mono">${timeFormatted}</span>
       </div>
-      <div class="text-slate-600 text-[11px] leading-tight">${report.condition_title}</div>
-      ${report.landmark_note ? `<div class="text-[10px] text-slate-500 italic">"${report.landmark_note}"</div>` : ''}
+      <div class="text-slate-700 text-xs leading-normal">${report.condition_title}</div>
+      ${report.landmark_note ? `<div class="text-xs text-slate-500 italic">"${report.landmark_note}"</div>` : ''}
     </div>
-    <span class="px-1.5 py-0.5 rounded text-[8px] font-bold ${
-      report.epistemic_status === 'KNOWN' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'
-    }">${report.epistemic_status || 'KNOWN'}</span>
+    <span class="px-2 py-0.5 rounded-md text-xs font-bold ${
+      report.epistemic_status === 'KNOWN' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800 border border-amber-300'
+    } border">${report.epistemic_status || 'KNOWN'}</span>
   `;
 
   if (prepend && container.firstChild) {
@@ -336,7 +336,7 @@ function setSimulatedHour(timeStr, index) {
 
   document.getElementById('metric-risk').innerHTML = `<i class="fa-solid fa-shield ${data.riskClass}"></i> ${data.risk}`;
   document.getElementById('metric-weather').innerHTML = `<i class="fa-solid fa-cloud-moon text-sky-600"></i> ${data.weather}`;
-  document.getElementById('metric-transport').innerHTML = `<i class="fa-solid fa-taxi text-amber-600"></i> ${data.transport}`;
+  document.getElementById('metric-transport').innerHTML = `<i class="fa-solid fa-taxi text-amber-800"></i> ${data.transport}`;
   document.getElementById('metric-emergency').innerHTML = `<i class="fa-solid fa-hospital text-purple-600"></i> ${data.emergency}`;
 
   document.getElementById('radar-tag').textContent = data.radarTag;
@@ -351,11 +351,11 @@ function setSimulatedHour(timeStr, index) {
     if (idx === index) {
       btn.className = "timeline-step active-timeline bg-amber-500 text-slate-950 font-bold border-2 border-amber-600 py-2 px-1 rounded-lg text-center shadow-2xs transition cursor-pointer";
       btn.querySelector('span:first-child').className = "block text-xs font-mono font-bold text-slate-950";
-      btn.querySelector('span:last-child').className = "block text-[10px] text-slate-900 font-semibold mt-0.5";
+      btn.querySelector('span:last-child').className = "block text-xs text-slate-900 font-semibold mt-0.5";
     } else {
       btn.className = "timeline-step bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 py-2 px-1 rounded-lg text-center transition cursor-pointer";
       btn.querySelector('span:first-child').className = "block text-xs font-mono font-semibold text-slate-700";
-      btn.querySelector('span:last-child').className = "block text-[10px] text-slate-500 mt-0.5";
+      btn.querySelector('span:last-child').className = "block text-xs text-slate-500 mt-0.5";
     }
   });
 }
@@ -363,6 +363,14 @@ function setSimulatedHour(timeStr, index) {
 async function refreshCheckpoints() {
   const ping = document.getElementById('ping-text');
   if (ping) ping.textContent = "Sensor ping: Just now";
+
+  const radarTag = document.getElementById('radar-tag');
+  if (radarTag) {
+    radarTag.classList.remove('telemetry-beacon');
+    void radarTag.offsetWidth;
+    radarTag.classList.add('telemetry-beacon');
+  }
+
   await loadInitialData();
   showToast("Checkpoints and havens re-synchronized from database.");
 }
@@ -429,13 +437,13 @@ function sendUserBubble(text) {
   const container = document.getElementById('chat-messages-container');
   const time = getCurrentTimeStr();
   const userMsg = document.createElement('div');
-  userMsg.className = "flex flex-col items-end";
+  userMsg.className = "flex flex-col items-end animate-message-enter";
   userMsg.innerHTML = `
     <div class="bg-[#d9fdd3] text-slate-800 text-xs rounded-xl rounded-tr-xs px-3 py-2 max-w-[85%] shadow-2xs border border-emerald-200/70">
       <div class="font-normal leading-relaxed text-slate-800">${text}</div>
-      <div class="flex items-center justify-end gap-1 mt-1 text-[10px] text-slate-500 font-mono">
+      <div class="flex items-center justify-end gap-1 mt-1 text-xs text-slate-500 font-mono">
         <span>${time}</span>
-        <i class="fa-solid fa-check-double text-sky-600 text-[11px]"></i>
+        <i class="fa-solid fa-check-double text-sky-600 text-xs"></i>
       </div>
     </div>
   `;
@@ -462,20 +470,20 @@ function sendBotMessage(htmlContent, isCard = false, customTag = "KNOWN") {
   const container = document.getElementById('chat-messages-container');
   const time = getCurrentTimeStr();
   const botMsg = document.createElement('div');
-  botMsg.className = "flex flex-col items-start w-full";
+  botMsg.className = "flex flex-col items-start w-full animate-message-enter";
 
   botMsg.innerHTML = `
-    <div class="bg-white text-slate-800 text-xs rounded-xl rounded-tl-xs p-3 max-w-[95%] shadow-2xs border border-slate-200/80 space-y-1.5">
-      <div class="flex items-center justify-between pb-1 border-b border-slate-100">
-        <span class="font-bold text-emerald-800 flex items-center gap-1.5 text-[10px]">
-          <i class="fa-solid fa-shield-halved text-emerald-600"></i> NightShift Engine
+    <div class="bg-white text-slate-900 text-xs rounded-xl rounded-tl-xs p-3.5 max-w-[95%] shadow-xs  space-y-2">
+      <div class="flex items-center justify-between pb-1.5 border-b border-slate-100">
+        <span class="font-bold text-emerald-800 flex items-center gap-1.5 text-xs">
+          <i class="fa-solid fa-shield-halved text-emerald-700"></i> NightShift Engine
         </span>
-        <span class="px-1.5 py-0.2 rounded text-[9px] font-bold ${
+        <span class="px-2 py-0.5 rounded-md text-xs font-bold ${
           customTag === 'KNOWN' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : (customTag === 'PROBABLE' ? 'bg-amber-100 text-amber-800 border-amber-300' : 'bg-rose-100 text-rose-800 border-rose-300')
         } border">${customTag}</span>
       </div>
-      <div class="text-slate-700 leading-snug text-xs">${htmlContent}</div>
-      <div class="flex items-center justify-end gap-1 mt-0.5 text-[10px] text-slate-400 font-mono">
+      <div class="text-slate-800 leading-normal text-xs">${htmlContent}</div>
+      <div class="flex items-center justify-end gap-1 mt-1 text-xs text-slate-500 font-mono">
         <span>${time}</span>
       </div>
     </div>
@@ -491,65 +499,65 @@ function selectChatRole(role) {
       const container = document.getElementById('chat-messages-container');
       const time = getCurrentTimeStr();
       const botMsg = document.createElement('div');
-      botMsg.className = "flex flex-col items-start w-full";
+      botMsg.className = "flex flex-col items-start w-full animate-message-enter";
       botMsg.innerHTML = `
-        <div class="bg-white text-slate-800 text-xs rounded-xl rounded-tl-xs p-3 max-w-[96%] w-full shadow-2xs border border-slate-200/80 space-y-2">
-          <div class="flex items-center justify-between pb-1 border-b border-slate-100">
-            <span class="font-bold text-emerald-800 flex items-center gap-1.5 text-[10px]">
-              <i class="fa-solid fa-shield-halved text-emerald-600"></i> NightShift Engine
+        <div class="bg-white text-slate-900 text-xs rounded-xl rounded-tl-xs p-4 max-w-[96%] w-full shadow-xs  space-y-2.5">
+          <div class="flex items-center justify-between pb-1.5 border-b border-slate-100">
+            <span class="font-bold text-emerald-800 flex items-center gap-1.5 text-xs">
+              <i class="fa-solid fa-shield-halved text-emerald-700"></i> NightShift Engine
             </span>
-            <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">INTAKE</span>
+            <span class="px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">INTAKE</span>
           </div>
-          <p class="text-slate-700 leading-snug text-xs">
+          <p class="text-slate-700 leading-normal text-xs">
             Great! Let's configure your safe shift commute. Please share your shift details:
           </p>
-          <div class="bg-slate-50 border border-slate-200 rounded-lg p-2.5 space-y-2 font-sans" id="chat-intake-card">
+          <div class="bg-slate-50 p-3 space-y-2.5 font-sans" id="chat-intake-card">
             <div>
-              <label class="block text-[10px] font-bold text-slate-700 uppercase mb-0.5">Worker Cohort</label>
-              <select id="inchat-worker-role" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-800 font-medium focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500">
-                <option value="Hospital Nurse">🏥 Hospital Nurse / Healthcare</option>
-                <option value="Security Guard">🛡️ Night Security Guard</option>
-                <option value="Factory Operator">🏭 Factory Shift Operator</option>
-                <option value="Delivery Partner">🛵 Delivery Partner</option>
-                <option value="IT BPO Professional">💻 IT Support / BPO Commuter</option>
-                <option value="Sanitation Crew">🧹 City Sanitation Crew</option>
+              <label class="block text-xs font-bold text-slate-800 uppercase mb-1">Worker Cohort</label>
+              <select id="inchat-worker-role" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-900 font-medium focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600">
+                <option value="Hospital Nurse">Hospital Nurse / Healthcare</option>
+                <option value="Security Guard">Night Security Guard</option>
+                <option value="Factory Operator">Factory Shift Operator</option>
+                <option value="Delivery Partner">Delivery Partner</option>
+                <option value="IT BPO Professional">IT Support / BPO Commuter</option>
+                <option value="Sanitation Crew">City Sanitation Crew</option>
               </select>
             </div>
-            <div class="grid grid-cols-2 gap-1.5">
+            <div class="grid grid-cols-2 gap-2">
               <div>
-                <label class="block text-[10px] font-bold text-slate-700 uppercase mb-0.5">Shift End</label>
-                <input type="time" id="inchat-shift-end" value="02:15" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-800 font-mono font-medium focus:ring-1 focus:ring-emerald-500">
+                <label class="block text-xs font-bold text-slate-800 uppercase mb-1">Shift End</label>
+                <input type="time" id="inchat-shift-end" value="02:15" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-900 font-mono font-medium focus:ring-1 focus:ring-emerald-600">
               </div>
               <div>
-                <label class="block text-[10px] font-bold text-slate-700 uppercase mb-0.5">Target Arrival</label>
-                <input type="time" id="inchat-shift-arr" value="03:00" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-800 font-mono font-medium focus:ring-1 focus:ring-emerald-500">
+                <label class="block text-xs font-bold text-slate-800 uppercase mb-1">Target Arrival</label>
+                <input type="time" id="inchat-shift-arr" value="03:00" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-900 font-mono font-medium focus:ring-1 focus:ring-emerald-600">
               </div>
             </div>
-            <div class="space-y-1">
-              <label class="block text-[10px] font-bold text-slate-700 uppercase mb-0.5">Route Corridor</label>
+            <div class="space-y-1.5">
+              <label class="block text-xs font-bold text-slate-800 uppercase mb-1">Route Corridor</label>
               <div class="relative">
-                <span class="absolute left-2 top-1.5 text-[9px] text-amber-500"><i class="fa-solid fa-location-dot"></i></span>
-                <input type="text" id="inchat-start-loc" value="Sector 62 Tech Park" placeholder="Start Hub" class="w-full bg-white border border-slate-300 rounded pl-5 pr-2 py-1 text-xs text-slate-800 font-medium focus:ring-1 focus:ring-emerald-500">
+                <span class="absolute left-2.5 top-2 text-xs text-amber-800"><i class="fa-solid fa-location-dot"></i></span>
+                <input type="text" id="inchat-start-loc" value="Sector 62 Tech Park" placeholder="Start Hub" class="w-full bg-white border border-slate-300 rounded pl-7 pr-2.5 py-1.5 text-xs text-slate-900 font-medium focus:ring-1 focus:ring-emerald-600">
               </div>
               <div class="relative">
-                <span class="absolute left-2 top-1.5 text-[9px] text-emerald-500"><i class="fa-solid fa-route"></i></span>
-                <input type="text" id="inchat-end-loc" value="Block C Residential" placeholder="Destination" class="w-full bg-white border border-slate-300 rounded pl-5 pr-2 py-1 text-xs text-slate-800 font-medium focus:ring-1 focus:ring-emerald-500">
+                <span class="absolute left-2.5 top-2 text-xs text-emerald-800"><i class="fa-solid fa-route"></i></span>
+                <input type="text" id="inchat-end-loc" value="Block C Residential" placeholder="Destination" class="w-full bg-white border border-slate-300 rounded pl-7 pr-2.5 py-1.5 text-xs text-slate-900 font-medium focus:ring-1 focus:ring-emerald-600">
               </div>
             </div>
             <div>
-              <label class="block text-[10px] font-bold text-slate-700 uppercase mb-0.5">Transport Mode</label>
-              <select id="inchat-transport-mode" class="w-full bg-white border border-slate-300 rounded px-2 py-1 text-xs text-slate-800 font-medium focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500">
-                <option value="Cab / Auto">🚕 Last-Mile Cab / Auto</option>
-                <option value="Night Bus">🚌 Night Feeder Bus</option>
-                <option value="Two-Wheeler">🏍️ Two-Wheeler / Scooter</option>
-                <option value="Walking">🚶 Walking (Illuminated Nodes Only)</option>
+              <label class="block text-xs font-bold text-slate-800 uppercase mb-1">Transport Mode</label>
+              <select id="inchat-transport-mode" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-900 font-medium focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600">
+                <option value="Cab / Auto">Last-Mile Cab / Auto</option>
+                <option value="Night Bus">Night Feeder Bus</option>
+                <option value="Two-Wheeler">Two-Wheeler / Scooter</option>
+                <option value="Walking">Walking (Illuminated Nodes Only)</option>
               </select>
             </div>
-            <button onclick="handleInChatCommuteSubmit()" type="button" class="w-full bg-[#128C7E] hover:bg-[#0d6e63] text-white font-bold py-1.5 px-3 rounded shadow-xs hover:shadow transition flex items-center justify-center gap-1.5 cursor-pointer text-xs active:scale-95">
+            <button onclick="handleInChatCommuteSubmit()" type="button" class="w-full bg-[#0d6357] hover:bg-[#06443c] text-white font-bold py-2 px-3 rounded shadow-xs hover:shadow transition flex items-center justify-center gap-2 cursor-pointer text-xs active:scale-95">
               <i class="fa-solid fa-compass text-xs"></i> Compute & Synthesize Safe Route (Syncs to DB)
             </button>
           </div>
-          <div class="flex items-center justify-end gap-1 mt-0.5 text-[10px] text-slate-400 font-mono">
+          <div class="flex items-center justify-end gap-1 mt-1 text-xs text-slate-500 font-mono">
             <span>${time}</span>
           </div>
         </div>
@@ -563,105 +571,105 @@ function selectChatRole(role) {
       const container = document.getElementById('chat-messages-container');
       const time = getCurrentTimeStr();
       const botMsg = document.createElement('div');
-      botMsg.className = "flex flex-col items-start w-full";
+      botMsg.className = "flex flex-col items-start w-full animate-message-enter";
       botMsg.innerHTML = `
-        <div class="bg-white text-slate-800 text-xs rounded-xl rounded-tl-xs p-3.5 max-w-[98%] w-full shadow-2xs border border-amber-200/90 space-y-2.5">
+        <div class="bg-white text-slate-900 text-xs rounded-xl rounded-tl-xs p-4 max-w-[98%] w-full shadow-xs  space-y-3">
           <div class="flex items-center justify-between pb-1.5 border-b border-amber-100">
-            <span class="font-bold text-amber-800 flex items-center gap-1.5 text-[11px]">
-              <i class="fa-solid fa-shield-halved text-amber-600"></i> Route Scout Ground Truth Report
+            <span class="font-bold text-amber-900 flex items-center gap-1.5 text-xs">
+              <i class="fa-solid fa-shield-halved text-amber-700"></i> Route Scout Ground Truth Report
             </span>
-            <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-amber-100 text-amber-900 border border-amber-300">TELEMETRY INTAKE</span>
+            <span class="px-2 py-0.5 rounded-md text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300">TELEMETRY INTAKE</span>
           </div>
-          <p class="text-slate-700 leading-snug text-xs">
+          <p class="text-slate-700 leading-normal text-xs">
             Select the real-time road condition on your corridor section to anchor live commuter safety:
           </p>
-          <div class="space-y-1.5 text-xs" id="road-condition-options">
-            <label class="flex items-center p-2 rounded-lg border border-slate-200 bg-white hover:bg-emerald-50/60 hover:border-emerald-300 cursor-pointer transition">
-              <input type="radio" name="road_condition" value="safe_light" checked class="text-emerald-600 focus:ring-emerald-500 h-3.5 w-3.5 border-slate-300">
+          <div class="space-y-2 text-xs" id="road-condition-options">
+            <label class="flex items-center p-2.5 rounded-lg border border-slate-200 bg-white hover:bg-emerald-50 hover:border-emerald-400 cursor-pointer transition">
+              <input type="radio" name="road_condition" value="safe_light" checked class="text-emerald-700 focus:ring-emerald-600 h-4 w-4 border-slate-300">
               <div class="ml-2.5 flex items-center gap-2 flex-grow">
-                <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs flex-shrink-0">
+                <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-xs flex-shrink-0">
                   <i class="fa-solid fa-lightbulb"></i>
                 </span>
-                <span class="font-semibold text-slate-800 text-[11.5px] leading-tight">Road is safe and proper lighting</span>
+                <span class="font-bold text-slate-900 text-xs">Road is safe and proper lighting</span>
               </div>
-              <span class="text-[9px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded border border-emerald-200 ml-1">Safe</span>
+              <span class="text-xs font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md border border-emerald-300 ml-1">Safe</span>
             </label>
 
-            <label class="flex items-center p-2 rounded-lg border border-slate-200 bg-white hover:bg-rose-50/60 hover:border-rose-300 cursor-pointer transition">
-              <input type="radio" name="road_condition" value="unsafe" class="text-rose-600 focus:ring-rose-500 h-3.5 w-3.5 border-slate-300">
+            <label class="flex items-center p-2.5 rounded-lg border border-slate-200 bg-white hover:bg-rose-50 hover:border-rose-400 cursor-pointer transition">
+              <input type="radio" name="road_condition" value="unsafe" class="text-rose-700 focus:ring-rose-600 h-4 w-4 border-slate-300">
               <div class="ml-2.5 flex items-center gap-2 flex-grow">
-                <span class="w-6 h-6 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center text-xs flex-shrink-0">
+                <span class="w-6 h-6 rounded-full bg-rose-100 text-rose-800 flex items-center justify-center text-xs flex-shrink-0">
                   <i class="fa-solid fa-triangle-exclamation"></i>
                 </span>
-                <span class="font-semibold text-slate-800 text-[11.5px] leading-tight">Road is unsafe</span>
+                <span class="font-bold text-slate-900 text-xs">Road is unsafe</span>
               </div>
-              <span class="text-[9px] font-bold text-rose-700 bg-rose-100 px-1.5 py-0.5 rounded border border-rose-200 ml-1">Hazard</span>
+              <span class="text-xs font-bold text-rose-800 bg-rose-100 px-2 py-0.5 rounded-md border border-rose-300 ml-1">Hazard</span>
             </label>
 
-            <label class="flex items-center p-2 rounded-lg border border-slate-200 bg-white hover:bg-amber-50/60 hover:border-amber-300 cursor-pointer transition">
-              <input type="radio" name="road_condition" value="construction" class="text-amber-600 focus:ring-amber-500 h-3.5 w-3.5 border-slate-300">
+            <label class="flex items-center p-2.5 rounded-lg border border-slate-200 bg-white hover:bg-amber-50 hover:border-amber-400 cursor-pointer transition">
+              <input type="radio" name="road_condition" value="construction" class="text-amber-700 focus:ring-amber-600 h-4 w-4 border-slate-300">
               <div class="ml-2.5 flex items-center gap-2 flex-grow">
-                <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center text-xs flex-shrink-0">
+                <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-900 flex items-center justify-center text-xs flex-shrink-0">
                   <i class="fa-solid fa-person-digging"></i>
                 </span>
-                <span class="font-semibold text-slate-800 text-[11.5px] leading-tight">Road is under Construction</span>
+                <span class="font-bold text-slate-900 text-xs">Road is under Construction</span>
               </div>
-              <span class="text-[9px] font-bold text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded border border-amber-200 ml-1">Barrier</span>
+              <span class="text-xs font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded-md border border-amber-300 ml-1">Barrier</span>
             </label>
 
-            <label class="flex items-center p-2 rounded-lg border border-slate-200 bg-white hover:bg-sky-50/60 hover:border-sky-300 cursor-pointer transition">
-              <input type="radio" name="road_condition" value="water_logging" class="text-sky-600 focus:ring-sky-500 h-3.5 w-3.5 border-slate-300">
+            <label class="flex items-center p-2.5 rounded-lg border border-slate-200 bg-white hover:bg-sky-50 hover:border-sky-400 cursor-pointer transition">
+              <input type="radio" name="road_condition" value="water_logging" class="text-sky-700 focus:ring-sky-600 h-4 w-4 border-slate-300">
               <div class="ml-2.5 flex items-center gap-2 flex-grow">
-                <span class="w-6 h-6 rounded-full bg-sky-100 text-sky-800 flex items-center justify-center text-xs flex-shrink-0">
+                <span class="w-6 h-6 rounded-full bg-sky-100 text-sky-900 flex items-center justify-center text-xs flex-shrink-0">
                   <i class="fa-solid fa-water"></i>
                 </span>
-                <span class="font-semibold text-slate-800 text-[11.5px] leading-tight">Water logging</span>
+                <span class="font-bold text-slate-900 text-xs">Water logging</span>
               </div>
-              <span class="text-[9px] font-bold text-sky-800 bg-sky-100 px-1.5 py-0.5 rounded border border-sky-200 ml-1">Flood</span>
+              <span class="text-xs font-bold text-sky-900 bg-sky-100 px-2 py-0.5 rounded-md border border-sky-300 ml-1">Flood</span>
             </label>
           </div>
 
           <!-- Photo Proof Submission Section -->
-          <div class="bg-slate-50 border border-slate-200 rounded-lg p-2.5 space-y-2">
+          <div class="bg-slate-50 p-3 space-y-2">
             <div class="flex items-center justify-between">
-              <span class="text-[10.5px] font-bold text-slate-700 uppercase tracking-wide flex items-center gap-1.5">
-                <i class="fa-solid fa-camera text-emerald-600"></i> Submit a photo as proof
+              <span class="text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
+                <i class="fa-solid fa-camera text-emerald-700"></i> Submit a photo as proof
               </span>
-              <span class="text-[9px] text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">Required Proof</span>
+              <span class="text-xs text-emerald-800 font-bold bg-emerald-100 px-2 py-0.5 rounded-md border border-emerald-300">Required Proof</span>
             </div>
 
-            <div class="border-2 border-dashed border-slate-300 rounded-lg p-2 bg-white flex flex-col items-center justify-center text-center gap-1.5 hover:border-emerald-500 transition cursor-pointer relative" onclick="triggerMockPhotoCycle()">
-              <div class="flex items-center gap-2.5 w-full">
+            <div class="border-2 border-dashed border-slate-300 rounded-lg p-2.5 bg-white flex flex-col items-center justify-center text-center gap-2 hover:border-emerald-600 transition cursor-pointer relative" onclick="triggerMockPhotoCycle()">
+              <div class="flex items-center gap-3 w-full">
                 <div class="w-14 h-12 rounded border border-slate-200 overflow-hidden bg-slate-900 flex-shrink-0 relative group shadow-2xs">
                   <img id="scout-preview-img" src="${selectedProofImage}" class="w-full h-full object-cover" alt="Proof Preview">
-                  <span class="absolute bottom-0 inset-x-0 bg-slate-950/70 text-[8px] text-white text-center font-mono py-0.5">REC 02:30</span>
+                  <span class="absolute bottom-0 inset-x-0 bg-slate-950/80 text-xs text-white text-center font-mono py-0.5">REC 02:30</span>
                 </div>
                 <div class="text-left flex-grow">
-                  <div class="text-[11px] font-bold text-slate-800 flex items-center gap-1" id="scout-preview-title">
-                    <i class="fa-solid fa-circle-check text-emerald-600 text-[10px]"></i> photo_proof_corridor_cam02.jpg
+                  <div class="text-xs font-bold text-slate-900 flex items-center gap-1" id="scout-preview-title">
+                    <i class="fa-solid fa-circle-check text-emerald-700 text-xs"></i> photo_proof_corridor_cam02.jpg
                   </div>
-                  <div class="text-[10px] text-slate-500 mt-0.5 flex items-center gap-2">
+                  <div class="text-xs text-slate-500 mt-0.5 flex items-center gap-2">
                     <span>Geo-stamp: 28.629° N, 77.369° E</span>
-                    <span class="text-emerald-700 font-semibold cursor-pointer underline hover:text-emerald-800">Tap to cycle snapshot</span>
+                    <span class="text-emerald-800 font-bold cursor-pointer underline hover:text-emerald-900">Tap to cycle snapshot</span>
                   </div>
                 </div>
-                <button type="button" class="bg-slate-100 hover:bg-slate-200 text-slate-700 p-1.5 rounded-md text-xs border border-slate-200 flex-shrink-0" title="Snap live camera">
-                  <i class="fa-solid fa-camera-rotate text-slate-600"></i>
+                <button type="button" class="bg-slate-100 hover:bg-slate-200 text-slate-700 p-2 rounded-md text-xs border border-slate-200 flex-shrink-0" title="Snap live camera">
+                  <i class="fa-solid fa-camera-rotate text-slate-700"></i>
                 </button>
               </div>
             </div>
 
             <div>
-              <label class="block text-[10px] font-bold text-slate-600 uppercase mb-0.5">Optional Landmark Note</label>
-              <input type="text" id="scout-optional-note" placeholder="e.g. Near Bypass East ramp pole #14, streetlamps operating at 100%" class="w-full bg-white border border-slate-300 rounded px-2.5 py-1 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500">
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Optional Landmark Note</label>
+              <input type="text" id="scout-optional-note" placeholder="e.g. Near Bypass East ramp pole #14, streetlamps operating at 100%" class="w-full bg-white border border-slate-300 rounded px-3 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600">
             </div>
           </div>
 
-          <button onclick="handleProviderGroundTruthSubmit()" type="button" class="w-full bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 hover:to-amber-800 text-white font-bold py-2 px-3 rounded-lg shadow-sm hover:shadow transition flex items-center justify-center gap-2 cursor-pointer text-xs active:scale-95">
+          <button onclick="handleProviderGroundTruthSubmit()" type="button" class="w-full bg-amber-700 hover:bg-amber-800 text-white font-bold py-2.5 px-3 rounded-lg shadow-xs hover:shadow transition flex items-center justify-center gap-2 cursor-pointer text-xs active:scale-95">
             <i class="fa-solid fa-bolt text-amber-200"></i> Submit Ground-Truth Intel to Supabase (+25 pts)
           </button>
 
-          <div class="flex items-center justify-end gap-1 mt-0.5 text-[10px] text-slate-400 font-mono">
+          <div class="flex items-center justify-end gap-1 mt-1 text-xs text-slate-500 font-mono">
             <span>${time}</span>
           </div>
         </div>
@@ -692,7 +700,7 @@ function triggerMockPhotoCycle() {
   const nextIdx = (samples.findIndex(s => s.name === (currentTitle ? currentTitle.textContent.trim().replace(/^.*photo/, 'photo') : '')) + 1) % samples.length;
   const chosen = samples[nextIdx];
   if (currentImg) currentImg.src = chosen.svg;
-  if (currentTitle) currentTitle.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 text-[10px]"></i> ${chosen.name}`;
+  if (currentTitle) currentTitle.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-800 text-xs"></i> ${chosen.name}`;
   selectedProofImage = chosen.svg;
 }
 
@@ -714,19 +722,19 @@ async function handleProviderGroundTruthSubmit() {
 
   if (selectedCondition === 'safe_light') {
     conditionText = "Road is safe and proper lighting";
-    conditionBadge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300"><i class="fa-solid fa-lightbulb"></i> Road Safe & Proper Lighting</span>`;
+    conditionBadge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300"><i class="fa-solid fa-lightbulb"></i> Road Safe & Proper Lighting</span>`;
     impactDesc = "Corridor lighting raised to 92%. Active patrolled lane verified.";
   } else if (selectedCondition === 'unsafe') {
     conditionText = "Road is unsafe";
-    conditionBadge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300"><i class="fa-solid fa-triangle-exclamation"></i> Road is Unsafe</span>`;
+    conditionBadge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-rose-100 text-rose-800 border border-rose-300"><i class="fa-solid fa-triangle-exclamation"></i> Road is Unsafe</span>`;
     impactDesc = "Caution alert pushed to active commuters. Direct escort waypoint active.";
   } else if (selectedCondition === 'construction') {
     conditionText = "Road is under Construction";
-    conditionBadge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300"><i class="fa-solid fa-person-digging"></i> Road Under Construction</span>`;
+    conditionBadge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300"><i class="fa-solid fa-person-digging"></i> Road Under Construction</span>`;
     impactDesc = "Arterial detour via Central Square engaged. Avoid pedestrian lane.";
   } else {
     conditionText = "Water logging";
-    conditionBadge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-sky-100 text-sky-800 border border-sky-300"><i class="fa-solid fa-water"></i> Water Logging Hazard</span>`;
+    conditionBadge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-sky-100 text-sky-800 border border-sky-300"><i class="fa-solid fa-water"></i> Water Logging Hazard</span>`;
     impactDesc = "Surface water warning broadcasted. Two-wheelers advised to take elevated flyover.";
   }
 
@@ -734,26 +742,26 @@ async function handleProviderGroundTruthSubmit() {
   const container = document.getElementById('chat-messages-container');
   const time = getCurrentTimeStr();
   const userMsg = document.createElement('div');
-  userMsg.className = "flex flex-col items-end w-full";
+  userMsg.className = "flex flex-col items-end w-full animate-message-enter";
   userMsg.innerHTML = `
     <div class="bg-[#d9fdd3] text-slate-800 text-xs rounded-xl rounded-tr-xs p-3 max-w-[88%] shadow-2xs border border-emerald-200/80 space-y-2">
       <div class="flex items-center justify-between gap-2">
-        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Route Observation Filed</span>
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">Route Observation Filed</span>
         ${conditionBadge}
       </div>
       <div class="text-[11.5px] font-semibold text-slate-900">${conditionText}</div>
-      <div class="bg-white/80 rounded-lg p-2 border border-emerald-200/70 flex items-center gap-2.5">
+      <div class="bg-white/80 p-2 flex items-center gap-2.5">
         <div class="w-16 h-12 rounded border border-slate-300 overflow-hidden bg-slate-900 flex-shrink-0 shadow-2xs">
           <img src="${selectedProofImage}" class="w-full h-full object-cover" alt="Attached Proof">
         </div>
         <div class="text-left text-[10.5px]">
           <div class="font-bold text-slate-800">📸 Photo Proof Attached</div>
-          <div class="text-slate-500 text-[10px] font-mono mt-0.5">Note: "${note}"</div>
+          <div class="text-slate-500 text-xs font-mono mt-0.5">Note: "${note}"</div>
         </div>
       </div>
-      <div class="flex items-center justify-end gap-1 mt-1 text-[10px] text-slate-500 font-mono">
+      <div class="flex items-center justify-end gap-1 mt-1 text-xs text-slate-500 font-mono">
         <span>${time}</span>
-        <i class="fa-solid fa-check-double text-sky-600 text-[11px]"></i>
+        <i class="fa-solid fa-check-double text-sky-600 text-xs"></i>
       </div>
     </div>
   `;
@@ -787,55 +795,55 @@ async function handleProviderGroundTruthSubmit() {
     console.warn('Error saving report to API:', e);
   }
 
-  // Acknowledgment message from NightShift Assistant
+  // Ack
   setTimeout(() => {
     const time2 = getCurrentTimeStr();
     const botMsg = document.createElement('div');
-    botMsg.className = "flex flex-col items-start w-full space-y-1.5";
+    botMsg.className = "flex flex-col items-start w-full space-y-2 animate-message-enter";
     botMsg.innerHTML = `
-      <div class="bg-white text-slate-800 text-xs rounded-xl rounded-tl-xs p-3.5 max-w-[96%] w-full shadow-2xs border border-emerald-200/90 space-y-2">
+      <div class="bg-white text-slate-900 text-xs rounded-xl rounded-tl-xs p-4 max-w-[96%] w-full shadow-xs  space-y-2.5">
         <div class="flex items-center justify-between pb-1.5 border-b border-slate-100">
-          <span class="font-bold text-emerald-800 flex items-center gap-1.5 text-[10.5px]">
-            <i class="fa-solid fa-shield-halved text-emerald-600"></i> NightShift Engine
+          <span class="font-bold text-emerald-800 flex items-center gap-1.5 text-xs">
+            <i class="fa-solid fa-shield-halved text-emerald-700"></i> NightShift Engine
           </span>
-          <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">KNOWN • STORED IN SUPABASE</span>
+          <span class="px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">KNOWN • STORED IN SUPABASE</span>
         </div>
 
         <div class="space-y-1">
-          <p class="text-slate-800 text-xs font-semibold flex items-center gap-1.5">
-            <i class="fa-solid fa-circle-check text-emerald-600"></i> Photo proof verified & telemetry broadcasted!
+          <p class="text-slate-900 text-xs font-bold flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-check text-emerald-700"></i> Photo proof verified & telemetry broadcasted!
           </p>
-          <p class="text-[11px] text-slate-600 leading-relaxed">
+          <p class="text-xs text-slate-700 leading-relaxed">
             Your ground-truth report has anchored the live safety graph for <strong>1,428 active night commuters</strong>. ${impactDesc}
           </p>
         </div>
 
-        <div class="bg-emerald-50/70 rounded-lg p-2.5 border border-emerald-200/80 text-[11px] space-y-1">
+        <div class="bg-emerald-50 p-3 text-xs space-y-1.5">
           <div class="flex justify-between items-center">
-            <span class="text-emerald-900 font-semibold">Epistemic Status:</span>
-            <span class="font-mono font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.2 rounded border border-emerald-200">[KNOWN] DB Ground Truth</span>
+            <span class="text-emerald-950 font-semibold">Epistemic Status:</span>
+            <span class="font-mono font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-300">[KNOWN] DB Ground Truth</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-emerald-900 font-semibold">Reputation Awarded:</span>
-            <span class="font-bold text-amber-700 flex items-center gap-1"><i class="fa-solid fa-trophy text-amber-500"></i> +25 Scout Points</span>
+            <span class="text-emerald-950 font-semibold">Reputation Awarded:</span>
+            <span class="font-bold text-amber-900 flex items-center gap-1"><i class="fa-solid fa-trophy text-amber-800"></i> +25 Scout Points</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-emerald-900 font-semibold">Total Scout Rep:</span>
-            <span class="font-mono font-bold text-slate-800">${scoutRepScore} pts (Rank #4)</span>
+            <span class="text-emerald-950 font-semibold">Total Scout Rep:</span>
+            <span class="font-mono font-bold text-slate-900">${scoutRepScore} pts (Rank #4)</span>
           </div>
         </div>
 
-        <div class="flex items-center justify-end gap-1 mt-0.5 text-[10px] text-slate-400 font-mono">
+        <div class="flex items-center justify-end gap-1 mt-1 text-xs text-slate-500 font-mono">
           <span>${time2}</span>
         </div>
       </div>
 
       <div class="flex flex-wrap gap-1.5 pt-0.5 max-w-[96%]">
-        <button class="bg-white hover:bg-amber-50 text-amber-800 border border-amber-300 px-2.5 py-1 rounded-full text-[10px] font-semibold transition shadow-2xs flex items-center gap-1 cursor-pointer" onclick="selectChatRole('provider')">
-          <i class="fa-solid fa-plus text-amber-600 text-[10px]"></i> Log Another Spot
+        <button class="bg-white hover:bg-amber-50 text-amber-900 border border-amber-300 px-3 py-1.5 rounded-full text-xs font-semibold transition shadow-xs flex items-center gap-1 cursor-pointer" onclick="selectChatRole('provider')">
+          <i class="fa-solid fa-plus text-amber-700 text-xs"></i> Log Another Spot
         </button>
-        <button class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-1 rounded-full text-[10px] font-semibold transition shadow-2xs flex items-center gap-1 cursor-pointer" onclick="selectChatRole('consumer')">
-          <i class="fa-solid fa-route text-sky-600 text-[10px]"></i> View Safe Corridor
+        <button class="bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 px-3 py-1.5 rounded-full text-xs font-semibold transition shadow-xs flex items-center gap-1 cursor-pointer" onclick="selectChatRole('consumer')">
+          <i class="fa-solid fa-route text-sky-700 text-xs"></i> View Safe Corridor
         </button>
       </div>
     `;
@@ -857,7 +865,7 @@ async function handleInChatCommuteSubmit() {
 
   // Update central dashboard plan
   const badge = document.getElementById('badge-status');
-  badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300";
+  badge.className = "px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300";
   badge.textContent = "KNOWN • OPTIMIZED CORRIDOR ACTIVE";
 
   document.getElementById('plan-title').textContent = `${endVal} Shift Departure: ${startLoc} → ${endLoc}`;
@@ -892,53 +900,53 @@ async function handleInChatCommuteSubmit() {
     const container = document.getElementById('chat-messages-container');
     const time = getCurrentTimeStr();
     const botMsg = document.createElement('div');
-    botMsg.className = "flex flex-col items-start w-full space-y-1.5";
+    botMsg.className = "flex flex-col items-start w-full space-y-2 animate-message-enter";
 
     botMsg.innerHTML = `
-      <div class="bg-white text-slate-800 text-xs rounded-xl rounded-tl-xs p-3 max-w-[95%] shadow-2xs border border-slate-200/80 space-y-1.5">
-        <div class="flex items-center justify-between pb-1 border-b border-slate-100">
-          <span class="font-bold text-emerald-800 flex items-center gap-1 text-[10px]">
-            <i class="fa-solid fa-shield-halved text-emerald-600"></i> NightShift Engine
+      <div class="bg-white text-slate-900 text-xs rounded-xl rounded-tl-xs p-3.5 max-w-[95%] shadow-xs  space-y-2">
+        <div class="flex items-center justify-between pb-1.5 border-b border-slate-100">
+          <span class="font-bold text-emerald-800 flex items-center gap-1 text-xs">
+            <i class="fa-solid fa-shield-halved text-emerald-700"></i> NightShift Engine
           </span>
-          <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">KNOWN</span>
+          <span class="px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">KNOWN</span>
         </div>
-        <p class="text-slate-700 leading-snug text-xs">
-          Safe route synthesized for <strong>${role}</strong>. Avoid bypass underpass. Recommended: <strong class="text-slate-900">Patrolled Arterial Corridor</strong>.
+        <p class="text-slate-800 leading-normal text-xs">
+          Safe route synthesized for <strong>${role}</strong>. Avoid bypass underpass. Recommended: <strong class="text-slate-950 font-bold">Patrolled Arterial Corridor</strong>.
         </p>
 
-        <div class="bg-slate-50 rounded-lg p-2 border border-slate-200 space-y-1 font-sans text-[11px]">
+        <div class="bg-slate-50 p-2.5 space-y-1.5 font-sans text-xs">
           <div class="flex items-center justify-between">
-            <span class="text-slate-500 font-medium">Route:</span>
+            <span class="text-slate-600 font-medium">Route:</span>
             <span class="font-bold text-slate-900">Arterial Corridor (45m ETA)</span>
           </div>
           <div class="flex items-center justify-between">
-            <span class="text-slate-500 font-medium">Risk Assessment:</span>
-            <span class="font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">Low [KNOWN]</span>
+            <span class="text-slate-600 font-medium">Risk Assessment:</span>
+            <span class="font-bold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">Low [KNOWN]</span>
           </div>
           <div class="flex items-center justify-between">
-            <span class="text-slate-500 font-medium">Live Transport:</span>
-            <span class="font-bold text-amber-800">2 Cabs Nearby</span>
+            <span class="text-slate-600 font-medium">Live Transport:</span>
+            <span class="font-bold text-amber-900">2 Cabs Nearby</span>
           </div>
           <div class="flex items-center justify-between">
-            <span class="text-slate-500 font-medium">Haven:</span>
-            <span class="text-slate-800 font-semibold">Apollo 24/7 (0.8 km)</span>
+            <span class="text-slate-600 font-medium">Haven:</span>
+            <span class="text-slate-900 font-bold">Apollo 24/7 (0.8 km)</span>
           </div>
         </div>
 
-        <div class="flex items-center justify-end gap-1 mt-0.5 text-[10px] text-slate-400 font-mono">
+        <div class="flex items-center justify-end gap-1 mt-1 text-xs text-slate-500 font-mono">
           <span>${time}</span>
         </div>
       </div>
 
-      <div class="flex flex-wrap gap-1 pt-0.5 max-w-[95%]">
-        <button class="bg-white/95 hover:bg-emerald-50 text-emerald-800 border border-emerald-300/80 px-2 py-1 rounded-full text-[10px] font-semibold transition shadow-2xs flex items-center gap-1 cursor-pointer" onclick="handleQuickReply('Request Live Escort Ping')">
-          <i class="fa-solid fa-satellite-dish text-emerald-600 text-[10px]"></i> Escort Ping
+      <div class="flex flex-wrap gap-1.5 pt-0.5 max-w-[95%]">
+        <button class="bg-white hover:bg-emerald-50 text-emerald-900 border border-emerald-300 px-2.5 py-1 rounded-full text-xs font-semibold transition shadow-xs flex items-center gap-1 cursor-pointer" onclick="handleQuickReply('Request Live Escort Ping')">
+          <i class="fa-solid fa-satellite-dish text-emerald-700 text-xs"></i> Escort Ping
         </button>
-        <button class="bg-white/95 hover:bg-sky-50 text-sky-800 border border-sky-300/80 px-2 py-1 rounded-full text-[10px] font-semibold transition shadow-2xs flex items-center gap-1 cursor-pointer" onclick="handleQuickReply('Find Nearest 24/7 ER')">
-          <i class="fa-solid fa-kit-medical text-sky-600 text-[10px]"></i> Nearest ER
+        <button class="bg-white hover:bg-sky-50 text-sky-900 border border-sky-300 px-2.5 py-1 rounded-full text-xs font-semibold transition shadow-xs flex items-center gap-1 cursor-pointer" onclick="handleQuickReply('Find Nearest 24/7 ER')">
+          <i class="fa-solid fa-kit-medical text-sky-700 text-xs"></i> Nearest ER
         </button>
-        <button class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 px-2 py-1 rounded-full text-[10px] font-semibold transition shadow-2xs flex items-center gap-1 cursor-pointer" onclick="handleQuickReply('Share Live SOS Location')">
-          <i class="fa-solid fa-location-arrow text-rose-600 text-[10px]"></i> SOS Location
+        <button class="bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-300 px-2.5 py-1 rounded-full text-xs font-semibold transition shadow-xs flex items-center gap-1 cursor-pointer" onclick="handleQuickReply('Share Live SOS Location')">
+          <i class="fa-solid fa-location-arrow text-rose-700 text-xs"></i> SOS Location
         </button>
       </div>
     `;
@@ -960,7 +968,7 @@ function processBotResponse(query) {
   } else if (q.includes('safety') || q.includes('route') || q.includes('escort')) {
     sendBotMessage(`
       <strong>Active Route Verification:</strong>
-      <div class="mt-1 bg-slate-50 p-2 rounded border border-slate-200 space-y-1">
+      <div class="mt-1 bg-slate-50 p-2 rounded  space-y-1">
         <div>🛣️ <strong>Recommended:</strong> Patrolled Arterial Corridor (Well-lit, 2 active PCR units)</div>
         <div>⚠️ <strong>Avoid:</strong> Underpass Bypass Rd (50% Dimmed [PROBABLE])</div>
         <div>👮 <strong>Nearest Security Node:</strong> Central Square Booth (300m)</div>
@@ -997,57 +1005,57 @@ function resetWhatsAppChat() {
   const time = getCurrentTimeStr();
   container.innerHTML = `
     <div class="flex justify-center my-0.5">
-      <span class="text-[10px] font-semibold tracking-wider text-slate-500 bg-white/85 shadow-2xs backdrop-blur-xs px-2.5 py-0.5 rounded-full uppercase border border-slate-200/50">
+      <span class="text-xs font-semibold tracking-wider text-slate-900 bg-white shadow-xs px-3 py-1 rounded-full uppercase border border-slate-300 font-bold">
         Shift Safe Channel • Live
       </span>
     </div>
 
     <div class="flex flex-col items-start w-full">
-      <div class="bg-white text-slate-800 text-xs rounded-xl rounded-tl-xs p-3.5 max-w-[96%] w-full shadow-2xs border border-slate-200/80 space-y-2.5">
+      <div class="bg-white text-slate-900 text-xs rounded-xl rounded-tl-xs p-4 max-w-[96%] w-full shadow-xs  space-y-3">
         <div class="flex items-center justify-between pb-1.5 border-b border-slate-100">
-          <span class="font-bold text-emerald-800 flex items-center gap-1.5 text-[10px]">
-            <i class="fa-solid fa-shield-halved text-emerald-600"></i> NightShift Engine
+          <span class="font-bold text-emerald-800 flex items-center gap-1.5 text-xs">
+            <i class="fa-solid fa-shield-halved text-emerald-700"></i> NightShift Engine
           </span>
-          <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">LIVE</span>
+          <span class="px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">LIVE</span>
         </div>
 
-        <p class="text-slate-800 leading-relaxed text-xs">
-          Hello! Welcome to <strong class="text-slate-900 font-bold">NightShift Operations</strong>. Are you joining as a <strong class="text-emerald-700">Provider (Route Scout)</strong> or a <strong class="text-emerald-700">Consumer</strong> tonight?
+        <p class="text-slate-800 leading-normal text-xs">
+          Hello! Welcome to <strong class="text-slate-950 font-bold">NightShift Operations</strong>. Are you joining as a <strong class="text-emerald-800 font-bold">Provider (Route Scout)</strong> or a <strong class="text-emerald-800 font-bold">Consumer</strong> tonight?
         </p>
 
-        <div class="grid grid-cols-1 gap-2 pt-1">
-          <button onclick="selectChatRole('consumer')" class="text-left p-2.5 rounded-lg border-2 border-emerald-500/80 bg-emerald-50/70 hover:bg-emerald-100/70 transition shadow-2xs group cursor-pointer">
+        <div class="grid grid-cols-1 gap-2.5 pt-1">
+          <button onclick="selectChatRole('consumer')" class="text-left p-3 rounded-lg border-2 border-emerald-500 bg-emerald-50 hover:bg-emerald-100 transition shadow-xs group cursor-pointer active:scale-98">
             <div class="flex items-start gap-2.5">
-              <div class="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-sm flex-shrink-0 shadow-xs group-hover:scale-105 transition">
+              <span class="w-8 h-8 rounded-md bg-emerald-700 text-white flex items-center justify-center font-bold text-sm flex-shrink-0 shadow-xs">
                 <i class="fa-solid fa-users"></i>
-              </div>
+              </span>
               <div class="flex-grow">
                 <div class="flex items-center justify-between">
-                  <div class="font-bold text-xs text-slate-900">Join as Consumer</div>
-                  <span class="text-[9px] font-bold text-emerald-800 bg-emerald-200/80 px-1.5 py-0.2 rounded">Select</span>
+                  <div class="font-bold text-xs text-slate-950">Join as Consumer</div>
+                  <span class="text-xs font-bold text-emerald-900 bg-emerald-200 px-2 py-0.2 rounded">Select</span>
                 </div>
-                <p class="text-[10.5px] text-slate-600 mt-0.5 leading-snug">Commuter / Night worker requesting safe corridor & live telemetry</p>
+                <p class="text-xs text-slate-700 mt-0.5 leading-snug">Commuter or night worker requesting safe corridor routing & live telemetry</p>
               </div>
             </div>
           </button>
 
-          <button onclick="selectChatRole('provider')" class="text-left p-2.5 rounded-lg border-2 border-amber-400 bg-amber-50/60 hover:bg-amber-100/70 transition shadow-2xs group cursor-pointer">
+          <button onclick="selectChatRole('provider')" class="text-left p-3 rounded-lg border-2 border-amber-400 bg-amber-50 hover:bg-amber-100 transition shadow-xs group cursor-pointer active:scale-98">
             <div class="flex items-start gap-2.5">
-              <div class="w-8 h-8 rounded-lg bg-amber-500 text-slate-950 flex items-center justify-center font-bold text-sm flex-shrink-0 shadow-xs group-hover:scale-105 transition">
+              <span class="w-8 h-8 rounded-md bg-amber-700 text-white flex items-center justify-center font-bold text-sm flex-shrink-0 shadow-xs">
                 <i class="fa-solid fa-bolt"></i>
-              </div>
+              </span>
               <div class="flex-grow">
                 <div class="flex items-center justify-between">
-                  <div class="font-bold text-xs text-slate-900">Join as Provider (Route Scout)</div>
-                  <span class="text-[9px] font-bold text-amber-800 bg-amber-200/80 px-1.5 py-0.2 rounded">Select</span>
+                  <div class="font-bold text-xs text-slate-950">Join as Provider (Route Scout)</div>
+                  <span class="text-xs font-bold text-amber-900 bg-amber-200 px-2 py-0.2 rounded">Select</span>
                 </div>
-                <p class="text-[10.5px] text-slate-600 mt-0.5 leading-snug">Community Route Scout / Contributor: Share road updates, lighting status, open havens & journey experiences</p>
+                <p class="text-xs text-slate-700 mt-0.5 leading-snug">Community Route Scout: Share live road conditions, lighting, open havens & hazards</p>
               </div>
             </div>
           </button>
         </div>
 
-        <div class="flex items-center justify-end gap-1 mt-1 text-[10px] text-slate-400 font-mono">
+        <div class="flex items-center justify-end gap-1 mt-1 text-xs text-slate-500 font-mono">
           <span>${time}</span>
         </div>
       </div>
