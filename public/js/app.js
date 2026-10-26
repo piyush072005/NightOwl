@@ -951,8 +951,46 @@ async function handleInChatCommuteSubmit() {
   }, 600);
 }
 
-function processBotResponse(query) {
+async function processBotResponse(query) {
   const q = query.toLowerCase();
+
+  // If Emergency SOS explicitly mentioned, open emergency modal immediately
+  if (q.includes('sos') || q.includes('emergency broadcast') || q.includes('panic')) {
+    triggerEmergencySOS();
+    sendBotMessage(`
+      <strong class="text-rose-700">🚨 EMERGENCY PROTOCOL TRIGGERED:</strong>
+      <p class="mt-1 text-slate-700">Connecting directly to Police PCR #4 (0.3 km away) and Lifeline Emergency Clinic. Your current GPS telemetry is transmitted.</p>
+    `, true, "KNOWN");
+    return;
+  }
+
+  // Call the server-side map-aware intelligence engine
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: query,
+        userLocation: currentUserLocation,
+        context: { activeRoute: currentActiveRoute }
+      })
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      sendBotMessage(data.text, true, data.tag || "KNOWN");
+
+      // Synchronize map with chatbot recommendation
+      if (data.mapAction) {
+        executeMapAction(data.mapAction);
+      }
+      return;
+    }
+  } catch (err) {
+    console.warn('[ChatBot] Server-side chat query failed, using local fallback:', err.message);
+  }
+
+  // Local fallback keyword handler
   if (q.includes('pharmacy') || q.includes('medicine') || q.includes('chemist')) {
     sendBotMessage(`
       <strong>Verified 24/7 Pharmacies On-Route:</strong>
@@ -961,10 +999,11 @@ function processBotResponse(query) {
         <li><strong class="text-slate-800">MedPlus Express</strong>: Metro Gate 2 (1.6 km) - Open</li>
       </ul>
     `, true, "KNOWN");
+    if (typeof toggleMapLayer === 'function') toggleMapLayer('pharmacy', true);
   } else if (q.includes('safety') || q.includes('route') || q.includes('escort')) {
     sendBotMessage(`
       <strong>Active Route Verification:</strong>
-      <div class="mt-1 bg-slate-50 p-2 rounded  space-y-1">
+      <div class="mt-1 bg-slate-50 p-2 rounded space-y-1">
         <div>🛣️ <strong>Recommended:</strong> Patrolled Arterial Corridor (Well-lit, 2 active PCR units)</div>
         <div>⚠️ <strong>Avoid:</strong> Underpass Bypass Rd (50% Dimmed [PROBABLE])</div>
         <div>👮 <strong>Nearest Security Node:</strong> Central Square Booth (300m)</div>
@@ -975,12 +1014,6 @@ function processBotResponse(query) {
       <strong>Night Transit Availability Radar:</strong>
       <p class="mt-1 text-slate-600">🚖 <strong>2 App Cabs Available</strong> within 4 mins of Sector 62 Hub. Night bus #414 frequency is reduced (next arrival at 03:20 AM).</p>
     `, true, "PROBABLE");
-  } else if (q.includes('sos') || q.includes('emergency') || q.includes('help')) {
-    triggerEmergencySOS();
-    sendBotMessage(`
-      <strong class="text-rose-700">🚨 EMERGENCY PROTOCOL TRIGGERED:</strong>
-      <p class="mt-1 text-slate-700">Connecting directly to Police PCR #4 (0.3 km away) and Lifeline Emergency Clinic. Your current GPS telemetry is transmitted.</p>
-    `, true, "KNOWN");
   } else if (q.includes('er') || q.includes('clinic') || q.includes('hospital')) {
     sendBotMessage(`
       <strong>Nearest 24/7 Emergency Rooms:</strong>
@@ -989,6 +1022,7 @@ function processBotResponse(query) {
         🚑 Direct Ambulance Line: +1 800-NIGHT-ER
       </div>
     `, true, "KNOWN");
+    if (typeof toggleMapLayer === 'function') toggleMapLayer('hospital', true);
   } else {
     sendBotMessage(`
       Telemetry verified for <strong class="text-slate-800">Sector 62 to Block C</strong> corridor. Checkpoints recorded in Supabase, and 2 emergency havens remain open.
@@ -1221,10 +1255,862 @@ ALTER PUBLICATION supabase_realtime ADD TABLE scout_reports, sos_alerts, commute
 }
 
 // ==========================================
+// DELHI INTERACTIVE SAFETY & MOBILITY MAP ENGINE
+// ==========================================
+
+/**
+ * Safely escapes HTML special characters.
+ */
+function escapeHtml(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+let delhiMap = null;
+let mapLayers = {
+  metro: null,
+  bus: null,
+  hospital: null,
+  pharmacy: null,
+  police: null,
+  ev_charging: null,
+  hazard: null,
+  live_buses: null
+};
+let activeLayersState = {
+  metro: true,
+  bus: true,
+  hospital: true,
+  pharmacy: true,
+  police: true,
+  ev_charging: true,
+  hazard: true,
+  live_buses: false
+};
+
+const liveBusMarkers = new Map();
+let liveBusPollingTimer = null;
+const BUS_POLL_INTERVAL_MS = 15000;
+
+let routePolylineLayers = [];
+let routeMarkerLayers = [];
+let userLocationMarker = null;
+let currentUserLocation = null;
+let currentActiveRoute = null;
+let currentRouteAlternatives = [];
+let selectedRouteIndex = 0;
+
+/**
+ * Initializes the Leaflet map centered on Delhi NCR.
+ */
+function initDelhiMap() {
+  const mapContainer = document.getElementById('delhi-map');
+  if (!mapContainer) return;
+  if (delhiMap) return; // Prevent duplicate initialization
+
+  if (typeof L === 'undefined') {
+    console.error('Leaflet library (L) is not loaded.');
+    updateMapStatusPill('Leaflet library not ready', 'rose');
+    return;
+  }
+
+  try {
+    // Delhi NCR Center: 28.6139° N, 77.2090° E (Central Delhi)
+    delhiMap = L.map('delhi-map', {
+      center: [28.6139, 77.2090],
+      zoom: 12,
+      minZoom: 10,
+      maxZoom: 18,
+      zoomControl: true
+    });
+
+    // OpenStreetMap standard tile layer
+    const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors • DMRC &amp; Delhi OTD',
+      maxZoom: 19
+    }).addTo(delhiMap);
+
+    tileLayer.on('tileerror', function() {
+      console.warn('OSM Tile load warning — connection slow or offline');
+      updateMapStatusPill('Offline Tile Cache', 'amber');
+    });
+
+    // Initialize layer groups for facilities & live buses
+    for (const key of Object.keys(activeLayersState)) {
+      mapLayers[key] = L.layerGroup();
+      if (activeLayersState[key]) {
+        mapLayers[key].addTo(delhiMap);
+      }
+    }
+
+    // Force Leaflet to recalculate container dimensions once rendered
+    setTimeout(() => { if (delhiMap) delhiMap.invalidateSize(); }, 200);
+    setTimeout(() => { if (delhiMap) delhiMap.invalidateSize(); }, 600);
+
+    window.addEventListener('resize', () => {
+      if (delhiMap) delhiMap.invalidateSize();
+    });
+
+    // Load facility markers across Delhi
+    loadDelhiMapPlaces();
+
+    // Trigger an initial preview route calculation between Sector 62 and Connaught Place
+    setTimeout(() => {
+      calculateAndRenderMapRoute('Noida Sector 62', 'Connaught Place', 'driving', false);
+    }, 400);
+
+    updateMapStatusPill('OpenStreetMap Live Active', 'emerald');
+  } catch (err) {
+    console.error('Failed to initialize Delhi map:', err);
+    updateMapStatusPill('Map initialization error', 'rose');
+  }
+}
+
+/**
+ * Updates the map status badge pill in the card header.
+ */
+function updateMapStatusPill(statusText, variant = 'emerald') {
+  const pill = document.getElementById('map-status-pill');
+  if (!pill) return;
+  
+  if (variant === 'emerald') {
+    pill.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300';
+    pill.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> ${escapeHtml(statusText)}`;
+  } else if (variant === 'amber') {
+    pill.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300';
+    pill.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> ${escapeHtml(statusText)}`;
+  } else {
+    pill.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300';
+    pill.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> ${escapeHtml(statusText)}`;
+  }
+}
+
+/**
+ * Creates SVG DivIcons for map markers.
+ */
+function createCustomMarkerIcon(category, iconClass, bgColor, textColor = 'text-white', size = 26) {
+  const html = `
+    <div class="custom-map-icon ${bgColor} ${textColor}" style="width: ${size}px; height: ${size}px;">
+      <i class="fa-solid ${iconClass}" style="font-size: ${Math.round(size * 0.44)}px;"></i>
+    </div>
+  `;
+  return L.divIcon({
+    html,
+    className: 'custom-leaflet-divicon',
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+    popupAnchor: [0, -size / 2]
+  });
+}
+
+/**
+ * Loads Delhi places & safety checkpoints from backend.
+ */
+async function loadDelhiMapPlaces() {
+  try {
+    const res = await fetch('/api/geospatial/nearby?lat=28.6139&lng=77.2090&category=all&radius=35&limit=100');
+    if (!res.ok) throw new Error('API returned ' + res.status);
+    const data = await res.json();
+    const places = data.results || [];
+
+    // Clear all existing facility layers
+    for (const key of Object.keys(mapLayers)) {
+      if (mapLayers[key]) mapLayers[key].clearLayers();
+    }
+
+    places.forEach(p => {
+      let icon = null;
+      let popupContent = '';
+
+      if (p.category === 'metro') {
+        icon = createCustomMarkerIcon('metro', 'fa-train-subway', 'bg-indigo-600', 'text-white', 24);
+        popupContent = `
+          <div class="space-y-1">
+            <div class="font-bold text-slate-900">${escapeHtml(p.name)}</div>
+            <div class="text-[11px] text-indigo-700 font-semibold">${escapeHtml(p.line || 'Delhi Metro')}</div>
+            <div class="text-[10px] text-slate-500">Gates: ${p.gates || 4} • CCTV: ${p.cctvCoverage || '95%'}</div>
+            <div class="pt-1 flex gap-1">
+              <button onclick="setAsDestination('${escapeHtml(p.name)}', ${p.lat}, ${p.lng})" class="px-2 py-0.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 rounded text-[10px] font-bold border border-indigo-200 cursor-pointer">Set as Dest</button>
+            </div>
+          </div>
+        `;
+      } else if (p.category === 'bus') {
+        icon = createCustomMarkerIcon('bus', 'fa-bus', 'bg-amber-500', 'text-slate-950', 24);
+        popupContent = `
+          <div class="space-y-1">
+            <div class="font-bold text-slate-900">${escapeHtml(p.name)}</div>
+            <div class="text-[11px] text-amber-800 font-medium">Routes: ${(p.routes || []).join(', ')}</div>
+            <div class="text-[10px] text-slate-500">Lighting: ${p.lightingRating || '90%'} • Shelter: Yes</div>
+            <div class="pt-1">
+              <button onclick="setAsDestination('${escapeHtml(p.name)}', ${p.lat}, ${p.lng})" class="px-2 py-0.5 bg-amber-50 hover:bg-amber-100 text-amber-900 rounded text-[10px] font-bold border border-amber-300 cursor-pointer">Set as Dest</button>
+            </div>
+          </div>
+        `;
+      } else if (p.category === 'hospital') {
+        icon = createCustomMarkerIcon('hospital', 'fa-hospital', 'bg-rose-600', 'text-white', 26);
+        popupContent = `
+          <div class="space-y-1.5 p-0.5">
+            <div class="flex items-center justify-between gap-2 border-b border-rose-100 pb-1">
+              <span class="font-bold text-slate-900">${escapeHtml(p.name)}</span>
+              <span class="text-[9px] bg-rose-100 text-rose-800 px-1 py-0.2 rounded font-bold uppercase">24/7 Casualty</span>
+            </div>
+            <div class="text-[11px] text-slate-600">${escapeHtml(p.address || '')}</div>
+            <div class="text-[10px] text-rose-900 bg-rose-50 p-1.5 rounded space-y-0.5">
+              <div>📞 Casualty Desk: <a href="tel:${p.emergencyPhone || p.phone}" class="font-mono font-bold text-rose-700 underline">${p.emergencyPhone || p.phone}</a></div>
+              <div>🚑 CATS Ambulance: <a href="tel:102" class="font-mono font-bold text-rose-700 underline">102</a> (Toll-Free)</div>
+            </div>
+            <div class="text-[9px] text-slate-500 italic">${escapeHtml(p.disclaimer || '24-hour emergency casualty confirmed.')}</div>
+            <div class="pt-1 flex gap-1">
+              <button onclick="setAsDestination('${escapeHtml(p.name)}', ${p.lat}, ${p.lng})" class="px-2 py-0.5 bg-rose-600 hover:bg-rose-700 text-white rounded text-[10px] font-bold transition shadow-2xs cursor-pointer">Route to Emergency</button>
+              <a href="tel:${p.emergencyPhone || p.phone}" class="px-2 py-0.5 bg-white hover:bg-rose-50 text-rose-700 rounded text-[10px] font-bold border border-rose-300 transition">Call Casualty</a>
+            </div>
+          </div>
+        `;
+      } else if (p.category === 'pharmacy') {
+        icon = createCustomMarkerIcon('pharmacy', 'fa-kit-medical', p.verified247 ? 'bg-emerald-600' : 'bg-amber-600', 'text-white', 24);
+        popupContent = `
+          <div class="space-y-1.5 p-0.5">
+            <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-1">
+              <span class="font-bold text-slate-900">${escapeHtml(p.name)}</span>
+              <span class="text-[9px] ${p.verified247 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'} px-1 py-0.2 rounded font-bold">${p.verified247 ? 'Verified 24/7' : 'Daytime Only'}</span>
+            </div>
+            <div class="text-[11px] text-slate-600">${escapeHtml(p.address || '')}</div>
+            <div class="text-[10px] text-slate-700">
+              📞 Direct Call: <a href="${p.callAction || 'tel:' + p.phone}" class="font-mono font-bold text-emerald-700 underline">${p.phone}</a>
+            </div>
+            <div class="text-[9px] text-slate-500 italic">${escapeHtml(p.disclaimer || 'Please confirm formulation availability before travelling.')}</div>
+            <div class="pt-1 flex gap-1">
+              <button onclick="setAsDestination('${escapeHtml(p.name)}', ${p.lat}, ${p.lng})" class="px-2 py-0.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[10px] font-bold transition shadow-2xs cursor-pointer">Route Here</button>
+              <a href="${p.callAction || 'tel:' + p.phone}" class="px-2 py-0.5 bg-white hover:bg-emerald-50 text-emerald-700 rounded text-[10px] font-bold border border-emerald-300 transition">Call Store</a>
+            </div>
+          </div>
+        `;
+      } else if (p.category === 'police') {
+        icon = createCustomMarkerIcon('police', 'fa-shield-halved', 'bg-sky-600', 'text-white', 25);
+        popupContent = `
+          <div class="space-y-1.5 p-0.5">
+            <div class="flex items-center justify-between gap-2 border-b border-sky-100 pb-1">
+              <span class="font-bold text-slate-900">${escapeHtml(p.name)}</span>
+              <span class="text-[9px] bg-sky-100 text-sky-800 px-1 py-0.2 rounded font-bold uppercase">PCR Post</span>
+            </div>
+            <div class="text-[11px] text-sky-900 font-medium">${escapeHtml(p.jurisdiction || 'Delhi Police')}</div>
+            <div class="text-[10px] text-slate-700 bg-sky-50 p-1.5 rounded space-y-0.5">
+              <div>🚨 Unified Emergency: <a href="tel:112" class="font-mono font-bold text-sky-700 underline">112 / 100</a></div>
+              <div>🛡️ Women In Distress: <a href="tel:1091" class="font-mono font-bold text-sky-700 underline">1091</a></div>
+            </div>
+            <div class="pt-1 flex gap-1">
+              <button onclick="setAsDestination('${escapeHtml(p.name)}', ${p.lat}, ${p.lng})" class="px-2 py-0.5 bg-sky-600 hover:bg-sky-700 text-white rounded text-[10px] font-bold transition shadow-2xs cursor-pointer">Route Here</button>
+              <a href="tel:112" class="px-2 py-0.5 bg-white hover:bg-sky-50 text-sky-700 rounded text-[10px] font-bold border border-sky-300 transition">Dial 112</a>
+            </div>
+          </div>
+        `;
+      } else if (p.category === 'ev_charging') {
+        icon = createCustomMarkerIcon('ev_charging', 'fa-bolt', 'bg-teal-600', 'text-white', 22);
+        popupContent = `
+          <div class="space-y-1">
+            <div class="font-bold text-slate-900">${escapeHtml(p.name)}</div>
+            <div class="text-[11px] text-teal-800 font-medium">${escapeHtml(p.type || 'Fast Charger')} (${p.powerKw || '60 kW'})</div>
+            <div class="text-[10px] text-slate-500">24/7 Access Hub</div>
+          </div>
+        `;
+      } else if (p.category === 'hazard') {
+        icon = createCustomMarkerIcon('hazard', 'fa-triangle-exclamation', 'bg-rose-500 ring-2 ring-rose-300', 'text-white', 28);
+        popupContent = `
+          <div class="space-y-1">
+            <div class="font-bold text-rose-900 flex items-center gap-1">⚠️ Hazard Advisory</div>
+            <div class="text-[11px] text-slate-800 font-semibold">${escapeHtml(p.name)}</div>
+            <div class="text-[10px] text-slate-600">${escapeHtml(p.impact_desc || p.impact || '')}</div>
+            <span class="inline-block mt-0.5 px-1.5 py-0.2 bg-amber-100 text-amber-800 rounded font-mono text-[9px] font-bold">${p.epistemic_status || 'KNOWN'}</span>
+          </div>
+        `;
+      }
+
+      if (icon && mapLayers[p.category]) {
+        const marker = L.marker([p.lat, p.lng], { icon }).bindPopup(popupContent);
+        mapLayers[p.category].addLayer(marker);
+      }
+    });
+  } catch (err) {
+    console.warn('Could not load all map places:', err.message);
+  }
+}
+
+/**
+ * Toggles visibility of a specific facility or live bus layer on the map.
+ */
+function toggleMapLayer(category, forceShow = null) {
+  if (!delhiMap || !mapLayers[category]) return;
+
+  const btn = document.getElementById(`btn-layer-${category}`);
+  const newState = forceShow !== null ? forceShow : !activeLayersState[category];
+  activeLayersState[category] = newState;
+
+  if (newState) {
+    delhiMap.addLayer(mapLayers[category]);
+    if (btn) {
+      btn.classList.remove('inactive');
+      btn.classList.add('active');
+    }
+
+    // Special logic for live bus stream
+    if (category === 'live_buses') {
+      fetchAndRenderLiveBuses(true);
+      if (!liveBusPollingTimer) {
+        liveBusPollingTimer = setInterval(() => {
+          if (activeLayersState.live_buses) {
+            fetchAndRenderLiveBuses(false);
+          }
+        }, BUS_POLL_INTERVAL_MS);
+      }
+    }
+  } else {
+    delhiMap.removeLayer(mapLayers[category]);
+    if (btn) {
+      btn.classList.add('inactive');
+      btn.classList.remove('active');
+    }
+
+    if (category === 'live_buses' && liveBusPollingTimer) {
+      clearInterval(liveBusPollingTimer);
+      liveBusPollingTimer = null;
+    }
+  }
+}
+
+/**
+ * Fetches and updates live Delhi bus positions from the official OTD endpoint.
+ * In-place marker updates keyed by vehicleId prevent duplicate markers.
+ */
+async function fetchAndRenderLiveBuses(userInitiated = false) {
+  const badge = document.getElementById('live-buses-count-badge');
+  const dot = document.getElementById('live-bus-feed-dot');
+  const statusEl = document.getElementById('live-bus-refresh-status');
+  const lastSyncEl = document.getElementById('live-bus-last-sync');
+
+  try {
+    const res = await fetch('/api/geospatial/delhi/buses/live');
+    if (!res.ok) throw new Error('Live bus endpoint returned status ' + res.status);
+    const data = await res.json();
+
+    const timestampStr = new Date().toLocaleTimeString();
+    if (lastSyncEl) lastSyncEl.textContent = `Last ping: ${timestampStr}`;
+
+    if (data.status === 'SUCCESS' && Array.isArray(data.vehicles)) {
+      const liveVehicles = data.vehicles;
+      if (badge) badge.textContent = liveVehicles.length;
+      if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+      if (statusEl) statusEl.textContent = `${liveVehicles.length} buses live in Delhi bounds`;
+
+      const seenVehicleIds = new Set();
+
+      for (const v of liveVehicles) {
+        seenVehicleIds.add(v.vehicleId);
+        const popupHtml = `
+          <div class="space-y-1 p-0.5">
+            <div class="flex items-center justify-between border-b border-emerald-100 pb-1">
+              <span class="font-bold text-slate-900">🚌 DTC Bus: Route ${escapeHtml(v.routeId)}</span>
+              <span class="text-[9px] bg-emerald-100 text-emerald-800 px-1 py-0.2 rounded font-mono font-bold">LIVE OTD</span>
+            </div>
+            <div class="text-[11px] text-slate-600">Vehicle ID: <span class="font-mono font-bold">${escapeHtml(v.vehicleId)}</span></div>
+            ${v.speedKmph != null ? `<div class="text-[10px] text-slate-600">Speed: <strong>${v.speedKmph} km/h</strong></div>` : ''}
+            <div class="text-[9px] text-slate-400">Position recorded: ${new Date(v.timestamp).toLocaleTimeString()}</div>
+          </div>
+        `;
+
+        if (liveBusMarkers.has(v.vehicleId)) {
+          // In-place update to prevent duplicate markers
+          const marker = liveBusMarkers.get(v.vehicleId);
+          marker.setLatLng([v.lat, v.lng]);
+          marker.setPopupContent(popupHtml);
+        } else {
+          // Create new bus marker
+          const busIcon = createCustomMarkerIcon('live_buses', 'fa-bus-simple', 'bg-emerald-600 ring-2 ring-emerald-300', 'text-white', 24);
+          const marker = L.marker([v.lat, v.lng], { icon: busIcon }).bindPopup(popupHtml);
+          mapLayers.live_buses.addLayer(marker);
+          liveBusMarkers.set(v.vehicleId, marker);
+        }
+      }
+
+      // Remove vehicles that are no longer in feed
+      for (const [vId, marker] of liveBusMarkers.entries()) {
+        if (!seenVehicleIds.has(vId)) {
+          mapLayers.live_buses.removeLayer(marker);
+          liveBusMarkers.delete(vId);
+        }
+      }
+
+      if (userInitiated) {
+        showToast(`📡 Live OTD Feed: ${liveVehicles.length} active buses streaming.`);
+      }
+    } else {
+      // Feed is unconfigured or unauthorized (Honest reporting without faking coordinates)
+      if (badge) badge.textContent = '0';
+      if (dot) dot.className = 'w-2 h-2 rounded-full bg-amber-400';
+      if (statusEl) statusEl.textContent = 'Key Required (Register at otd.delhi.gov.in)';
+
+      // Clear any remaining markers
+      if (mapLayers.live_buses) {
+        mapLayers.live_buses.clearLayers();
+        liveBusMarkers.clear();
+      }
+
+      if (userInitiated) {
+        showToast('ℹ️ Live GPS tracking requires DELHI_OTD_API_KEY from otd.delhi.gov.in. Static schedules active.');
+        openOTDKeyModal();
+      }
+    }
+  } catch (err) {
+    console.warn('Error fetching live bus feed:', err.message);
+    if (statusEl) statusEl.textContent = 'OTD gateway temporarily unavailable';
+  }
+}
+
+function openOTDKeyModal() {
+  const modal = document.getElementById('otd-key-modal');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeOTDKeyModal() {
+  const modal = document.getElementById('otd-key-modal');
+  if (modal) modal.classList.add('hidden');
+}
+
+/**
+ * Recenters the map to Central Delhi.
+ */
+function recenterDelhiMap() {
+  if (delhiMap) {
+    delhiMap.flyTo([28.6139, 77.2090], 12, { duration: 1.0 });
+  }
+}
+
+/**
+ * Explicit user GPS location request with browser permission prompt.
+ */
+function getUserCurrentLocation() {
+  if (!navigator.geolocation) {
+    showToast('Geolocation is not supported by your browser.', true);
+    return;
+  }
+
+  showToast('Requesting GPS location permission...');
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+      currentUserLocation = { lat, lng };
+
+      if (!delhiMap) return;
+
+      // Update or create user location marker with pulsing beacon
+      if (userLocationMarker) {
+        userLocationMarker.setLatLng([lat, lng]);
+      } else {
+        const beaconIcon = L.divIcon({
+          html: `
+            <div class="relative flex items-center justify-center">
+              <span class="absolute w-8 h-8 rounded-full bg-sky-500/30 animate-ping"></span>
+              <span class="relative w-4 h-4 rounded-full bg-sky-600 border-2 border-white shadow-md"></span>
+            </div>
+          `,
+          className: 'user-gps-divicon',
+          iconSize: [20, 20],
+          iconAnchor: [10, 10]
+        });
+        userLocationMarker = L.marker([lat, lng], { icon: beaconIcon, zIndexOffset: 1000 })
+          .bindPopup('<strong class="text-sky-900">📍 You Are Here</strong><br/><span class="text-xs text-slate-500">Live Browser GPS</span>')
+          .addTo(delhiMap);
+      }
+
+      delhiMap.flyTo([lat, lng], 14, { duration: 1.2 });
+      
+      const originInput = document.getElementById('route-origin-input');
+      if (originInput) originInput.value = 'My Location (GPS)';
+
+      showToast('📍 Live GPS location acquired and centered!');
+    },
+    (err) => {
+      console.warn('Geolocation denied or failed:', err.message);
+      showToast('Location permission denied or unavailable. Using default origin.', true);
+    },
+    { enableHighAccuracy: true, timeout: 6000, maximumAge: 60000 }
+  );
+}
+
+/**
+ * Quick destination helper for popup clicks.
+ */
+function setAsDestination(name, lat, lng) {
+  const destInput = document.getElementById('route-dest-input');
+  if (destInput) destInput.value = name;
+  handleCalculateRouteButton();
+}
+
+/**
+ * Sets a preset route.
+ */
+function setQuickRoute(origin, dest) {
+  const o = document.getElementById('route-origin-input');
+  const d = document.getElementById('route-dest-input');
+  if (o) o.value = origin;
+  if (d) d.value = dest;
+  handleCalculateRouteButton();
+}
+
+/**
+ * Button handler for manual route calculate button.
+ */
+function handleCalculateRouteButton() {
+  const originVal = (document.getElementById('route-origin-input')?.value || '').trim();
+  const destVal = (document.getElementById('route-dest-input')?.value || '').trim();
+  const modeVal = document.getElementById('route-mode-select')?.value || 'driving';
+
+  if (!originVal || !destVal) {
+    showToast('Please provide both an origin and destination.', true);
+    return;
+  }
+
+  calculateAndRenderMapRoute(originVal, destVal, modeVal, true);
+}
+
+/**
+ * Calculates road-network routes, scores safety, and renders polylines and markers.
+ */
+async function calculateAndRenderMapRoute(originQuery, destQuery, mode = 'driving', notifyToast = true) {
+  const loadingOverlay = document.getElementById('map-loading-overlay');
+  const loadingText = document.getElementById('map-loading-text');
+  if (loadingOverlay) loadingOverlay.classList.remove('hidden');
+  if (loadingText) loadingText.textContent = `Finding route: ${originQuery} → ${destQuery}...`;
+
+  try {
+    // 1. Geocode Origin
+    let startCoords = null;
+    let startLabel = originQuery;
+    if (originQuery.toLowerCase().includes('my location') && currentUserLocation) {
+      startCoords = currentUserLocation;
+      startLabel = 'Current GPS Location';
+    } else {
+      const geoOriginRes = await fetch(`/api/geospatial/search?q=${encodeURIComponent(originQuery)}`);
+      if (!geoOriginRes.ok) throw new Error(`Could not find origin "${originQuery}"`);
+      const geoOrigin = await geoOriginRes.json();
+      startCoords = { lat: geoOrigin.lat, lng: geoOrigin.lng };
+      startLabel = geoOrigin.name;
+    }
+
+    // 2. Geocode Destination
+    const geoDestRes = await fetch(`/api/geospatial/search?q=${encodeURIComponent(destQuery)}`);
+    if (!geoDestRes.ok) throw new Error(`Could not find destination "${destQuery}"`);
+    const geoDest = await geoDestRes.json();
+    const destCoords = { lat: geoDest.lat, lng: geoDest.lng };
+    const destLabel = geoDest.name;
+
+    // 3. Request Route & Safety Score
+    const routeRes = await fetch('/api/geospatial/route', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        startLat: startCoords.lat,
+        startLng: startCoords.lng,
+        endLat: destCoords.lat,
+        endLng: destCoords.lng,
+        mode
+      })
+    });
+
+    if (!routeRes.ok) throw new Error('Route calculation failed on server');
+    const routeData = await routeRes.json();
+    const routes = routeData.routes || [];
+
+    if (routes.length === 0) {
+      throw new Error('No usable road route found between these locations.');
+    }
+
+    currentRouteAlternatives = routes;
+    selectedRouteIndex = 0;
+    currentActiveRoute = routes[0];
+
+    // Render on Leaflet Map
+    renderRoutesOnMap(routes, startCoords, startLabel, destCoords, destLabel);
+
+    // Update Comparison Panel
+    renderRouteComparisonPanel(routes, 0);
+
+    // Synchronize Center Dashboard Header Card (#plan-status-card)
+    syncDashboardRouteCard(routes[0], startLabel, destLabel);
+
+    if (notifyToast) {
+      showToast(`🛣️ Road route computed: ${routes[0].durationMins} mins • Safety score ${routes[0].safety.safetyScore}/100`);
+    }
+  } catch (err) {
+    console.error('Route calculation error:', err);
+    showToast(err.message, true);
+  } finally {
+    if (loadingOverlay) loadingOverlay.classList.add('hidden');
+  }
+}
+
+/**
+ * Draws polylines and markers on the Leaflet map.
+ */
+function renderRoutesOnMap(routes, origin, originLabel, destination, destLabel) {
+  if (!delhiMap) return;
+
+  // Clear previous polylines & markers
+  routePolylineLayers.forEach(l => delhiMap.removeLayer(l));
+  routePolylineLayers = [];
+  routeMarkerLayers.forEach(m => delhiMap.removeLayer(m));
+  routeMarkerLayers = [];
+
+  // Drop Origin & Destination Pins
+  const originIcon = createCustomMarkerIcon('origin', 'fa-location-dot', 'bg-sky-600 ring-2 ring-sky-300', 'text-white', 28);
+  const destIcon = createCustomMarkerIcon('dest', 'fa-flag-checkered', 'bg-emerald-600 ring-2 ring-emerald-300', 'text-white', 28);
+
+  const mOrigin = L.marker([origin.lat, origin.lng], { icon: originIcon, zIndexOffset: 800 })
+    .bindPopup(`<strong>Origin:</strong> ${escapeHtml(originLabel)}`)
+    .addTo(delhiMap);
+  routeMarkerLayers.push(mOrigin);
+
+  const mDest = L.marker([destination.lat, destination.lng], { icon: destIcon, zIndexOffset: 800 })
+    .bindPopup(`<strong>Destination:</strong> ${escapeHtml(destLabel)}`)
+    .addTo(delhiMap);
+  routeMarkerLayers.push(mDest);
+
+  // Render Polylines for each alternative
+  routes.forEach((route, idx) => {
+    const isSafest = route.isSafest;
+    const isSelected = idx === selectedRouteIndex;
+
+    const polyColor = isSelected
+      ? (isSafest ? '#059669' : '#0284c7') // emerald for safest, sky for alternative selected
+      : '#94a3b8'; // muted slate for unselected alternative
+
+    const polyWeight = isSelected ? 6 : 4;
+    const polyDash = isSelected ? null : '6, 8';
+    const polyOpacity = isSelected ? 0.95 : 0.65;
+
+    const polyline = L.polyline(route.coordinates, {
+      color: polyColor,
+      weight: polyWeight,
+      opacity: polyOpacity,
+      dashArray: polyDash,
+      lineCap: 'round',
+      lineJoin: 'round'
+    }).addTo(delhiMap);
+
+    polyline.bindTooltip(
+      `<strong>${escapeHtml(route.name)}</strong>: ${route.durationMins}m • Score ${route.safety.safetyScore}/100`,
+      { sticky: true, className: 'text-xs font-sans' }
+    );
+
+    polyline.on('click', () => {
+      selectMapRoute(idx);
+    });
+
+    routePolylineLayers.push(polyline);
+  });
+
+  // Fit bounds to show entire route with padding
+  if (routePolylineLayers.length > 0) {
+    const group = L.featureGroup(routePolylineLayers);
+    delhiMap.fitBounds(group.getBounds(), { padding: [40, 40] });
+  }
+}
+
+/**
+ * Switches the active selected route among alternatives.
+ */
+function selectMapRoute(index) {
+  selectedRouteIndex = index;
+  currentActiveRoute = currentRouteAlternatives[index];
+
+  // Re-style polylines
+  routePolylineLayers.forEach((poly, idx) => {
+    const isSelected = idx === index;
+    const route = currentRouteAlternatives[idx];
+    const isSafest = route.isSafest;
+
+    poly.setStyle({
+      color: isSelected ? (isSafest ? '#059669' : '#0284c7') : '#94a3b8',
+      weight: isSelected ? 6 : 4,
+      opacity: isSelected ? 0.95 : 0.60,
+      dashArray: isSelected ? null : '6, 8'
+    });
+    if (isSelected) poly.bringToFront();
+  });
+
+  renderRouteComparisonPanel(currentRouteAlternatives, index);
+  syncDashboardRouteCard(currentActiveRoute);
+}
+
+/**
+ * Synchronizes the dashboard center plan card (#plan-status-card) with computed route.
+ */
+function syncDashboardRouteCard(route, originLabel = 'Sector 62', destLabel = 'Connaught Place') {
+  if (!route) return;
+
+  const titleEl = document.getElementById('plan-title');
+  if (titleEl) titleEl.textContent = `${getCurrentTimeStr()} Departure: ${originLabel} → ${destLabel}`;
+
+  const etaEl = document.getElementById('plan-eta');
+  if (etaEl) {
+    etaEl.innerHTML = `${route.durationMins} mins <span class="text-xs font-medium text-slate-600">(${route.distanceKm} km)</span>`;
+  }
+
+  const descEl = document.getElementById('plan-description');
+  if (descEl) {
+    descEl.textContent = route.recommendationReason || route.safety.summaryText;
+  }
+
+  const riskEl = document.getElementById('metric-risk');
+  if (riskEl) {
+    riskEl.innerHTML = `<i class="fa-solid fa-shield text-emerald-800"></i> Score: ${route.safety.safetyScore}/100`;
+  }
+
+  const transportEl = document.getElementById('metric-transport');
+  if (transportEl) {
+    transportEl.innerHTML = `<i class="fa-solid fa-car text-amber-800"></i> ${route.mode === 'walking' ? 'Pedestrian Corridor' : 'Arterial Road'}`;
+  }
+
+  const emergencyEl = document.getElementById('metric-emergency');
+  if (emergencyEl) {
+    emergencyEl.innerHTML = `<i class="fa-solid fa-hospital text-purple-600"></i> ${route.safety.signals.havenCount} Havens On-Route`;
+  }
+}
+
+/**
+ * Renders the route comparison & safety breakdown bar under the map.
+ */
+function renderRouteComparisonPanel(routes, activeIdx = 0) {
+  const panel = document.getElementById('route-comparison-panel');
+  if (!panel) return;
+
+  const activeRoute = routes[activeIdx] || routes[0];
+  const s = activeRoute.safety;
+
+  // Build alternatives tabs
+  const tabsHtml = routes.map((r, i) => {
+    const isSel = i === activeIdx;
+    const badge = r.isSafest ? '🛡️ Safest' : '⚡ Fastest';
+    return `
+      <button onclick="selectMapRoute(${i})" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer border ${isSel ? 'bg-white border-emerald-500 text-emerald-900 shadow-2xs' : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200'}">
+        <span>${escapeHtml(r.name)}</span>
+        <span class="text-[10px] px-1.5 py-0.2 rounded font-mono ${r.isSafest ? 'bg-emerald-100 text-emerald-800' : 'bg-sky-100 text-sky-800'}">${badge}</span>
+        <span class="font-normal text-slate-500">(${r.durationMins}m)</span>
+      </button>
+    `;
+  }).join('');
+
+  panel.innerHTML = `
+    <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-200">
+      <div class="flex items-center gap-1.5 flex-wrap">
+        <span class="text-xs font-bold text-slate-700">Routes:</span>
+        ${tabsHtml}
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-bold ${s.safetyScore >= 80 ? 'text-emerald-700' : 'text-amber-800'} flex items-center gap-1">
+          <i class="fa-solid fa-shield-halved"></i> Safety Score: ${s.safetyScore}/100
+        </span>
+        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${s.epistemicStatus === 'KNOWN' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${s.epistemicStatus}</span>
+      </div>
+    </div>
+
+    <!-- Multi-Signal Breakdown Matrix -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-xs">
+      <div class="p-2 bg-white rounded border border-slate-200">
+        <span class="text-slate-500 block text-[10px] uppercase font-semibold">Police Proximity</span>
+        <span class="font-bold text-slate-800 flex items-center gap-1 mt-0.5">
+          <i class="fa-solid fa-shield-halved text-sky-600 text-xs"></i> ${s.signals.policeCount} Units (≤1.5km)
+        </span>
+      </div>
+      <div class="p-2 bg-white rounded border border-slate-200">
+        <span class="text-slate-500 block text-[10px] uppercase font-semibold">24/7 Havens</span>
+        <span class="font-bold text-slate-800 flex items-center gap-1 mt-0.5">
+          <i class="fa-solid fa-kit-medical text-emerald-600 text-xs"></i> ${s.signals.havenCount} Pharmacies/ER
+        </span>
+      </div>
+      <div class="p-2 bg-white rounded border border-slate-200">
+        <span class="text-slate-500 block text-[10px] uppercase font-semibold">Street Illumination</span>
+        <span class="font-bold text-slate-800 flex items-center gap-1 mt-0.5">
+          <i class="fa-solid fa-lightbulb text-amber-600 text-xs"></i> ${s.breakdown.lightingScore.current}/${s.breakdown.lightingScore.max} pts
+        </span>
+      </div>
+      <div class="p-2 bg-white rounded border border-slate-200">
+        <span class="text-slate-500 block text-[10px] uppercase font-semibold">Disruptions / Hazards</span>
+        <span class="font-bold ${s.signals.hazardsEncountered.length > 0 ? 'text-rose-700' : 'text-emerald-700'} flex items-center gap-1 mt-0.5">
+          <i class="fa-solid fa-triangle-exclamation text-xs"></i> ${s.signals.hazardsEncountered.length} Reported
+        </span>
+      </div>
+    </div>
+
+    <div class="text-[11px] text-slate-600 pt-1 leading-relaxed">
+      <strong>Safety Reasoning:</strong> ${escapeHtml(activeRoute.recommendationReason || s.summaryText)}
+    </div>
+  `;
+}
+
+/**
+ * Handles map actions emitted from the map-aware chatbot.
+ */
+function executeMapAction(action) {
+  if (!action || !delhiMap) return;
+
+  if (action.type === 'RENDER_ROUTE') {
+    const originInput = document.getElementById('route-origin-input');
+    const destInput = document.getElementById('route-dest-input');
+    if (originInput && action.origin) originInput.value = action.origin.label || '';
+    if (destInput && action.destination) destInput.value = action.destination.label || '';
+
+    currentRouteAlternatives = action.routes || [];
+    selectedRouteIndex = action.selectedRouteIndex || 0;
+    currentActiveRoute = currentRouteAlternatives[selectedRouteIndex];
+
+    renderRoutesOnMap(
+      currentRouteAlternatives,
+      action.origin,
+      action.origin.label || 'Origin',
+      action.destination,
+      action.destination.label || 'Destination'
+    );
+
+    renderRouteComparisonPanel(currentRouteAlternatives, selectedRouteIndex);
+    syncDashboardRouteCard(currentActiveRoute, action.origin.label, action.destination.label);
+  } else if (action.type === 'SHOW_PLACES') {
+    if (action.category && typeof toggleMapLayer === 'function') {
+      toggleMapLayer(action.category, true);
+    }
+    const places = action.places || [];
+    if (places.length > 0) {
+      const first = places[0];
+      if (first.lat && first.lng) {
+        delhiMap.flyTo([first.lat, first.lng], 13, { duration: 1.0 });
+      }
+    }
+  } else if (action.type === 'SHOW_EMERGENCY_PANEL') {
+    if (typeof toggleMapLayer === 'function') {
+      toggleMapLayer('police', true);
+      toggleMapLayer('hospital', true);
+    }
+    showToast('🚨 Official 24/7 Delhi Emergency Helplines active: CATS 102, Police 112, Women Helpline 1091.');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else if (action.type === 'SHOW_BUSES') {
+    if (typeof toggleMapLayer === 'function') {
+      toggleMapLayer('live_buses', true);
+    }
+  }
+}
+
+// ==========================================
 // INITIALIZATION
 // ==========================================
 window.addEventListener('DOMContentLoaded', async () => {
   resetWhatsAppChat();
+  initDelhiMap();
   await initSupabaseClient();
   await loadInitialData();
 });

@@ -16,8 +16,42 @@
     rel="stylesheet" />
   <!-- Supabase JS Client (v2) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Leaflet CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
   <style>
+    /* Leaflet Custom Marker & Popup Styles */
+    .custom-map-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 9999px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+      transition: transform 0.15s ease-in-out;
+    }
+    .custom-map-icon:hover {
+      transform: scale(1.15);
+      z-index: 9999 !important;
+    }
+    .leaflet-popup-content-wrapper {
+      border-radius: 12px;
+      padding: 4px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15);
+      font-family: 'Outfit', sans-serif;
+    }
+    .leaflet-popup-content {
+      margin: 8px 12px;
+      line-height: 1.4;
+      font-size: 12px;
+    }
+    .layer-pill.inactive {
+      opacity: 0.45;
+      background-color: #f1f5f9 !important;
+      color: #64748b !important;
+      border-color: #cbd5e1 !important;
+    }
+
     body {
       font-family: 'Outfit', sans-serif;
       font-size: 14px;
@@ -790,6 +824,40 @@ body > header h2 {
       </div>
     </div>
 
+    <!-- Delhi Official Emergency Quick-Response Action Bar -->
+    <div class="bg-rose-900 text-white rounded-xl p-3 border border-rose-800 shadow-sm flex flex-wrap items-center justify-between gap-2.5">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-rose-800/80 border border-rose-700 flex items-center justify-center text-rose-200">
+          <i class="fa-solid fa-phone-volume text-sm animate-pulse"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-rose-200">Delhi Emergency Dispatch Services (24/7 Toll-Free)</span>
+            <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-rose-800 border border-rose-700 text-rose-100">Direct Click-to-Call</span>
+          </div>
+          <p class="text-[11px] text-rose-200/90">Always accessible immediate phone dispatch for ambulance, police, and distress support</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-1.5 flex-wrap">
+        <a href="tel:102" class="px-2.5 py-1 bg-white text-rose-900 hover:bg-rose-100 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-xs" title="Centralised Accident & Trauma Services (CATS) Ambulance">
+          <i class="fa-solid fa-truck-medical text-rose-600"></i> CATS Ambulance: <span class="font-mono">102</span>
+        </a>
+        <a href="tel:112" class="px-2.5 py-1 bg-white text-rose-900 hover:bg-rose-100 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-xs" title="Delhi Police ERSS Unified Dispatch">
+          <i class="fa-solid fa-shield-halved text-rose-600"></i> Police ERSS: <span class="font-mono">112</span>
+        </a>
+        <a href="tel:1091" class="px-2.5 py-1 bg-white text-rose-900 hover:bg-rose-100 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-xs" title="Delhi Police Women In Distress Helpline">
+          <i class="fa-solid fa-person-dress text-rose-600"></i> Women Helpline: <span class="font-mono">1091</span>
+        </a>
+        <a href="tel:101" class="px-2 py-1 bg-rose-800 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 border border-rose-700" title="Delhi Fire & Rescue Service">
+          <i class="fa-solid fa-fire-extinguisher text-amber-300"></i> Fire: <span class="font-mono">101</span>
+        </a>
+        <a href="tel:1077" class="px-2 py-1 bg-rose-800 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 border border-rose-700" title="Delhi Disaster Management Authority">
+          <i class="fa-solid fa-triangle-exclamation text-amber-300"></i> DDMA: <span class="font-mono">1077</span>
+        </a>
+      </div>
+    </div>
+
     <!-- Main Content 3-Column Holy Grail Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
 
@@ -891,6 +959,120 @@ body > header h2 {
 
       <!-- Column 2: Center Main Operations & Safety Corridor Canvas (5 cols) -->
       <section class="lg:col-span-5 space-y-4">
+        <!-- INTERACTIVE DELHI SAFETY & MOBILITY MAP -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden" id="delhi-map-card">
+          <!-- Map Header with Status & Telemetry -->
+          <div class="p-3.5 bg-slate-50/90 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-lg bg-emerald-600/10 border border-emerald-500/25 text-emerald-700 flex items-center justify-center text-xs font-bold">
+                <i class="fa-solid fa-map-location-dot"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wide">Interactive Delhi Safety Map</h3>
+                  <span id="map-status-pill" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> OpenStreetMap Active
+                  </span>
+                </div>
+                <p class="text-[11px] text-slate-500">Real-time road network routing, 24/7 havens &amp; safety-informed corridor intelligence</p>
+              </div>
+            </div>
+            
+            <div class="flex items-center gap-1.5">
+              <button onclick="getUserCurrentLocation()" class="px-2.5 py-1 text-xs font-semibold bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-lg shadow-2xs transition flex items-center gap-1.5 cursor-pointer" title="Find My Location (Explicit Permission Required)">
+                <i class="fa-solid fa-location-crosshairs text-sky-600 text-xs"></i> My Location
+              </button>
+              <button onclick="recenterDelhiMap()" class="px-2.5 py-1 text-xs font-semibold bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-lg shadow-2xs transition flex items-center gap-1 cursor-pointer" title="Recenter to Central Delhi">
+                <i class="fa-solid fa-crosshairs text-slate-600 text-xs"></i> Recenter
+              </button>
+            </div>
+          </div>
+
+          <!-- Route Query Bar & Quick Presets -->
+          <div class="p-3 bg-white border-b border-slate-100 space-y-2">
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
+              <div class="sm:col-span-5 relative">
+                <span class="absolute left-2.5 top-2 text-slate-400 text-xs"><i class="fa-solid fa-circle-dot text-sky-600"></i></span>
+                <input type="text" id="route-origin-input" placeholder="Origin (e.g. Noida Sector 62 or My Location)" value="Noida Sector 62" class="w-full bg-slate-50 border border-slate-300 rounded-lg pl-7 pr-2.5 py-1.5 text-xs text-slate-800 focus:bg-white focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500" />
+              </div>
+              <div class="sm:col-span-5 relative">
+                <span class="absolute left-2.5 top-2 text-slate-400 text-xs"><i class="fa-solid fa-location-dot text-rose-500"></i></span>
+                <input type="text" id="route-dest-input" placeholder="Destination (e.g. Connaught Place, AIIMS)" value="Connaught Place" class="w-full bg-slate-50 border border-slate-300 rounded-lg pl-7 pr-2.5 py-1.5 text-xs text-slate-800 focus:bg-white focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500" />
+              </div>
+              <div class="sm:col-span-2 flex items-center gap-1">
+                <select id="route-mode-select" class="w-1/2 bg-slate-50 border border-slate-300 rounded-lg py-1.5 px-1 text-xs text-slate-700 font-medium">
+                  <option value="driving">🚗 Car</option>
+                  <option value="walking">🚶 Walk</option>
+                </select>
+                <button onclick="handleCalculateRouteButton()" id="calc-route-btn" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg py-1.5 px-1 text-xs font-bold shadow-2xs transition flex items-center justify-center cursor-pointer">
+                  Route
+                </button>
+              </div>
+            </div>
+
+            <!-- Quick Destination Presets -->
+            <div class="flex items-center gap-1.5 overflow-x-auto text-[11px] pt-0.5 custom-scroll whitespace-nowrap">
+              <span class="text-slate-500 font-semibold flex items-center gap-1"><i class="fa-solid fa-compass text-amber-700"></i> Presets:</span>
+              <button onclick="setQuickRoute('Noida Sector 62', 'Connaught Place')" class="px-2 py-0.5 bg-slate-100 hover:bg-amber-100 hover:text-amber-900 rounded-md text-slate-700 font-medium border border-slate-200 transition cursor-pointer">Sector 62 → CP</button>
+              <button onclick="setQuickRoute('Hauz Khas', 'AIIMS New Delhi')" class="px-2 py-0.5 bg-slate-100 hover:bg-amber-100 hover:text-amber-900 rounded-md text-slate-700 font-medium border border-slate-200 transition cursor-pointer">Hauz Khas → AIIMS</button>
+              <button onclick="setQuickRoute('Kashmere Gate ISBT', 'Central Secretariat')" class="px-2 py-0.5 bg-slate-100 hover:bg-amber-100 hover:text-amber-900 rounded-md text-slate-700 font-medium border border-slate-200 transition cursor-pointer">Kashmere Gate → Central Sec</button>
+              <button onclick="setQuickRoute('Dwarka Sector 21', 'Connaught Place')" class="px-2 py-0.5 bg-slate-100 hover:bg-amber-100 hover:text-amber-900 rounded-md text-slate-700 font-medium border border-slate-200 transition cursor-pointer">Dwarka → CP</button>
+            </div>
+
+            <!-- Facility Filter Toggles -->
+            <div class="flex items-center gap-1.5 overflow-x-auto text-[11px] pt-1 border-t border-slate-100 custom-scroll whitespace-nowrap">
+              <span class="text-slate-500 font-semibold flex items-center gap-1"><i class="fa-solid fa-filter text-slate-400"></i> Layers:</span>
+              <button onclick="toggleMapLayer('live_buses')" id="btn-layer-live_buses" class="layer-pill inactive px-2.5 py-0.5 rounded-full text-emerald-900 bg-emerald-100 border border-emerald-300 font-bold transition cursor-pointer flex items-center gap-1.5" title="Delhi Open Transit Data GTFS-Realtime Stream">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> 📡 Live Buses (OTD)
+                <span id="live-buses-count-badge" class="bg-emerald-600 text-white rounded-full px-1 text-[9px] font-mono">0</span>
+              </button>
+              <button onclick="toggleMapLayer('hospital')" id="btn-layer-hospital" class="layer-pill active px-2 py-0.5 rounded-full text-rose-700 bg-rose-50 border border-rose-200 font-semibold transition cursor-pointer">🏥 24/7 Hospitals</button>
+              <button onclick="toggleMapLayer('pharmacy')" id="btn-layer-pharmacy" class="layer-pill active px-2 py-0.5 rounded-full text-emerald-800 bg-emerald-50 border border-emerald-200 font-semibold transition cursor-pointer">💊 24/7 Pharmacies</button>
+              <button onclick="toggleMapLayer('police')" id="btn-layer-police" class="layer-pill active px-2 py-0.5 rounded-full text-sky-800 bg-sky-50 border border-sky-200 font-semibold transition cursor-pointer">👮 Police &amp; PCR</button>
+              <button onclick="toggleMapLayer('metro')" id="btn-layer-metro" class="layer-pill active px-2 py-0.5 rounded-full text-indigo-700 bg-indigo-50 border border-indigo-200 font-semibold transition cursor-pointer">🚇 Metro</button>
+              <button onclick="toggleMapLayer('bus')" id="btn-layer-bus" class="layer-pill active px-2 py-0.5 rounded-full text-amber-800 bg-amber-50 border border-amber-200 font-semibold transition cursor-pointer">🚌 Bus Stops</button>
+              <button onclick="toggleMapLayer('ev_charging')" id="btn-layer-ev" class="layer-pill active px-2 py-0.5 rounded-full text-teal-800 bg-teal-50 border border-teal-200 font-semibold transition cursor-pointer">⚡ EV Hubs</button>
+              <button onclick="toggleMapLayer('hazard')" id="btn-layer-hazard" class="layer-pill active px-2 py-0.5 rounded-full text-rose-800 bg-rose-100 border border-rose-300 font-bold transition cursor-pointer">⚠️ Hazards</button>
+            </div>
+
+            <!-- Live Bus OTD Telemetry Strip (Visible when Live Buses layer is engaged) -->
+            <div id="live-bus-telemetry-bar" class="p-2 bg-slate-900 text-white text-[11px] rounded-lg flex flex-wrap items-center justify-between gap-2 transition-all">
+              <div class="flex items-center gap-2">
+                <span id="live-bus-feed-dot" class="w-2 h-2 rounded-full bg-amber-400"></span>
+                <span class="font-bold text-slate-100" id="live-bus-feed-title">Delhi OTD Live Vehicle Stream</span>
+                <span class="text-slate-400 font-mono" id="live-bus-refresh-status">Checking authorized feed status...</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-slate-400 font-mono text-[10px]" id="live-bus-last-sync">Last ping: —</span>
+                <button onclick="fetchAndRenderLiveBuses(true)" class="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-emerald-300 rounded border border-slate-700 font-semibold cursor-pointer text-[10px]">
+                  <i class="fa-solid fa-arrows-rotate text-[10px] mr-1"></i> Sync Now
+                </button>
+                <button onclick="openOTDKeyModal()" class="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-amber-300 rounded border border-slate-700 font-semibold cursor-pointer text-[10px]">
+                  <i class="fa-solid fa-key text-[10px] mr-1"></i> API Key Setup
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Leaflet Map Container -->
+          <div class="relative w-full h-[440px] bg-slate-100">
+            <div id="delhi-map" class="w-full h-full z-10"></div>
+            <!-- Loading overlay -->
+            <div id="map-loading-overlay" class="absolute inset-0 bg-white/80 backdrop-blur-xs flex flex-col items-center justify-center z-20 hidden">
+              <i class="fa-solid fa-circle-notch fa-spin text-2xl text-emerald-600 mb-2"></i>
+              <span class="text-xs font-semibold text-slate-700" id="map-loading-text">Calculating road route &amp; safety signals...</span>
+            </div>
+          </div>
+
+          <!-- Active Route Comparison & Safety Score Breakdown Bar -->
+          <div id="route-comparison-panel" class="p-3 bg-slate-50 border-t border-slate-200 space-y-2">
+            <div class="text-xs text-slate-500 italic flex items-center justify-between">
+              <span>Ready. Select an origin and destination or ask the Assistant for a route.</span>
+              <span class="text-[11px] text-slate-400">Map Attribution: © OpenStreetMap contributors, DMRC &amp; Delhi OTD</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Main Live Route Plan Card -->
         <div class="bg-white rounded-xl p-5 border border-slate-200  shadow-2xs relative overflow-hidden"
           id="plan-status-card">
@@ -1411,6 +1593,64 @@ body > header h2 {
         <button
           class="px-4 py-2 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition cursor-pointer"
           onclick="closeSupabaseModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delhi Open Transit Data (OTD) API Key & Live Tracking Modal -->
+  <div class="fixed inset-0 bg-slate-900/65 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4 overflow-y-auto" id="otd-key-modal">
+    <div class="bg-white rounded-2xl max-w-xl w-full p-6 border border-slate-200 shadow-2xl space-y-4 my-8 animate-modal-enter">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-bus"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900 leading-tight">Official Delhi Open Transit Data (OTD)</h3>
+            <p class="text-xs text-slate-600">Real-Time DTC &amp; Cluster Bus Fleet Tracking Feed</p>
+          </div>
+        </div>
+        <button class="text-slate-600 hover:text-slate-800 text-lg cursor-pointer" onclick="closeOTDKeyModal()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-xs">
+        <div class="font-bold text-slate-800 flex items-center gap-2">
+          <span id="otd-modal-status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+          <span id="otd-modal-status-title">Feed Status: Checking authorized key...</span>
+        </div>
+        <p class="text-slate-600" id="otd-modal-status-desc">
+          Live GPS tracking streams actual DTC bus locations from the official endpoint <code>/api/realtime/VehiclePositions.pb</code> via GTFS-Realtime Protobuf.
+        </p>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <h4 class="font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
+          <i class="fa-solid fa-circle-info text-sky-600"></i> How to Get Official OTD API Access
+        </h4>
+        <ol class="list-decimal list-inside space-y-1.5 text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-200 font-mono text-[11px]">
+          <li>Visit the official Delhi OTD developer portal: <a href="https://otd.delhi.gov.in/register/" target="_blank" class="text-emerald-700 underline font-bold">otd.delhi.gov.in/register</a></li>
+          <li>Register your developer account to receive your private authorized API key.</li>
+          <li>Add your key to the backend environment: <code>DELHI_OTD_API_KEY=your_private_key</code></li>
+          <li>Restart the server. NightOwl automatically begins decoding the live protobuf feed!</li>
+        </ol>
+      </div>
+
+      <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900 space-y-1">
+        <strong>🛡️ NightOwl Integrity Notice:</strong>
+        <p class="text-[11px] text-amber-800">
+          NightOwl strictly reports genuine transit data. When no authorized key is present, NightOwl shows static timetables and stops, and explicitly reports live tracking is unconfigured rather than fabricating fake vehicle positions.
+        </p>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+        <a href="https://otd.delhi.gov.in/documentation/" target="_blank" class="px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-lg border border-slate-200 transition flex items-center gap-1">
+          <i class="fa-solid fa-book text-slate-500"></i> OTD Documentation
+        </a>
+        <button class="px-4 py-1.5 text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 rounded-lg transition cursor-pointer" onclick="closeOTDKeyModal()">
+          Close
+        </button>
       </div>
     </div>
   </div>

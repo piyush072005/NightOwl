@@ -5,13 +5,16 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
+    "build": "echo 'Build complete'",
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node server.js",
+    "test": "node test/test_platform.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "gtfs-realtime-bindings": "^2.2.0"
   }
 }

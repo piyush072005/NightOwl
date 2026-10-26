@@ -5,6 +5,7 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { createClient } from '@supabase/supabase-js';
+import geospatialRoutes from './routes/geospatialRoutes.js';
 
 dotenv.config();
 
@@ -17,6 +18,10 @@ const PORT = parseInt(process.env.PORT, 10) || 3000;
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Mount Geospatial, Routing & Chat Routes
+app.use('/api/geospatial', geospatialRoutes);
+app.use('/api', geospatialRoutes);
 
 // Supabase client instance (server-side)
 let supabase = null;
@@ -384,10 +389,11 @@ app.get('*', (req, res) => {
 });
 
 function startServer(portToTry) {
-  const server = app.listen(portToTry, () => {
+  const HOST = '0.0.0.0';
+  const server = app.listen(portToTry, HOST, () => {
     console.log(`\n======================================================`);
     console.log(`🌙 NightOwl Full Stack Server running at:`);
-    console.log(`👉 http://localhost:${portToTry}`);
+    console.log(`👉 http://${HOST}:${portToTry}`);
     console.log(`======================================================\n`);
   });
 

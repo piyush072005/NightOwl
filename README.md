@@ -1,96 +1,108 @@
-# NightOwl - Full Stack Safety & Operations Dashboard (Supabase Integration)
+# NightOwl — Delhi Safety & Mobility Intelligence Platform
 
-A full-stack, real-time operations hub for night-time worker safety and community route intelligence, powered by **Express.js**, **Node.js**, **Vanilla JavaScript**, **Tailwind CSS**, and **Supabase (PostgreSQL + Realtime)**.
+A full-stack, map-aware urban mobility and night-time safety platform for Delhi NCR commuters, healthcare workers, security personnel, and community scouts.
+
+Powered by **Express.js**, **Node.js 22**, **Leaflet & OpenStreetMap**, **OSRM Road Network Routing**, **Delhi Open Transit Data (OTD)**, and **Supabase (PostgreSQL + Realtime)**.
 
 ---
 
-## 🌟 Key Features
-- **Full Stack Architecture**: Express.js server providing REST API endpoints with dual support for Supabase cloud database and local fallback mode.
-- **Supabase Integration**:
-  - Live data persistence for **Route Scout Ground Truth reports**, **Commute Intakes**, **Emergency SOS dispatches**, and **Corridor Checkpoints**.
-  - **Supabase Realtime WebSockets**: Instant live updates across multiple screens when any scout files a report or an SOS beacon is triggered.
-  - Built-in in-browser **Supabase Setup Modal** to configure API credentials on the fly.
-- **Community Ground Truth Telemetry**: Route scout submission flow with photo proof preview, road condition ratings (safe, unsafe, construction, flood/water logging), and gamified reputation score tracking.
-- **Shift Commute Safe Route Synthesizer**: Intelligent corridor calculation based on worker cohort (nurses, security guards, delivery partners, etc.), departure hour, and transport mode.
-- **Emergency SOS Dispatch**: Rapid panic alert button logging GPS coordinates to the database and broadcasting emergency signals.
-- **Epistemic Tagging System**: Reliable ground truth classifications (`KNOWN`, `PROBABLE`, `OUTDATED`, `UNKNOWN`) to avoid night safety hallucinations.
+## 🌟 Core Platform Capabilities
+
+1. **Interactive Delhi Safety & Mobility Map**:
+   - Centered on Delhi NCR (`28.6139° N, 77.2090° E`).
+   - OpenStreetMap tile layer with attribution, responsive sizing, and custom category badges.
+   - User Geolocation with explicit browser permission prompt and live pulsing beacon.
+   - Filterable facility layers:
+     - 🚇 **Delhi Metro Stations** (interchanges, last train timetables, CCTV status)
+     - 🚌 **Delhi Bus Terminals & Stops** (DTC routes, night frequency, shelters)
+     - 🏥 **24/7 Hospitals & Trauma Centers** (AIIMS, Safdarjung, RML, LNJP, Max, Fortis)
+     - 💊 **24/7 Verified Pharmacies** (Apollo, MedPlus, Guardian, Wellness Forever)
+     - 👮 **Delhi Police Stations & PCR Units** (112 emergency dispatch nodes)
+     - ⚡ **EV Fast Charging Superhubs** (Tata Power EZ, Statiq, BluSmart)
+     - ⚠️ **Verified Hazard & Caution Zones** (dim underpasses, construction barriers, road diversions)
+
+2. **Safety-Informed Road Route Engine**:
+   - Real road-network polyline calculation using OSRM driving & walking profiles with road-corridor fallback.
+   - Transparent, multi-signal scoring model (0–100):
+     - **Police Proximity Score** (≤1.5 km of patrol nodes)
+     - **24/7 Haven Coverage** (open pharmacies and trauma clinics)
+     - **Verified Street Illumination** (scout ground-truth reports)
+     - **Hazard & Disruption Penalty** (active closures or 50% dimmed underpasses)
+   - Alternative Route Comparison:
+     - Recommends the **Safety-Informed Route** vs. the **Fastest Route** with clear tradeoffs in time and vigilance.
+     - Interactive polyline selection on map and detailed score breakdown matrix.
+
+3. **Map-Aware Conversational Assistant**:
+   - Location-aware natural language processing integrated into the WhatsApp interface.
+   - Understands route queries (*"Safest route from Noida Sector 62 to Connaught Place"*, *"Walk from Hauz Khas to AIIMS"*).
+   - Returns concise explanations, triggers route rendering, places pins, and adjusts map viewport.
+   - Answers facility queries (*"Find nearby 24/7 pharmacy"*, *"Show emergency hospitals"*, *"Where is the nearest police station?"*).
+   - Safe emergency SOS protocol linking directly to police PCR units and emergency contacts.
+
+4. **Delhi Open Transit Data (OTD) Adapter**:
+   - Supports static GTFS schedules, circular routes (TMS, OMS), and metro lines.
+   - Configurable live GPS vehicle stream adapter using `DELHI_OTD_API_KEY`.
+   - Clear distinction between static and authorized real-time feeds.
 
 ---
 
 ## 📁 Project Structure
+
 ```
-NightOwl2/
-├── .env                              # Environment variables (Supabase URL & Anon Key)
+NightOwl/
 ├── .env.example                      # Template for environment variables
-├── package.json                      # Node dependencies & npm scripts
-├── server.js                         # Express backend API & Supabase server client
-├── supabase/
-│   ├── schema.sql                    # 1-Click SQL script to generate all tables & RLS
-│   └── README_SUPABASE_SETUP.md      # Detailed step-by-step guide to generating tables
+├── package.json                      # Dependencies and npm scripts (dev, test, start)
+├── server.js                         # Unified Express server & API gateway on port 3000
+├── routes/
+│   └── geospatialRoutes.js           # REST endpoints for search, nearby, routes, transit & chat
+├── services/
+│   ├── delhiData.js                  # Curated Delhi NCR landmarks, hospitals, police, metro, pharmacies
+│   ├── geocodingService.js           # Fast local matching + OpenStreetMap Nominatim with caching
+│   ├── placesService.js              # Haversine spatial radius filtering across categories
+│   ├── routingService.js             # OSRM road routing engine + Delhi arterial synthesizer fallback
+│   ├── safetyScoringService.js       # Transparent, explainable safety scoring & route comparison
+│   ├── transitService.js             # Delhi Open Transit Data (OTD) adapter (static + live feed)
+│   └── chatService.js                # Map-aware NLP engine emitting structured map actions
 ├── public/
-│   ├── index.html                    # Dashboard UI with live Supabase status
+│   ├── index.html                    # Dashboard UI with Leaflet map container & WhatsApp simulator
 │   └── js/
-│       └── app.js                    # Frontend logic & Supabase Realtime client
-└── new1.html                         # Original static HTML file preserved for reference
+│       └── app.js                    # Client-side map initialization, layer controls & realtime sync
+├── test/
+│   └── test_platform.js              # Automated test suite verifying all 13 core capabilities
+└── supabase/
+    ├── schema.sql                    # SQL script to generate 6 tables, RLS & Realtime triggers
+    └── README_SUPABASE_SETUP.md      # Supabase setup guide
 ```
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Running Locally
 
 ### 1. Install Dependencies
 ```bash
 npm install
 ```
 
-### 2. Start the Server
-```bash
-npm start
-```
-Or for auto-reloading development:
+### 2. Start the Application
 ```bash
 npm run dev
+# or: npm start
+```
+Open **`http://localhost:3000`** in your browser.
+
+### 3. Run Automated Tests
+```bash
+npm test
 ```
 
-Visit the dashboard in your browser:
-👉 **[http://localhost:3000](http://localhost:3000)**
-
 ---
 
-## 🗄️ How to Generate the Tables in Supabase
+## 🔑 Environment Variables (.env)
 
-1. Open your [Supabase Dashboard](https://supabase.com/dashboard) and create/select a project.
-2. In the left navigation, click **SQL Editor** (`>_`).
-3. Click **+ New Query**.
-4. Open [supabase/schema.sql](supabase/schema.sql) from this project, copy all the SQL code, and paste it into the editor.
-5. Click **Run**.
-6. That's it! All 6 tables (`scout_reports`, `commute_intakes`, `sos_alerts`, `corridor_checkpoints`, `scout_profiles`, `chat_messages`), RLS security policies, and Realtime publications are created instantly.
-
-For a detailed walkthrough, see [supabase/README_SUPABASE_SETUP.md](supabase/README_SUPABASE_SETUP.md).
-
----
-
-## 🔌 Connecting Supabase to NightOwl
-
-1. In your Supabase Dashboard, go to **Project Settings** > **API**.
-2. Copy your **Project URL** and **anon public key**.
-3. Open `http://localhost:3000` and click the **"Setup Supabase (Demo Mode)"** button in the header.
-4. Paste the credentials and click **"Save & Connect Supabase"**.
-5. The status badge will change to **🟢 Supabase Connected** and live database synchronization will be active!
-
----
-
-## 📡 REST API Endpoints
-
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/api/health` | Check backend & Supabase connection health |
-| `GET` | `/api/config` | Read public Supabase configuration |
-| `POST` | `/api/config` | Update & persist Supabase URL and Anon Key |
-| `GET` | `/api/checkpoints` | Fetch verified corridor checkpoints & safe havens |
-| `GET` | `/api/profile` | Get current scout reputation, score & badge |
-| `GET` | `/api/reports` | Get recent ground-truth intel reports |
-| `POST` | `/api/reports` | Submit a new ground-truth intel report (+25 pts) |
-| `GET` | `/api/commutes` | Get commute safe route intakes |
-| `POST` | `/api/commutes` | Synthesize & store a safe shift commute corridor |
-| `POST` | `/api/sos` | Broadcast an Emergency SOS panic alert |
+| Variable | Description |
+|---|---|
+| `PORT` | Web server port (defaults to 3000) |
+| `DELHI_OTD_API_KEY` | *(Optional)* API key from `otd.delhi.gov.in` for authorized live bus GPS stream |
+| `GEMINI_API_KEY` | *(Optional)* Google Gemini API key for advanced generative reasoning |
+| `SUPABASE_URL` | *(Optional)* Supabase project URL (in-memory fallback active when empty) |
+| `SUPABASE_ANON_KEY` | *(Optional)* Supabase anon public key |

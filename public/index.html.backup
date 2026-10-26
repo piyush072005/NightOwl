@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>NightOwl - Operations & Safety Decision Dashboard (Full Stack)</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <!-- FontAwesome Icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <!-- Google Fonts Inter & JetBrains Mono -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+  <!-- Supabase JS Client (v2) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body {
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      text-wrap: pretty;
+    }
+
+    h1 {
+      font-size: 26px;
+      font-weight: 800;
+      line-height: 1.25;
+      text-wrap: balance;
+    }
+
+    h2 {
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.3;
+      text-wrap: balance;
+    }
+
+    h3 {
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.35;
+      text-wrap: balance;
+    }
+
+    h4 {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.4;
+      text-wrap: balance;
+    }
+
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .whatsapp-pattern {
+      background-color: #efeae2;
+      background-image: radial-gradient(#d5cdc4 1px, transparent 1px);
+      background-size: 16px 16px;
+      padding: 16px;
+    }
+
+    .custom-scroll::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+
+    .custom-scroll::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.03);
+    }
+
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #94a3b8;
+      border-radius: 4px;
+    }
+
+    ::selection {
+      background-color: #fde68a;
+      color: #78350f;
+    }
+
+    /* Purposeful Motion System & Easing Tokens */
+    :root {
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-in-out-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #lighting-bar {
+      transition: width 380ms var(--ease-out-expo), background-color 300ms ease;
+    }
+
+    @keyframes messageEnter {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-message-enter {
+      animation: messageEnter 220ms var(--ease-out-expo) forwards;
+    }
+
+    @keyframes modalEnter {
+      from {
+        opacity: 0;
+        transform: scale(0.97) translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .animate-modal-enter {
+      animation: modalEnter 240ms var(--ease-out-expo) forwards;
+    }
+
+    @keyframes signalPulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
+      }
+
+      70% {
+        box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+      }
+    }
+
+    .telemetry-beacon {
+      animation: signalPulse 700ms var(--ease-out-expo) 1;
+    }
+
+    /* Accessibility: Respect Reduced Motion */
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+
+      .animate-message-enter,
+      .animate-modal-enter,
+      .telemetry-beacon {
+        animation: none !important;
+        transform: none !important;
+        opacity: 1 !important;
+      }
+    }
+/* NIGHTSHIFT: Larger, cleaner dashboard header */
+body > header {
+  min-height: 100px;
+  padding: 20px 32px !important;
+  gap: 20px;
+}
+
+body > header .fa-moon {
+  font-size: 30px !important;
+}
+
+body > header .text-base {
+  font-size: 25px !important;
+}
+
+body > header p {
+  font-size: 14px !important;
+  line-height: 1.6;
+}
+
+/* More spacious dashboard cards */
+main > div.grid.grid-cols-2.md\:grid-cols-3.lg\:grid-cols-6 {
+  gap: 16px;
+}
+
+main > div.grid.grid-cols-2.md\:grid-cols-3.lg\:grid-cols-6 > div {
+  padding: 20px !important;
+  border-radius: 16px;
+}
+
+main > div.grid.grid-cols-2.md\:grid-cols-3.lg\:grid-cols-6 > div > div:first-child {
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+main > div.grid.grid-cols-2.md\:grid-cols-3.lg\:grid-cols-6 > div > div:nth-child(2) {
+  font-size: 26px !important;
+}
+
+@media (max-width: 768px) {
+  body > header {
+    padding: 14px 16px !important;
+    flex-wrap: wrap;
+  }
+
+  main > div.grid.grid-cols-2.md\:grid-cols-3.lg\:grid-cols-6 > div {
+    padding: 14px !important;
+  }
+}
+
+/* ========================================
+   NIGHTSHIFT — PREMIUM CHAT UI
+   Visual-only enhancements; existing JS intact
+======================================== */
+
+/* Main chatbot panel */
+#whatsapp-section {
+  border: 1px solid #e4e7ec !important;
+  border-radius: 20px !important;
+  overflow: hidden;
+  box-shadow: 0 12px 35px rgba(16, 24, 40, 0.09) !important;
+  background: #fff;
+}
+
+/* Chat header */
+#whatsapp-section > div:first-child {
+  background: linear-gradient(135deg, #101828 0%, #163b35 100%) !important;
+  padding: 20px 18px !important;
+  min-height: 92px;
+  box-shadow: none !important;
+}
+
+#whatsapp-section > div:first-child h3 {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.3px;
+}
+
+#whatsapp-section > div:first-child p {
+  font-size: 12px !important;
+  margin-top: 5px;
+}
+
+/* Avatar */
+#whatsapp-section > div:first-child .rounded-full.bg-white\/20 {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 15px !important;
+  background: rgba(255,255,255,.12) !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,.12);
+}
+
+/* Clean chat canvas */
+#chat-messages-container {
+  background-color: #f7f9fc !important;
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(16,24,40,.035) 1px, transparent 0) !important;
+  background-size: 22px 22px !important;
+  padding: 18px 14px !important;
+  gap: 14px !important;
+}
+
+/* Date/status pill */
+#chat-messages-container > div:first-child span {
+  background: #fff !important;
+  color: #667085 !important;
+  border: 1px solid #eaecf0 !important;
+  border-radius: 999px !important;
+  padding: 7px 12px !important;
+  font-size: 10px !important;
+  letter-spacing: .7px;
+  box-shadow: 0 2px 8px rgba(16,24,40,.04) !important;
+}
+
+/* Chat message cards */
+#chat-messages-container .animate-message-enter > div {
+  border-radius: 16px !important;
+  box-shadow: 0 3px 12px rgba(16,24,40,.055) !important;
+  line-height: 1.65;
+}
+
+/* Assistant message */
+#chat-messages-container .animate-message-enter > div.bg-white {
+  border: 1px solid #eaecf0 !important;
+  border-top-left-radius: 5px !important;
+  padding: 16px !important;
+}
+
+/* User message */
+#chat-messages-container .animate-message-enter > div.bg-\[\#d9fdd3\] {
+  background: #e6f8ef !important;
+  border: 1px solid #c6ead8 !important;
+  border-top-right-radius: 5px !important;
+  padding: 14px !important;
+}
+
+/* Quick prompt area */
+#whatsapp-section > div:nth-last-child(2) {
+  background: #fff !important;
+  border-top: 1px solid #eaecf0 !important;
+  padding: 12px !important;
+  gap: 8px !important;
+}
+
+#whatsapp-section > div:nth-last-child(2) button {
+  padding: 7px 12px !important;
+  border-radius: 999px !important;
+  font-size: 11px !important;
+  transition: all .2s ease;
+}
+
+#whatsapp-section > div:nth-last-child(2) button:hover {
+  border-color: #00a878 !important;
+  color: #008f68 !important;
+  transform: translateY(-1px);
+}
+
+/* Message composer */
+#whatsapp-section > div:last-child {
+  background: #fff !important;
+  padding: 14px !important;
+  gap: 10px !important;
+  border-top: 1px solid #eaecf0 !important;
+}
+
+#whatsapp-input {
+  min-height: 44px;
+  padding: 11px 40px 11px 16px !important;
+  border: 1px solid #d0d5dd !important;
+  border-radius: 14px !important;
+  font-size: 13px !important;
+  box-shadow: none !important;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+#whatsapp-input:focus {
+  border-color: #00a878 !important;
+  box-shadow: 0 0 0 3px rgba(0,168,120,.12) !important;
+}
+
+#whatsapp-section > div:last-child > button:last-child {
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 13px !important;
+  background: #00a878 !important;
+  box-shadow: 0 4px 10px rgba(0,168,120,.2) !important;
+}
+
+#whatsapp-section > div:last-child > button:last-child:hover {
+  background: #008f68 !important;
+  transform: translateY(-1px);
+}
+
+/* Smooth scrollbar */
+#chat-messages-container::-webkit-scrollbar {
+  width: 5px;
+}
+
+#chat-messages-container::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+/* Mobile layout */
+@media (max-width: 768px) {
+  #whatsapp-section {
+    height: 650px !important;
+    border-radius: 16px !important;
+  }
+
+  #whatsapp-section > div:first-child {
+    padding: 15px !important;
+    min-height: 80px;
+  }
+
+  #chat-messages-container {
+    padding: 14px 10px !important;
+  }
+
+  #chat-messages-container .animate-message-enter > div {
+    max-width: 95%;
+  }
+}
+/* ===== REAL WHATSAPP-STYLE NIGHTSHIFT CHAT ===== */
+
+/* Chat container */
+#whatsapp-section {
+  border: 1px solid #d1d7db !important;
+  border-radius: 12px !important;
+  background: #efeae2 !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08) !important;
+  overflow: hidden;
+}
+
+/* Classic WhatsApp dark green header */
+#whatsapp-section > div:first-child {
+  background: #075e54 !important;
+  min-height: 76px !important;
+  padding: 12px 16px !important;
+  box-shadow: none !important;
+}
+
+/* WhatsApp avatar */
+#whatsapp-section > div:first-child .rounded-full.bg-white\/20 {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+  background: #128c7e !important;
+  border: 2px solid rgba(255,255,255,.25);
+}
+
+/* Assistant name */
+#whatsapp-section > div:first-child h3 {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+}
+
+/* Online status */
+#whatsapp-section > div:first-child p {
+  font-size: 12px !important;
+  color: #d4f5e9 !important;
+  margin-top: 3px;
+}
+
+/* WhatsApp chat wallpaper */
+#chat-messages-container {
+  background-color: #efeae2 !important;
+  background-image:
+    radial-gradient(circle, rgba(120,110,95,.10) 1px, transparent 1.5px) !important;
+  background-size: 20px 20px !important;
+  padding: 18px 12px !important;
+  gap: 12px !important;
+}
+
+/* Date divider */
+#chat-messages-container > div:first-child span {
+  background: #fcf4cb !important;
+  color: #54656f !important;
+  border: none !important;
+  border-radius: 7px !important;
+  font-size: 10px !important;
+  font-weight: 500 !important;
+  padding: 6px 10px !important;
+  box-shadow: 0 1px 1px rgba(0,0,0,.05) !important;
+}
+
+/* Remove modern card appearance from chat bubbles */
+#chat-messages-container .animate-message-enter > div {
+  box-shadow: 0 1px 1px rgba(0,0,0,.12) !important;
+  line-height: 1.55;
+  font-size: 12px;
+}
+
+/* Assistant messages — WhatsApp incoming white bubble */
+#chat-messages-container .animate-message-enter > div.bg-white {
+  background: #ffffff !important;
+  border: none !important;
+  border-radius: 8px 8px 8px 2px !important;
+  padding: 11px 12px !important;
+  max-width: 88%;
+}
+
+/* User messages — WhatsApp outgoing light green bubble */
+#chat-messages-container .animate-message-enter > div.bg-\[\#d9fdd3\] {
+  background: #d9fdd3 !important;
+  border: none !important;
+  border-radius: 8px 8px 2px 8px !important;
+  padding: 10px 12px !important;
+  max-width: 88%;
+}
+
+/* Quick action strip */
+#whatsapp-section > div:nth-last-child(2) {
+  background: #f0f2f5 !important;
+  border-top: 1px solid #e0e0e0 !important;
+  padding: 9px 8px !important;
+  gap: 6px !important;
+}
+
+/* WhatsApp-like quick reply pills */
+#whatsapp-section > div:nth-last-child(2) button {
+  background: #ffffff !important;
+  border: 1px solid #d6dce0 !important;
+  color: #075e54 !important;
+  border-radius: 18px !important;
+  padding: 6px 11px !important;
+  font-size: 11px !important;
+}
+
+#whatsapp-section > div:nth-last-child(2) button:hover {
+  background: #e5f4ee !important;
+  border-color: #128c7e !important;
+}
+
+/* Bottom composer area */
+#whatsapp-section > div:last-child {
+  background: #f0f2f5 !important;
+  border-top: none !important;
+  padding: 10px !important;
+  gap: 8px !important;
+}
+
+/* Rounded WhatsApp message input */
+#whatsapp-input {
+  background: #ffffff !important;
+  border: none !important;
+  border-radius: 24px !important;
+  min-height: 42px !important;
+  padding: 10px 40px 10px 16px !important;
+  font-size: 13px !important;
+  box-shadow: none !important;
+}
+
+#whatsapp-input:focus {
+  border: none !important;
+  box-shadow: 0 0 0 1px rgba(18,140,126,.25) !important;
+}
+
+/* WhatsApp green send button */
+#whatsapp-section > div:last-child > button:last-child {
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 50% !important;
+  background: #128c7e !important;
+  box-shadow: none !important;
+}
+
+#whatsapp-section > div:last-child > button:last-child:hover {
+  background: #075e54 !important;
+}
+
+/* Scrollbar */
+#chat-messages-container::-webkit-scrollbar {
+  width: 5px;
+}
+
+#chat-messages-container::-webkit-scrollbar-thumb {
+  background: rgba(84,101,111,.35);
+  border-radius: 8px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  #whatsapp-section {
+    border-radius: 10px !important;
+    height: 650px !important;
+  }
+
+  #chat-messages-container {
+    padding: 14px 9px !important;
+  }
+}
+
+/* NIGHTSHIFT HEADER — BETTER SPACING */
+
+/* Overall header spacing */
+body > header {
+  padding: 20px 36px !important;
+  column-gap: 28px !important;
+}
+
+/* Logo and brand name */
+body > header .fa-moon {
+  margin-right: 5px;
+}
+
+/* Main title and subtitle */
+body > header h1 {
+  letter-spacing: 0.3px;
+  margin-bottom: 5px !important;
+  line-height: 1.4 !important;
+}
+
+body > header p {
+  line-height: 1.6 !important;
+  letter-spacing: 0.15px;
+}
+
+/* Status badges */
+body > header .rounded-full,
+body > header .rounded-lg {
+  padding: 9px 13px !important;
+  margin-left: 4px;
+  margin-right: 4px;
+}
+
+/* Right-side header controls */
+body > header button {
+  padding: 12px 17px !important;
+  letter-spacing: 0.2px;
+}
+
+/* Give the header groups breathing room */
+body > header > div {
+  gap: 14px;
+}
+
+/* Prevent title and subtitle from feeling cramped */
+body > header h1,
+body > header h2 {
+  line-height: 1.45 !important;
+}
+
+@media (max-width: 768px) {
+  body > header {
+    padding: 16px !important;
+    row-gap: 14px !important;
+  }
+
+  body > header > div {
+    gap: 10px;
+  }
+}
+
+  </style>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fffbeb',
+              100: '#fef3c7',
+              200: '#fde68a',
+              500: '#f59e0b',
+              600: '#d97706',
+              700: '#b45309',
+              800: '#92400e',
+            },
+            wa: {
+              teal: '#128C7E',
+              darkTeal: '#075E54',
+              green: '#25D366',
+              lightGreen: '#dcf8c6',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body
+  class="bg-slate-100/80 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-amber-100 selection:text-amber-900">
+
+  <!-- Top Navigation Header -->
+  <header
+    class="bg-white border-b border-slate-200 sticky top-0 z-40 px-4 lg:px-8 py-3 flex items-center justify-between shadow-xs">
+    <div class="flex items-center space-x-3 sm:space-x-4">
+      <div class="flex items-center gap-3">
+        <div
+          class="bg-amber-500/10 p-2.5 rounded-xl border border-amber-500/25 text-amber-800 shadow-xs flex items-center justify-center">
+          <i class="fa-solid fa-moon text-lg"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-base font-extrabold tracking-tight text-slate-900">NightOwl</span>
+            <span
+              class="text-xs uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300">Operations
+              Hub</span>
+            <span
+              class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 "></span> Telemetry Live
+            </span>
+          </div>
+          <p class="text-xs text-slate-600 font-medium hidden sm:block">Night-Time Worker Safety & Community Route
+            Intelligence Engine • Full Stack</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Global Actions & Supabase Live Status Indicator -->
+    <div class="flex items-center space-x-2 sm:space-x-3">
+      <!-- Supabase Connection Status Pill -->
+      <button id="supabase-status-btn" onclick="openSupabaseModal()"
+        class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition shadow-2xs cursor-pointer active:scale-95 bg-slate-50 text-slate-700 border-slate-300 hover:bg-slate-100"
+        title="Click to view Supabase Connection details">
+        <span id="supabase-status-dot" class="w-2 h-2 rounded-full bg-amber-500 "></span>
+        <span id="supabase-status-text">Checking Supabase...</span>
+        <i class="fa-solid fa-database text-xs ml-0.5 text-slate-600"></i>
+      </button>
+
+      <!-- Night Simulated Clock -->
+      <div class="hidden md:flex items-center space-x-2 px-3 py-1.5 text-xs text-slate-700">
+        <i class="fa-regular fa-clock text-amber-800"></i>
+        <span class="font-mono font-bold text-slate-900 text-sm" id="live-night-clock">02:30 AM</span>
+        <span class="text-xs text-slate-600 font-medium">(Simulated Lull)</span>
+      </div>
+
+      <!-- Emergency SOS button -->
+      <button
+        class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-2 shadow-2xs cursor-pointer active:scale-95"
+        onclick="triggerEmergencySOS()">
+        <i class="fa-solid fa-triangle-exclamation text-rose-600 "></i> Emergency SOS
+      </button>
+
+      <!-- Scout Rep Profile Pill -->
+      <div class="hidden lg:flex items-center pl-2 border-l border-slate-200 space-x-2">
+        <div
+          class="w-8 h-8 rounded-full bg-amber-500/10 border border-amber-300 flex items-center justify-center text-amber-700 font-bold text-xs">
+          <i class="fa-solid fa-users text-amber-800"></i>
+        </div>
+        <div class="text-left text-xs">
+          <div class="font-semibold text-slate-800 leading-tight" id="header-scout-title">Community Route Scout</div>
+          <div class="text-xs text-slate-600" id="header-scout-rep">Scout Hub • Rep 480 pts (Level 3)</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Notification Banner when Database Live Updates happen -->
+  <div id="live-toast"
+    class="fixed top-16 right-5 z-50 transform transition-all duration-300 translate-y-[-20px] opacity-0 pointer-events-none bg-slate-900 text-white text-xs px-4 py-2.5 rounded-xl shadow-lg border border-slate-700 flex items-center gap-2">
+    <i class="fa-solid fa-bell text-amber-400"></i>
+    <span id="toast-text">New live telemetry received</span>
+  </div>
+
+  <!-- Main Dashboard Layout -->
+  <main class="flex-grow max-w-[1600px] w-full mx-auto px-4 lg:px-6 py-5 space-y-5">
+
+    <!-- KPI Summary Row -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
+      <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
+        <div class="flex items-center justify-between text-slate-600 text-xs font-medium mb-1">
+          <span>Active Commuters</span>
+          <i class="fa-solid fa-users text-amber-800"></i>
+        </div>
+        <div class="text-xl font-bold text-slate-900 font-mono" id="kpi-commuters">1,428</div>
+        <div class="text-xs text-emerald-800 font-medium mt-0.5 flex items-center gap-1">
+          <i class="fa-solid fa-arrow-up text-xs"></i> 12% shift peak
+        </div>
+      </div>
+
+      <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
+        <div class="flex items-center justify-between text-slate-600 text-xs font-medium mb-1">
+          <span>Corridor Lighting</span>
+          <i class="fa-solid fa-lightbulb text-amber-800"></i>
+        </div>
+        <div class="text-xl font-bold text-slate-900 font-mono" id="kpi-lighting">84% Lit</div>
+        <div class="text-xs text-amber-800 font-medium mt-0.5 flex items-center gap-1">
+          <i class="fa-solid fa-circle-check text-xs"></i> Ground-Truthed
+        </div>
+      </div>
+
+      <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
+        <div class="flex items-center justify-between text-slate-600 text-xs font-medium mb-1">
+          <span>Community Scouts</span>
+          <i class="fa-solid fa-users text-sky-600"></i>
+        </div>
+        <div class="text-xl font-bold text-slate-900 font-mono" id="kpi-scouts">42 Scouts</div>
+        <div class="text-xs text-emerald-800 font-medium mt-0.5 flex items-center gap-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Live on Grid
+        </div>
+      </div>
+
+      <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
+        <div class="flex items-center justify-between text-slate-600 text-xs font-medium mb-1">
+          <span>Open Havens Verified</span>
+          <i class="fa-solid fa-hospital text-rose-500"></i>
+        </div>
+        <div class="text-xl font-bold text-slate-900 font-mono" id="kpi-havens">34 Verified</div>
+        <div class="text-xs text-emerald-800 font-medium mt-0.5 flex items-center gap-1">
+          <i class="fa-solid fa-circle-check text-xs"></i> 24/7 Verified
+        </div>
+      </div>
+
+      <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
+        <div class="flex items-center justify-between text-slate-600 text-xs font-medium mb-1">
+          <span>Live Route Reports</span>
+          <i class="fa-solid fa-bolt text-amber-800"></i>
+        </div>
+        <div class="text-xl font-bold text-slate-900 font-mono" id="kpi-intel-reports">128 Reports</div>
+        <div class="text-xs text-slate-600 font-medium mt-0.5" id="kpi-reports-sub">Synced with DB</div>
+      </div>
+
+      <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
+        <div class="flex items-center justify-between text-slate-600 text-xs font-medium mb-1">
+          <span>Epistemic Reliability</span>
+          <i class="fa-solid fa-circle-nodes text-emerald-800"></i>
+        </div>
+        <div class="text-xl font-bold text-emerald-700 font-mono" id="kpi-epistemic">KNOWN</div>
+        <div class="text-xs text-slate-600 font-medium mt-0.5">98.4% Live Verified</div>
+      </div>
+    </div>
+
+    <!-- Main Content 3-Column Holy Grail Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+
+      <!-- Column 1: Left Control & Epistemic Tagging System (3 cols) -->
+      <aside class="lg:col-span-3 space-y-4">
+        <!-- Epistemic Reliability Legend Card -->
+        <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-2xs">
+          <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
+            <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-shield-halved text-sky-600"></i> Epistemic Tagging System
+            </h3>
+          </div>
+          <p class="text-xs text-slate-600 mb-2.5 leading-relaxed">Guarantees safety decisions reflect empirical ground
+            truth, avoiding night hallucinations:</p>
+          <div class="divide-y divide-slate-100 text-xs">
+            <div class="flex items-center justify-between py-2">
+              <span class="font-bold text-emerald-700 flex items-center gap-1.5 text-xs">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span> KNOWN
+              </span>
+              <span class="text-slate-600 font-medium text-xs">Sensor / Live GPS &lt; 5m</span>
+            </div>
+            <div class="flex items-center justify-between py-2">
+              <span class="font-bold text-amber-700 flex items-center gap-1.5 text-xs">
+                <span class="w-2 h-2 rounded-full bg-amber-500"></span> PROBABLE
+              </span>
+              <span class="text-slate-600 font-medium text-xs">Historical Patrol Pattern</span>
+            </div>
+            <div class="flex items-center justify-between py-2">
+              <span class="font-bold text-orange-700 flex items-center gap-1.5 text-xs">
+                <span class="w-2 h-2 rounded-full bg-orange-500"></span> OUTDATED
+              </span>
+              <span class="text-slate-600 font-medium text-xs">&gt; 45m Signal Gap</span>
+            </div>
+            <div class="flex items-center justify-between py-2">
+              <span class="font-bold text-rose-700 flex items-center gap-1.5 text-xs">
+                <span class="w-2 h-2 rounded-full bg-rose-500"></span> UNKNOWN
+              </span>
+              <span class="text-slate-600 font-medium text-xs">Fallback Safe Anchor</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active Alerts Broadcast Box -->
+        <div class="bg-amber-50/70 rounded-xl p-3.5 border border-amber-200 shadow-2xs space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-amber-900 flex items-center gap-1.5">
+              <i class="fa-solid fa-bullhorn text-amber-800"></i> Night Advisory
+            </span>
+            <span class="text-xs font-mono text-amber-700" id="advisory-time">02:18 AM</span>
+          </div>
+          <p class="text-xs text-amber-800 leading-normal" id="advisory-text">
+            Underpass streetlights on <strong>Bypass East</strong> operating on reduced 50% backup power. Motorized
+            transit advised over pedestrian routes.
+          </p>
+        </div>
+
+        <!-- Operations Dispatch Stats Summary -->
+        <div class="bg-white rounded-xl p-3.5 border border-slate-200 shadow-2xs space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-users text-emerald-800"></i> Community Intel Feed
+            </span>
+            <span
+              class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Database
+              Active</span>
+          </div>
+          <div class="text-xs text-slate-600 space-y-1.5 pt-1">
+            <div class="flex justify-between items-center">
+              <span>Active Contributors:</span>
+              <span class="font-bold text-slate-800" id="sidebar-scout-count">42 Scouts</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span>Corridor Reports Filed:</span>
+              <span class="font-bold text-slate-800" id="sidebar-report-count">128 tonight</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span>Community Trust Score:</span>
+              <span class="font-bold text-emerald-700">98.4%</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span>Scout Rank Badge:</span>
+              <span class="font-bold text-amber-700" id="sidebar-badge-title">Verified Night Pioneer</span>
+            </div>
+          </div>
+          <div class="pt-2 border-t border-slate-100 flex flex-col gap-2">
+            <button
+              class="w-full bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 py-1.5 px-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+              onclick="selectChatRole('provider')">
+              <i class="fa-solid fa-bolt text-amber-800 text-xs"></i> Log Route Observation (+25 pts)
+            </button>
+            <button
+              class="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-300 py-1.5 px-2 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer"
+              onclick="openSupabaseModal()">
+              <i class="fa-solid fa-gear text-slate-600 text-xs"></i> Supabase Setup & Tables
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Column 2: Center Main Operations & Safety Corridor Canvas (5 cols) -->
+      <section class="lg:col-span-5 space-y-4">
+        <!-- Main Live Route Plan Card -->
+        <div class="bg-white rounded-xl p-5 border border-slate-200  shadow-2xs relative overflow-hidden"
+          id="plan-status-card">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+            <div>
+              <span
+                class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300"
+                id="badge-status">
+                KNOWN • OPTIMIZED CORRIDOR ACTIVE
+              </span>
+              <h2 class="text-base font-bold text-slate-900 mt-1 tracking-tight" id="plan-title">
+                02:15 AM Shift Departure: Sector 62 → Block C
+              </h2>
+            </div>
+            <div class="text-left sm:text-right">
+              <span class="text-xs font-semibold text-slate-600 uppercase tracking-wide">Target Arrival</span>
+              <div class="text-sm font-mono font-bold text-amber-700" id="plan-eta">
+                03:02 AM <span class="text-xs font-medium text-slate-600">(47 mins)</span>
+              </div>
+            </div>
+          </div>
+          <p class="text-xs text-slate-600 leading-relaxed mb-4" id="plan-description">
+            Public transit frequency is minimal at this hour. The engine has synthesized a well-lit corridor avoiding
+            isolated underpasses, leveraging 24/7 patrol checkpoints and active open pharmacies along the arterial
+            route.
+          </p>
+
+          <!-- Corridor Health Metrics Matrix -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3 border-t border-slate-100 text-xs">
+            <div class="p-2 bg-slate-50">
+              <span class="text-slate-600 block mb-0.5 text-xs font-medium">Risk Level</span>
+              <span class="font-bold text-emerald-700 flex items-center gap-1 text-xs" id="metric-risk">
+                <i class="fa-solid fa-shield text-emerald-800"></i> Low (Patrolled)
+              </span>
+            </div>
+            <div class="p-2 bg-slate-50">
+              <span class="text-slate-600 block mb-0.5 text-xs font-medium">Weather / Surface</span>
+              <span class="font-bold text-sky-700 flex items-center gap-1 text-xs" id="metric-weather">
+                <i class="fa-solid fa-cloud-moon text-sky-600"></i> Clear (14°C)
+              </span>
+            </div>
+            <div class="p-2 bg-slate-50">
+              <span class="text-slate-600 block mb-0.5 text-xs font-medium">Transit Availability</span>
+              <span class="font-bold text-amber-800 flex items-center gap-1 text-xs" id="metric-transport">
+                <i class="fa-solid fa-taxi text-amber-800"></i> 2 Cabs Nearby
+              </span>
+            </div>
+            <div class="p-2 bg-slate-50">
+              <span class="text-slate-600 block mb-0.5 text-xs font-medium">Emergency Havens</span>
+              <span class="font-bold text-purple-700 flex items-center gap-1 text-xs" id="metric-emergency">
+                <i class="fa-solid fa-hospital text-purple-600"></i> 2 Open Clinics
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2-Column Corridor Detail: Essential Havens & Incident Radar -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Essential Havens Open Now -->
+          <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-2xs flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-xs font-bold text-slate-800 flex items-center gap-1.5 uppercase tracking-wide">
+                  <i class="fa-solid fa-kit-medical text-rose-500"></i> 24/7 Open Havens
+                </h3>
+                <span
+                  class="text-xs px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-bold border border-emerald-300">KNOWN</span>
+              </div>
+              <div class="space-y-2" id="services-list">
+                <div class="py-2 flex items-center justify-between">
+                  <div>
+                    <h4 class="text-xs font-semibold text-slate-900">Apollo 24/7 Pharmacy</h4>
+                    <p class="text-xs text-slate-600">Block B (0.8 km from route)</p>
+                  </div>
+                  <span
+                    class="text-xs text-emerald-800 font-bold bg-emerald-100 px-1.5 py-0.5 rounded border border-emerald-300">Open
+                    Now</span>
+                </div>
+                <div class="py-2 flex items-center justify-between">
+                  <div>
+                    <h4 class="text-xs font-semibold text-slate-900">Lifeline Emergency Clinic</h4>
+                    <p class="text-xs text-slate-600">Expressway Junc. (1.4 km)</p>
+                  </div>
+                  <span
+                    class="text-xs text-emerald-800 font-bold bg-emerald-100 px-1.5 py-0.5 rounded border border-emerald-300">Open
+                    Now</span>
+                </div>
+              </div>
+            </div>
+            <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
+              <span id="ping-text">Sensor ping: Just now</span>
+              <button
+                class="text-amber-700 hover:text-amber-800 font-semibold inline-flex items-center gap-1 cursor-pointer"
+                onclick="refreshCheckpoints()">
+                <i class="fa-solid fa-rotate text-xs"></i> Sync
+              </button>
+            </div>
+          </div>
+
+          <!-- Safety & Patrol Radar -->
+          <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-2xs flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-xs font-bold text-slate-800 flex items-center gap-1.5 uppercase tracking-wide">
+                  <i class="fa-solid fa-route text-amber-800"></i> Community Observation Radar
+                </h3>
+                <span class="text-xs px-2 py-0.5 bg-amber-100 text-amber-800 rounded font-bold border border-amber-300"
+                  id="radar-tag">PROBABLE</span>
+              </div>
+              <div class="space-y-2">
+                <div class="p-2 bg-slate-50">
+                  <div class="flex justify-between text-xs mb-1">
+                    <span class="text-slate-700 font-semibold">Underpass Lighting</span>
+                    <span class="text-amber-700 font-bold" id="light-status-text">50% Dim</span>
+                  </div>
+                  <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                    <div class="bg-amber-500 h-full w-1/2 transition-all duration-300" id="lighting-bar"></div>
+                  </div>
+                  <p class="text-xs text-slate-600 mt-1" id="radar-reported-note">Reported by Scout @Rhea_K 8m ago</p>
+                </div>
+                <div class="py-2 flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <div
+                      class="w-6 h-6 rounded bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-800 font-bold text-xs">
+                      <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div>
+                      <h4 class="text-xs font-semibold text-slate-900">Crowd & Vigilance Activity</h4>
+                      <p class="text-xs text-slate-600" id="crowd-vigilance-note">Active tea stall & commuters at
+                        Central Sq. (@Dev_M 4m ago)</p>
+                    </div>
+                  </div>
+                  <span
+                    class="text-xs text-emerald-800 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">Vouched</span>
+                </div>
+              </div>
+            </div>
+            <div class="mt-3 pt-2.5 border-t border-slate-100 text-xs text-slate-600 flex justify-between items-center">
+              <span>Scout Vouched Stretch:</span>
+              <span class="text-emerald-700 font-bold">42 active alerts verified</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Simulated Night Shift Progression Timeline Slider -->
+        <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-2xs">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-xs font-bold text-slate-800 flex items-center gap-1.5 uppercase tracking-wide">
+              <i class="fa-solid fa-timeline text-amber-800"></i> Night Progression Simulation (12 AM → 5 AM)
+            </h3>
+            <span
+              class="text-xs font-mono font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded"
+              id="timeline-current-hour">02:30 AM</span>
+          </div>
+          <p class="text-xs text-slate-600 mb-3">Simulate transit availability and police presence shifts across the
+            night window:</p>
+          <div class="grid grid-cols-5 gap-1.5" id="timeline-buttons-container">
+            <button
+              class="timeline-step bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 py-2 px-1 rounded-lg text-center transition cursor-pointer"
+              onclick="setSimulatedHour('12:00 AM', 0)" type="button">
+              <span class="block text-xs font-mono font-semibold text-slate-700">12:00 AM</span>
+              <span class="block text-xs text-slate-600 mt-0.5">Regular Bus</span>
+            </button>
+            <button
+              class="timeline-step bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 py-2 px-1 rounded-lg text-center transition cursor-pointer"
+              onclick="setSimulatedHour('01:30 AM', 1)" type="button">
+              <span class="block text-xs font-mono font-semibold text-slate-700">01:30 AM</span>
+              <span class="block text-xs text-slate-600 mt-0.5">Transition</span>
+            </button>
+            <button
+              class="timeline-step active-timeline bg-amber-500 text-slate-950 font-bold border-2 border-amber-600 py-2 px-1 rounded-lg text-center shadow-2xs transition cursor-pointer"
+              onclick="setSimulatedHour('02:30 AM', 2)" type="button">
+              <span class="block text-xs font-mono font-bold text-slate-950">02:30 AM</span>
+              <span class="block text-xs text-slate-900 font-semibold mt-0.5">Shift End</span>
+            </button>
+            <button
+              class="timeline-step bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 py-2 px-1 rounded-lg text-center transition cursor-pointer"
+              onclick="setSimulatedHour('03:45 AM', 3)" type="button">
+              <span class="block text-xs font-mono font-semibold text-slate-700">03:45 AM</span>
+              <span class="block text-xs text-slate-600 mt-0.5">Deep Lull</span>
+            </button>
+            <button
+              class="timeline-step bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 py-2 px-1 rounded-lg text-center transition cursor-pointer"
+              onclick="setSimulatedHour('05:00 AM', 4)" type="button">
+              <span class="block text-xs font-mono font-semibold text-slate-700">05:00 AM</span>
+              <span class="block text-xs text-slate-600 mt-0.5">Early Dawn</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Safe Commute Verification Nodes Table (Loaded from Supabase) -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
+          <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
+              <i class="fa-solid fa-map-pin text-emerald-800"></i> Corridor Safety Checkpoints (Supabase Table:
+              <code>corridor_checkpoints</code>)
+            </h3>
+            <span class="text-xs text-slate-600 font-medium" id="checkpoint-count-badge">4 Verified Checkpoints</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead
+                class="bg-slate-50 text-slate-600 text-xs uppercase font-bold tracking-wider border-b border-slate-200/60">
+                <tr>
+                  <th class="py-2 px-3">Node</th>
+                  <th class="py-2 px-3">Type</th>
+                  <th class="py-2 px-3">Lighting</th>
+                  <th class="py-2 px-3">Community Vouch & Anchor</th>
+                  <th class="py-2 px-3 text-right">Epistemic Status</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-slate-700" id="checkpoints-tbody">
+                <!-- Dynamically populated from Supabase / API -->
+                <tr class="hover:bg-slate-50/80">
+                  <td class="py-2 px-3 font-semibold text-slate-900">Sector 62 Hub Exit</td>
+                  <td class="py-2 px-3 text-slate-600">Departure Gate</td>
+                  <td class="py-2 px-3"><span class="text-emerald-700 font-semibold">100% High Mast</span></td>
+                  <td class="py-2 px-3">CCTV + 24/7 Chai Kiosk (Vouched by 8 Scouts)</td>
+                  <td class="py-2 px-3 text-right"><span
+                      class="px-1.5 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">KNOWN</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Recent Scout Intel Submissions Feed (Supabase Realtime Feed) -->
+        <div class="bg-white     overflow-hidden">
+          <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
+              <i class="fa-solid fa-list-check text-amber-800"></i> Live Ground-Truth Intel Stream (Table:
+              <code>scout_reports</code>)
+            </h3>
+            <span
+              class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 "></span> Supabase Realtime
+            </span>
+          </div>
+          <div class="p-3 divide-y divide-slate-100 max-h-56 overflow-y-auto custom-scroll space-y-2"
+            id="scout-reports-list">
+            <!-- Dynamically populated from Supabase -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Column 3: Right Sidebar Live WhatsApp Assistant Simulator (4 cols) -->
+      <aside class="lg:col-span-4 sticky top-20 space-y-4">
+        <!-- WhatsApp Chat Panel Container -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[740px]"
+          id="whatsapp-section">
+          <!-- WhatsApp Header -->
+          <div class="bg-[#0b5c53] px-4 py-3 text-white flex items-center justify-between shadow-xs flex-shrink-0">
+            <div class="flex items-center space-x-2.5">
+              <div class="relative flex-shrink-0">
+                <div
+                  class="w-9 h-9 rounded-full bg-white/20 ring-2 ring-emerald-300/60 flex items-center justify-center font-bold text-white shadow-inner">
+                  <i class="fa-solid fa-shield-cat text-base text-emerald-200"></i>
+                </div>
+                <span
+                  class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 border-2 border-[#128C7E] rounded-full "></span>
+                <span
+                  class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 border-2 border-[#128C7E] rounded-full"></span>
+              </div>
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <h3 class="text-xs font-bold tracking-tight text-white leading-tight">NightOwl Assistant</h3>
+                  <span
+                    class="bg-emerald-500/30 text-emerald-100 text-xs px-1 py-0.2 rounded font-mono border border-emerald-400/30">Bot</span>
+                </div>
+                <p class="text-xs text-emerald-100/90 flex items-center gap-1">
+                  <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-300"></span> Ground Truth Realtime
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-1 text-emerald-100 text-xs">
+              <button class="hover:text-white p-1 rounded hover:bg-white/10 transition cursor-pointer"
+                onclick="resetWhatsAppChat()" title="Reset Chat to Initial State">
+                <i class="fa-solid fa-arrow-rotate-left text-xs"></i>
+              </button>
+              <button class="hover:text-white p-1 rounded hover:bg-white/10 transition cursor-pointer"
+                onclick="simulateShareLiveLocation()" title="Share Live GPS Location">
+                <i class="fa-solid fa-location-dot text-xs"></i>
+              </button>
+              <div class="h-3 w-[1px] bg-emerald-600 mx-0.5"></div>
+              <span
+                class="text-xs bg-emerald-900/60 px-1.5 py-0.5 rounded text-emerald-200 border border-emerald-700/60 font-mono">DB
+                SYNC</span>
+            </div>
+          </div>
+
+          <!-- Chat Messages Stream Area with In-Chat Conversational Flow -->
+          <div class="whatsapp-pattern p-3 flex-grow overflow-y-auto custom-scroll flex flex-col space-y-3"
+            id="chat-messages-container">
+            <!-- Date divider -->
+            <div class="flex justify-center my-0.5">
+              <span
+                class="text-xs font-semibold tracking-wider text-slate-900 bg-white shadow-xs px-3 py-1 rounded-full uppercase border border-slate-300 font-bold">
+                Shift Safe Channel • Live
+              </span>
+            </div>
+          </div>
+
+          <!-- Quick Prompt Suggestions Bar -->
+          <div
+            class="bg-slate-50 border-t border-slate-200 px-3 py-1.5 flex items-center gap-1.5 overflow-x-auto text-xs whitespace-nowrap flex-shrink-0 custom-scroll">
+            <span class="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1">
+              <i class="fa-solid fa-bolt text-amber-800"></i> Prompt:
+            </span>
+            <button
+              class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-full text-xs font-medium transition cursor-pointer"
+              onclick="sendChatMessage('Check route safety status')">🛡️ Safety</button>
+            <button
+              class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-full text-xs font-medium transition cursor-pointer"
+              onclick="sendChatMessage('Find open pharmacy nearby')">💊 Pharmacy</button>
+            <button
+              class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-full text-xs font-medium transition cursor-pointer"
+              onclick="selectChatRole('provider')">✨ Scout Intel</button>
+            <button
+              class="bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-full text-xs font-medium transition cursor-pointer"
+              onclick="sendChatMessage('Simulate Emergency SOS')">🚨 SOS</button>
+          </div>
+
+          <!-- Message Composer Bar -->
+          <div class="bg-slate-100 p-2.5 border-t border-slate-200 flex items-center gap-1.5 flex-shrink-0">
+            <button
+              class="text-slate-600 hover:text-slate-700 p-1 rounded-full hover:bg-slate-200/70 transition cursor-pointer"
+              onclick="handleQuickReply('Share Live GPS Pin')" title="Share GPS Pin">
+              <i class="fa-solid fa-paperclip text-xs"></i>
+            </button>
+            <div class="relative flex-grow">
+              <input
+                class="w-full bg-white border border-slate-300 rounded-full pl-3 pr-8 py-1.5 text-xs text-slate-800 placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 shadow-2xs"
+                id="whatsapp-input" onkeypress="if(event.key === 'Enter') handleSendButtonClick()"
+                placeholder="Type inquiry or tap option..." type="text" />
+              <button class="absolute right-2.5 top-1.5 text-slate-600 hover:text-slate-600 cursor-pointer text-xs"
+                onclick="handleQuickReply('Record Audio Note')" title="Record Audio Note">
+                <i class="fa-solid fa-microphone text-xs"></i>
+              </button>
+            </div>
+            <button
+              class="bg-[#128C7E] hover:bg-[#0d6e63] text-white w-7 h-7 rounded-full flex items-center justify-center shadow-xs transition duration-150 cursor-pointer active:scale-95 flex-shrink-0"
+              onclick="handleSendButtonClick()" title="Send Message">
+              <i class="fa-solid fa-paper-plane text-xs"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Escort Dispatch Banner -->
+        <div class="bg-white rounded-xl p-3 border border-slate-200 shadow-2xs flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div
+              class="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center font-bold text-xs">
+              <i class="fa-solid fa-bolt"></i>
+            </div>
+            <div>
+              <div class="text-xs font-bold text-slate-900">Report Route Ground Truth</div>
+              <div class="text-xs text-slate-600">Share lighting, safe shops & hazards into Supabase</div>
+            </div>
+          </div>
+          <button
+            class="bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold px-3 py-1 rounded-lg transition shadow-2xs cursor-pointer"
+            onclick="selectChatRole('provider')">Contribute</button>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- Emergency SOS Modal Dialog -->
+  <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4"
+    id="sos-modal">
+    <div
+      class="bg-white rounded-2xl max-w-md w-full p-6 border border-slate-200 shadow-xl space-y-4 animate-modal-enter">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2 text-rose-600 font-bold text-base">
+          <i class="fa-solid fa-triangle-exclamation"></i> Emergency SOS Broadcast
+        </div>
+        <button class="text-slate-600 hover:text-slate-600 text-lg cursor-pointer" onclick="closeSOSModal()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <p class="text-slate-600 text-xs leading-relaxed">
+        Real-time incident dispatch alert will be recorded directly into the Supabase <code>sos_alerts</code> table. The
+        nearest PCR vehicle and emergency network contacts will receive your live GPS tracking telemetry immediately.
+      </p>
+      <div class="bg-rose-50   p-3  text-xs text-rose-800 space-y-1">
+        <div><strong>Location:</strong> Sector 62 Tech Park Transit Corridor</div>
+        <div><strong>Nearest Police Van:</strong> PCR #4 (0.3 km away)</div>
+        <div><strong>Emergency Dispatch:</strong> 112 / 100 Initiated</div>
+        <div><strong>Supabase Sync:</strong> Realtime WebSocket Broadcast</div>
+      </div>
+      <div class="flex gap-2 justify-end pt-2">
+        <button
+          class="px-4 py-2 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition cursor-pointer"
+          onclick="closeSOSModal()">Cancel</button>
+        <button
+          class="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow-xs transition cursor-pointer"
+          onclick="confirmSOSCall()">Confirm Broadcast</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase Settings & Table Generator Modal Dialog -->
+  <div
+    class="fixed inset-0 bg-slate-900/65 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4 overflow-y-auto"
+    id="supabase-modal">
+    <div
+      class="bg-white rounded-2xl max-w-2xl w-full p-6 border border-slate-200 shadow-2xl space-y-4 my-8 animate-modal-enter">
+
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2.5">
+          <div
+            class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-database"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900 leading-tight">Supabase Database Integration</h3>
+            <p class="text-xs text-slate-600">Configure connection and learn how to generate tables in Supabase</p>
+          </div>
+        </div>
+        <button class="text-slate-600 hover:text-slate-600 text-lg cursor-pointer" onclick="closeSupabaseModal()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Current Connection Status Card -->
+      <div id="modal-status-box" class="p-3.5 flex items-center justify-between text-xs bg-slate-50">
+        <div class="flex items-center gap-2.5">
+          <span id="modal-status-dot" class="w-3 h-3 rounded-full bg-amber-500"></span>
+          <div>
+            <div class="font-bold text-slate-800" id="modal-status-title">Checking connection...</div>
+            <div class="text-xs text-slate-600" id="modal-status-desc">Fetching status from server</div>
+          </div>
+        </div>
+        <button onclick="checkBackendHealth()"
+          class="px-2.5 py-1 bg-white border border-slate-200 rounded text-slate-700 font-semibold text-xs hover:bg-slate-100 cursor-pointer">
+          <i class="fa-solid fa-rotate-right mr-1"></i> Refresh
+        </button>
+      </div>
+
+      <!-- Credentials Configuration Form -->
+      <div class="bg-slate-50/80 p-4 space-y-3">
+        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+          <i class="fa-solid fa-key text-amber-800"></i> Supabase API Credentials
+        </h4>
+        <div class="space-y-2 text-xs">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Project URL (SUPABASE_URL)</label>
+            <input type="text" id="cfg-supabase-url" placeholder="https://xyzcompany.supabase.co"
+              class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800 font-mono focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500" />
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Public Anon Key (SUPABASE_ANON_KEY)</label>
+            <input type="password" id="cfg-supabase-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+              class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800 font-mono focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500" />
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 pt-1">
+          <button onclick="saveSupabaseConfig()"
+            class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-lg text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer">
+            <i class="fa-solid fa-floppy-disk"></i> Save & Connect Supabase
+          </button>
+        </div>
+      </div>
+
+      <!-- Step-by-Step Instructions on How to Generate Tables in Supabase -->
+      <div class="space-y-3 pt-1">
+        <div class="flex items-center justify-between">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+            <i class="fa-solid fa-table-list text-sky-600"></i> How to Generate the Tables in Supabase
+          </h4>
+          <button onclick="copySQLSchema()"
+            class="text-xs text-sky-700 font-semibold hover:underline flex items-center gap-1 cursor-pointer">
+            <i class="fa-regular fa-copy"></i> Copy Full SQL Script
+          </button>
+        </div>
+
+        <div class="bg-slate-900 text-slate-200 rounded-xl p-3.5 text-xs space-y-2.5 font-mono">
+          <div class="flex items-start gap-2">
+            <span
+              class="bg-emerald-500 text-slate-950 font-bold w-4 h-4 rounded-full flex items-center justify-center text-xs mt-0.5">1</span>
+            <div>Log in to <a href="https://supabase.com/dashboard" target="_blank"
+                class="text-emerald-400 underline font-semibold">supabase.com/dashboard</a> and create or select your
+              project.</div>
+          </div>
+          <div class="flex items-start gap-2">
+            <span
+              class="bg-emerald-500 text-slate-950 font-bold w-4 h-4 rounded-full flex items-center justify-center text-xs mt-0.5">2</span>
+            <div>In the left sidebar, click the <strong class="text-white">SQL Editor</strong> icon (<i
+                class="fa-solid fa-code text-xs text-emerald-400"></i>).</div>
+          </div>
+          <div class="flex items-start gap-2">
+            <span
+              class="bg-emerald-500 text-slate-950 font-bold w-4 h-4 rounded-full flex items-center justify-center text-xs mt-0.5">3</span>
+            <div>Click <strong class="text-white">+ New Query</strong>, paste the SQL schema from <code
+                class="text-amber-300">supabase/schema.sql</code>, and click <strong
+                class="text-emerald-400">Run</strong>.</div>
+          </div>
+          <div class="flex items-start gap-2">
+            <span
+              class="bg-emerald-500 text-slate-950 font-bold w-4 h-4 rounded-full flex items-center justify-center text-xs mt-0.5">4</span>
+            <div>All 6 tables (<code>scout_reports</code>, <code>commute_intakes</code>, <code>sos_alerts</code>,
+              <code>corridor_checkpoints</code>, <code>chat_messages</code>, <code>scout_profiles</code>) + Realtime +
+              RLS policies are created automatically!</div>
+          </div>
+          <div class="flex items-start gap-2">
+            <span
+              class="bg-emerald-500 text-slate-950 font-bold w-4 h-4 rounded-full flex items-center justify-center text-xs mt-0.5">5</span>
+            <div>Navigate to <strong class="text-white">Project Settings &gt; API</strong>, copy your <strong
+                class="text-white">Project URL</strong> &amp; <strong class="text-white">anon public key</strong>, and
+              paste them above!</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end pt-2 border-t border-slate-100">
+        <button
+          class="px-4 py-2 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition cursor-pointer"
+          onclick="closeSupabaseModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard Footer -->
+  <footer class="bg-white border-t border-slate-200 py-3.5 px-6 text-center text-xs text-slate-600">
+    NightOwl Decision Dashboard • Full Stack Supabase Edition • Real-time Telemetry, Community Ground Truth Network &
+    Emergency Haven Network
+  </footer>
+
+  <!-- App Logic & Supabase Integration Script -->
+  <script src="/js/app.js"></script>
+</body>
+
+</html>
